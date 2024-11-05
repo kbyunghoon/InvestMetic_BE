@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: investMetic
+
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username:
+    url:
+    password:
+
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        format_sql: 'true'
+    hibernate:
+      ddl-auto: create
+
+# JPA 쿼리 로그 이쁘게 보임
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: 'true'
