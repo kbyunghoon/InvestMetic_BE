@@ -27,10 +27,11 @@ public class Notice extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private int noticeNum; //공지사항번호
-    private String noticeTitle; //공지사항제목
+    private String title; //공지사항제목
+
     @Column(length = 3000)
-    private String noticeContent; //공지사항내용
+    private String content; //공지사항내용
+
     @Column(length = 1000)
     private String fileUrl; //파일경로
 

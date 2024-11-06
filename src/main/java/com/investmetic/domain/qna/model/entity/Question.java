@@ -33,7 +33,7 @@ public class Question extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    private String target;      //문의대상 트레이더
+    private String targetName;      //문의대상 트레이더
 
     private String title;       //문의제목
 
