@@ -3,6 +3,7 @@ package com.investmetic.domain.qna.model.entity;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Question {
+public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long questionId;

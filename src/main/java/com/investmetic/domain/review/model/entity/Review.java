@@ -2,6 +2,7 @@ package com.investmetic.domain.review.model.entity;
 
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Review {
+public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
