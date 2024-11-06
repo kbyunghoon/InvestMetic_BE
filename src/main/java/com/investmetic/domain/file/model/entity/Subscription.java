@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity(name = "FileSubscription")
 @Getter
 @NoArgsConstructor
 public class Subscription {

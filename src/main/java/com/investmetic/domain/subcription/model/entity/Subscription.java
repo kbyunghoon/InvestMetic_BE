@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Entity(name = "UserSubscription")
 @Getter
 @NoArgsConstructor
 public class Subscription {
@@ -29,5 +29,4 @@ public class Subscription {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
 }
