@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import java.math.BigDecimal;
+import java.lang.Long;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,53 +26,53 @@ public class StrategyStatistics extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    private BigDecimal balance; // 잔고
+    private Long balance; // 잔고
 
     private String operationPeriod; // 운용 기간
 
-    private BigDecimal cumulativeTransactionAmount; // 누적 거래금액
+    private Long cumulativeTransactionAmount; // 누적 거래금액
 
     private LocalDate startDate; // 시작일
 
-    private BigDecimal principal; // 원금
+    private Long principal; // 원금
 
     private LocalDate endDate; // 종료일
 
     private Integer daysSincePeakUpdate; // 최고점 이후 경과일
 
-    private BigDecimal cumulativeProfitAmount; // 누적 수익금액
+    private Long cumulativeProfitAmount; // 누적 수익금액
 
-    private BigDecimal cumulativeProfitRate; // 누적 수익률
+    private Long cumulativeProfitRate; // 누적 수익률
 
-    private BigDecimal recentYearProfitRate; // 최근 1년 수익률
+    private Long recentYearProfitRate; // 최근 1년 수익률
 
-    private BigDecimal maxCumulativeProfitAmount; // 최대 누적 수익금액
+    private Long maxCumulativeProfitAmount; // 최대 누적 수익금액
 
-    private BigDecimal maxCumulativeProfitRate; // 최대 누적 수익률
+    private Long maxCumulativeProfitRate; // 최대 누적 수익률
 
-    private BigDecimal averageProfitLossAmount; // 평균 손익 금액
+    private Long averageProfitLossAmount; // 평균 손익 금액
 
-    private BigDecimal averageProfitLossRate; // 평균 손익률
+    private Long averageProfitLossRate; // 평균 손익률
 
-    private BigDecimal maxDailyProfitAmount; // 최대 일간 수익금액
+    private Long maxDailyProfitAmount; // 최대 일간 수익금액
 
-    private BigDecimal maxDailyProfitRate; // 최대 일간 수익률
+    private Long maxDailyProfitRate; // 최대 일간 수익률
 
-    private BigDecimal maxDailyLossAmount; // 최대 일간 손실금액
+    private Long maxDailyLossAmount; // 최대 일간 손실금액
 
-    private BigDecimal maxDailyLossRate; // 최대 일간 손실률
+    private Long maxDailyLossRate; // 최대 일간 손실률
 
-    private BigDecimal roa; // ROA
+    private Long roa; // ROA
 
-    private BigDecimal profitFactor; // Profit Factor
+    private Long profitFactor; // Profit Factor
 
-    private BigDecimal currentDrawdown; // 현재 낙폭
+    private Long currentDrawdown; // 현재 낙폭
 
-    private BigDecimal currentDrawdownRate; // 현재 낙폭률
+    private Long currentDrawdownRate; // 현재 낙폭률
 
-    private BigDecimal maxDrawdown; // 최대 낙폭
+    private Long maxDrawdown; // 최대 낙폭
 
-    private BigDecimal maxDrawdownRate; // 최대 낙폭률
+    private Long maxDrawdownRate; // 최대 낙폭률
 
     private Integer currentConsecutiveProfitLossDays; // 현재 연속 손익일수
 
@@ -86,11 +86,11 @@ public class StrategyStatistics extends BaseEntity {
 
     private Double winRate; // 승률
 
-    private BigDecimal smScore; // SM Score
+    private Long smScore; // SM Score
 
-    private BigDecimal kpRatio; // KP Ratio
+    private Long kpRatio; // KP Ratio
 
-    private BigDecimal initialInvestment; // 최초 투자금액
+    private Long initialInvestment; // 최초 투자금액
 
     private LocalDate finalProfitLossDate; // 최종 손익 일자
 

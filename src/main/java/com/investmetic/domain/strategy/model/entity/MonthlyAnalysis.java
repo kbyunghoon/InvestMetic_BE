@@ -8,7 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import java.math.BigDecimal;
+import java.lang.Long;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,15 +27,15 @@ public class MonthlyAnalysis extends BaseEntity {
 
     private String month; // 월
 
-    private BigDecimal monthlyAveragePrincipal; // 월 평균 원금
+    private Long monthlyAveragePrincipal; // 월 평균 원금
 
-    private BigDecimal depositsWithdrawals; // 입출금 합계
+    private Long depositsWithdrawals; // 입출금 합계
 
-    private BigDecimal monthlyProfitLoss; // 월간 손익
+    private Long monthlyProfitLoss; // 월간 손익
 
-    private BigDecimal monthlyProfitLossRate; // 월간 손익률
+    private Long monthlyProfitLossRate; // 월간 손익률
 
-    private BigDecimal cumulativeProfitLoss; // 누적 손익
+    private Long cumulativeProfitLoss; // 누적 손익
 
-    private BigDecimal cumulativeProfitLossRate; // 누적 손익률
+    private Long cumulativeProfitLossRate; // 누적 손익률
 }
