@@ -10,7 +10,7 @@ import lombok.Getter;
  */
 @Getter
 public class BaseResponse<T> {
-    private final Boolean isSuccess = false; // 상태 코드에 따른 Boolean
+    private final Boolean isSuccess; // 상태 코드에 따른 Boolean
     private final String message; // 에러 설명
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -25,6 +25,7 @@ public class BaseResponse<T> {
      * @param baseResponseCode 응답 코드 및 메시지를 포함한 BaseResponseCode 객체
      */
     public BaseResponse(BaseResponseCode baseResponseCode) {
+        this.isSuccess = false;
         this.code = baseResponseCode.getCode();
         this.message = baseResponseCode.getMessage();
     }
@@ -36,6 +37,7 @@ public class BaseResponse<T> {
      * @param result 요청 성공 시 반환할 데이터
      */
     public BaseResponse(String message, T result) {
+        this.isSuccess = true;
         this.message = message;
         this.result = result;
     }
