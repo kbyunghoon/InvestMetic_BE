@@ -1,4 +1,4 @@
-package com.investmetic.domain.subcription.model.entity;
+package com.investmetic.domain.subscription.model.entity;
 
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.entity.User;
