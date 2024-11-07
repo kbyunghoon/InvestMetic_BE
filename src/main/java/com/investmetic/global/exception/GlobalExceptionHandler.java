@@ -1,4 +1,5 @@
 package com.investmetic.global.exception;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ public class GlobalExceptionHandler {
 
     /**
      * 커스텀 예외 처리
+     *
      * @param e 발생한 BaseException 인스턴스
      * @return HTTP 상태 코드와 함께 BaseResponse 형식의 오류 응답
      */
@@ -31,14 +33,16 @@ public class GlobalExceptionHandler {
 
     /**
      * enum 타입이 일치하지 않을 때 발생하는 예외 처리
+     *
      * @RequestParam 으로 전달된 enum 타입의 값이 맞지 않을 때 주로 발생
      */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    protected ResponseEntity<BaseResponse<String>> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+    protected ResponseEntity<BaseResponse<String>> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException e) {
         log.error("MethodArgumentTypeMismatchException 예외 처리: {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.fail(ErrorCode.INVALID_DATE, "Invalid date format or type mismatch."));
+                .body(BaseResponse.fail(ErrorCode.INVALID_DATE));
     }
 
     /**
@@ -46,11 +50,12 @@ public class GlobalExceptionHandler {
      * @RequestBody 또는 @RequestPart 사용 시 발생
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<BaseResponse<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    protected ResponseEntity<BaseResponse<String>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException 예외 처리 : {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.fail(ErrorCode.INVALID_INPUT_VALUE, "Validation failed for request body."));
+                .body(BaseResponse.fail(ErrorCode.INVALID_INPUT_VALUE));
     }
 
     /**
@@ -61,17 +66,18 @@ public class GlobalExceptionHandler {
         log.error("HttpMessageNotReadableException 예외 처리 : {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.fail(ErrorCode.EMPTY_PATH_VARIABLE, "Required path variable is missing."));
+                .body(BaseResponse.fail(ErrorCode.EMPTY_PATH_VARIABLE));
     }
 
     /**
      * 지원되지 않는 HTTP 메서드로 요청할 때 발생하는 예외 처리
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    protected ResponseEntity<BaseResponse<Void>> handleHttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException e) {
+    protected ResponseEntity<BaseResponse<Void>> handleHttpRequestMethodNotSupportedException(
+            final HttpRequestMethodNotSupportedException e) {
         log.error("HttpRequestMethodNotSupportedException 예외 처리 : {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(BaseResponse.fail(ErrorCode.METHOD_NOT_ALLOWED, "HTTP method not supported."));
+                .body(BaseResponse.fail(ErrorCode.METHOD_NOT_ALLOWED));
     }
 }
