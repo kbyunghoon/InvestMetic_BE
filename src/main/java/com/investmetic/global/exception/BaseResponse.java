@@ -21,7 +21,7 @@ public class BaseResponse<T> {
     private final Integer code;      // 성공 또는 오류 코드
 
     // 생성자
-    private BaseResponse(Boolean isSuccess, int code, String message, T result) {
+    private BaseResponse(Boolean isSuccess, Integer code, String message, T result) {
         this.isSuccess = isSuccess;
         this.code = code;
         this.message = message;
@@ -30,32 +30,19 @@ public class BaseResponse<T> {
 
     // 성공 응답 생성자
     public static <T> BaseResponse<T> success() {
-        return new BaseResponse<>(true, SuccessCode.OK.getStatusCode(), SuccessCode.OK.getMessage(), null);
+        return new BaseResponse<>(true, null, SuccessCode.OK.getMessage(), null);
     }
 
     public static <T> BaseResponse<T> success(T data) {
-        return new BaseResponse<>(true, SuccessCode.OK.getStatusCode(), SuccessCode.OK.getMessage(), data);
+        return new BaseResponse<>(true, null, SuccessCode.OK.getMessage(), data);
     }
 
     public static <T> BaseResponse<T> success(SuccessCode code, T data) {
-        return new BaseResponse<>(true, code.getStatusCode(), code.getMessage(), data);
-    }
-
-    public static <T> BaseResponse<T> success(SuccessCode code, String message, T data) {
-        return new BaseResponse<>(true, code.getStatusCode(), message, data);
+        return new BaseResponse<>(true, null, code.getMessage(), data); // 성공 시 code는 null로 설정
     }
 
     // 실패 응답 생성자
     public static <T> BaseResponse<T> fail(ErrorCode code) {
         return new BaseResponse<>(false, code.getStatusCode(), code.getMessage(), null);
-    }
-
-    public static <T> BaseResponse<T> fail(ErrorCode code, String message) {
-        return new BaseResponse<>(false, code.getStatusCode(), message, null);
-    }
-
-    public static <T> BaseResponse<T> create(int code, String message, T data) {
-        // boolean isSuccess = code >= 200 && code < 300; // 200-299 상태 코드를 성공으로 간주
-        return new BaseResponse<>(true, code, message, data);
     }
 }
