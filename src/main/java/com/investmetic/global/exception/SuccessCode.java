@@ -22,4 +22,8 @@ public enum SuccessCode {
 
     private final HttpStatus status; // HTTP 상태 코드
     private final String message; // 오류 메시지
+
+    public int getStatusCode() {
+        return status.value();
+    }
 }
