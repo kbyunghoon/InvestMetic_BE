@@ -5,12 +5,12 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
- * BaseResponseCode는 API 응답에서 발생할 수 있는 오류 코드와 메시지 enum
+ * ErrorCode API 응답에서 발생할 수 있는 오류 코드와 메시지 enum
  * 각 오류 상황에 대한 HttpStatus, 오류 코드, 설명 메시지
  */
 @Getter
 @AllArgsConstructor
-public enum BaseResponseCode {
+public enum ErrorCode {
     // 공통(Common) 오류
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, 1001, "잘못된 입력 값"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, 1002, "허용되지 않은 메서드"),

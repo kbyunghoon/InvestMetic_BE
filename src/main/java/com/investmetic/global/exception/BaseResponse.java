@@ -22,23 +22,23 @@ public class BaseResponse<T> {
     /**
      * 실패 응답을 생성
      *
-     * @param baseResponseCode 응답 코드 및 메시지를 포함한 BaseResponseCode 객체
+     * @param error 응답 코드 및 메시지를 포함한 BaseResponseCode 객체
      */
-    public BaseResponse(BaseResponseCode baseResponseCode) {
+    public BaseResponse(ErrorCode error) {
         this.isSuccess = false;
-        this.code = baseResponseCode.getCode();
-        this.message = baseResponseCode.getMessage();
+        this.code = error.getCode();
+        this.message = error.getMessage();
     }
 
     /**
      * 성공 응답을 생성
      *
-     * @param message 성공 메시지
+     * @param success 성공 메시지
      * @param result 요청 성공 시 반환할 데이터
      */
-    public BaseResponse(String message, T result) {
+    public BaseResponse(SuccessCode success, T result) {
         this.isSuccess = true;
-        this.message = message;
+        this.message = success.getMessage();
         this.result = result;
     }
 }
