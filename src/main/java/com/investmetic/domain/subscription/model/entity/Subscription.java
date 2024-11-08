@@ -14,7 +14,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "UserSubscription")
+@Entity
 @Getter
 @NoArgsConstructor
 public class Subscription extends BaseEntity {
