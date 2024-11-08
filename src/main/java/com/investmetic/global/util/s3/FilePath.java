@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum FilePath {
     USER_PROFILE("user-profile/"),
     STRATEGY_EXCEL("strategy/excel/"),
+    STRATEGY_PROPOSAL("strategy/proposal/"),
     STRATEGY_IMAGE("strategy/image/"),
     NOTICE("notice/"),
     QNA("qna/");
