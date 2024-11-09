@@ -38,7 +38,14 @@ public enum ErrorCode {
     DAILY_ANALYSIS_REGISTER_FAILED(HttpStatus.BAD_REQUEST, 3014, "해당 날짜 데이터 삭제를 실패했습니다."),
     ACCOUNT_IMAGE_QUERY_FAILED(HttpStatus.BAD_REQUEST, 3015, "실계좌 이미지 조회에 실패했습니다."),
     ACCOUNT_IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, 3016, "실계좌 이미지 등록/수정에 실패했습니다."),
-    ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다.");
+    ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
+
+
+    // 전략리뷰 관련오류(3300번대 );
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다.");
+
+
+
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드
