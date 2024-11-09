@@ -1,5 +1,6 @@
 package com.investmetic.global.util.s3;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
@@ -32,11 +33,10 @@ class S3FileServiceTest {
         //객체 URL 획득
         String s3Path = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size);
 
-        System.out.println("s3Path = " + s3Path);
-        System.out.println(bucketPath + FilePath.STRATEGY_IMAGE.getPath() + fileName);
-
-        assertTrue(s3Path.equals(bucketPath + FilePath.STRATEGY_IMAGE.getPath() + fileName));
         System.out.println(s3Path);
+
+        assertTrue(s3Path.contains(FilePath.STRATEGY_IMAGE.getPath()));
+        assertTrue(s3Path.contains(fileName));
     }
 
     @Test
@@ -49,15 +49,10 @@ class S3FileServiceTest {
         String s3Path;
 
         // 확장자 다르면 RuntimeException던짐.
-        try {
-            //throw new RuntimeException("Not Supported File");
-            s3Path = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size);
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
+        RuntimeException exception = assertThrows(RuntimeException.class
+                , () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
 
-            assertTrue(e.getClass().equals(RuntimeException.class));
-            assertTrue(e.getMessage().equals("Not Supported File"));
-        }
+        assertTrue(exception.getMessage().equals("Not Supported File"));
     }
 
     @Test
@@ -68,16 +63,11 @@ class S3FileServiceTest {
 
         String s3Path;
 
-        // 2MB초과면  RuntimeException던짐.
-        try {
-            //throw new RuntimeException("Not Supported File");
-            s3Path = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size);
-        } catch (RuntimeException e) {
-            System.out.println(e.getMessage());
+        // 2MB 이상이면  RuntimeException던짐.
+        RuntimeException exception = assertThrows(RuntimeException.class
+                , () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
 
-            assertTrue(e.getClass().equals(RuntimeException.class));
-            assertTrue(e.getMessage().equals("Not Supported File"));
-        }
+        assertTrue(exception.getMessage().equals("Not Supported File"));
     }
 
     @Test
@@ -103,13 +93,73 @@ class S3FileServiceTest {
 
         //객체 URL 획득
         String s3Path = s3FileService.getS3Path(FilePath.STRATEGY_EXCEL, fileName, size);
+        System.out.println("s3Path = " + s3Path);
+
+        assertTrue(s3Path.contains(FilePath.STRATEGY_EXCEL.getPath()));
+
+        assertTrue(s3Path.contains(fileName));
+    }
+
+    @Test
+    @DisplayName("공지사항 정상 문서 확장자랑 사이즈 판별")
+    void passNoticeCase1() {
+
+        String fileName = "testDocs.docx"; // 확장자 충족
+        int size = 1024 * 1024; // 1MB
+
+        String s3Path = s3FileService.getS3Path(FilePath.NOTICE, fileName, size);
 
         System.out.println("s3Path = " + s3Path);
-        System.out.println(bucketPath + FilePath.STRATEGY_EXCEL.getPath() + fileName);
 
-        assertTrue(s3Path.equals(bucketPath + FilePath.STRATEGY_EXCEL.getPath() + fileName));
-        System.out.println(s3Path);
+        assertTrue(s3Path.contains(FilePath.NOTICE.getPath()));
+        assertTrue(s3Path.contains(fileName));
     }
+
+    @Test
+    @DisplayName("공지사항 정상 이미지")
+    void passNoticeCase2() {
+
+        String fileName = "testImage.jpg"; // 확장자 충족
+        int size = 1024 * 1024; // 1MB
+
+        String s3Path = s3FileService.getS3Path(FilePath.NOTICE, fileName, size);
+
+        System.out.println("s3Path = " + s3Path);
+
+        assertTrue(s3Path.contains(FilePath.NOTICE.getPath()));
+        assertTrue(s3Path.contains(fileName));
+    }
+
+
+    @Test
+    @DisplayName("공지사항 문서 확장자 다를 때")
+    void noPassNoticeCase1() {
+        String fileName = "testDocs.docc"; //docc 으로 철자 다르게 함.
+
+        int size = 1024 * 1024; //1MB
+
+        RuntimeException exception = assertThrows(RuntimeException.class
+                , () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
+
+        assertTrue(exception.getMessage().equals("Not Supported File"));
+
+    }
+
+    @Test
+    @DisplayName("공지사항에 이미지 이상한거 들어갔을 때")
+    void noPassNoticeCase2() {
+        String fileName = "testDocs.jpa"; //jpa 으로 철자 다르게 함.
+
+        int size = 1024 * 1024; //1MB
+
+        // 확장자 틀릴 때 RuntimeException던짐.
+        RuntimeException exception = assertThrows(RuntimeException.class
+                , () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
+
+        assertTrue(exception.getMessage().equals("Not Supported File"));
+    }
+
+
 }
 
 

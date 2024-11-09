@@ -9,8 +9,10 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
-import lombok.RequiredArgsConstructor;
+import java.util.HashSet;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +25,13 @@ import org.springframework.stereotype.Service;
  * image metadata 받아오는 파라미터가 달라질 수 있음.(content-type)
  */
 @Service
-@RequiredArgsConstructor
 public class S3FileService {
 
     private final AmazonS3 amazonS3;
+
+
+    @Value("${cloud.aws.s3.expiration}")
+    private long apiExpiration;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName; //버킷 이름
@@ -37,6 +42,16 @@ public class S3FileService {
     @Value("${cloud.aws.s3.defaultImgPath}")
     private String bucketPath;
 
+    private static HashSet<String> imgExtensionSet;
+    private static HashSet<String> excelExtensionSet;
+    private static HashSet<String> docsExtensionSet;
+
+    public S3FileService(AmazonS3 amazonS3) {
+        this.amazonS3 = amazonS3;
+        imgExtensionSet = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
+        excelExtensionSet = new HashSet<>(Arrays.asList("xls", "xlsx"));
+        docsExtensionSet = new HashSet<>(Arrays.asList("doc", "docx", "pptx", "ppt"));
+    }
 
     /**
      * S3상에서 UserProfile이미지가 저장될 경로를 반환.
@@ -49,45 +64,82 @@ public class S3FileService {
      */
     public String getS3Path(FilePath filePath, String fileName, int size) {
 
-        //엑셀
+        //전략 엑셀.
         if (filePath.equals(FilePath.STRATEGY_EXCEL)) {
             //확장자가 틀리거나 500MB이상 인지 확인
             if (!filterExcelExtension(fileName) || !(size < 1024 * 1024 * 500)) {
                 throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
             }
 
-            //이미지
+            //전략 이미지, 유저 프로필 사진
         } else if (filePath.equals(FilePath.STRATEGY_IMAGE) || filePath.equals(FilePath.USER_PROFILE)) {
             //확장자가 틀리거나 2MB이상인지 확인
             if (!filterImageExtension(fileName) || !(size < 1024 * 1024 * 2)) {
                 throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
             }
-        }//공지사항, QnA 필요.
+
+            //공지사항.
+        } else if (filePath.equals(FilePath.NOTICE)) {
+            //확장자가 틀리거나 5MB이상인지 확인
+            if (!filterNoticeExtension(fileName) || !(size < 1024 * 1024 * 5)) {
+                throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
+            }
+        } else {
+
+            // 아무것도 아닌경우. - 이럴 일은 없겠지만...
+            throw new RuntimeException("Not Supported Type");
+        }
 
         //객체 URL 경로 반환.(도메인 경로 포함)
-        return prefixFilePath(filePath.getPath(), fileName);
+        return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
 
     /**
-     * 현재 파일의 확장자가 jpg, jpeg, png 맞는지 확인
+     * 현재 파일의 확장자가 imgExtensionList에 해당하는지 확인
      *
      * @param filename 확장자가 붙은 파일 이름
      */
     private boolean filterImageExtension(String filename) {
+
         String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        return (extension.equals("jpg") || extension.equals("jpeg") || extension.equals("png"));
+
+        // 해당하는 확장자가 있으면 true 반환.
+        return imgExtensionSet.contains(extension);
     }
 
 
     /**
-     * 현재 파일의 확장자가 xls, xlsx가 맞는지 확인
+     * 현재 파일의 확장자가 excelExtensionList에 해당하는지 확인
      *
      * @param filename 확장자가 붙은 파일 이름
      */
     private boolean filterExcelExtension(String filename) {
+
         String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        return (extension.equals("xls") || extension.equals("xlsx"));
+
+        // 해당하는 확장자가 있으면 true 반환. O(n)이지만 가독성을 위해...
+        return excelExtensionSet.contains(extension);
+    }
+
+
+    /**
+     * 현재 파일의 확장자가 imgExtensionList나 docsExtensionList에 해당하는지 확인.
+     *
+     * @param filename 확장자가 붙은 파일 이름.
+     */
+    private boolean filterNoticeExtension(String filename) {
+
+        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+
+        //공치사항에 올릴 파일이 이미지 확장자에 해당하는지 검증.
+        if (filterImageExtension(extension)) {
+            return true;
+        }
+
+        //공지사항헤 올릴 파일이 doc이나 ppt 종류에 해당하는지 검증.
+        return docsExtensionSet.contains(extension);
+
     }
 
     /**
@@ -110,6 +162,7 @@ public class S3FileService {
     public String getPreSignedUrl(String filePath) {
 
         // s3객체 URL에서 Key 추출(testCode에서 확인)
+        // filename에 ".com/" 안들어가있으면 앞에서부터 문자 짤립니다... postman으로 test할 때 확인하세요.
         String s3Key = filePath.substring(filePath.lastIndexOf(".com/") + 5);
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucketName, s3Key);
@@ -151,7 +204,7 @@ public class S3FileService {
     private Date getPreSignedUrlExpiration() {
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime(); // 현재 시간
-        expTimeMillis += 1000 * 60; //1분  (1000 * 60 = 1분)
+        expTimeMillis += apiExpiration; // 지정한 유효시간을 밀리초로 더해줌.
         expiration.setTime(expTimeMillis); //현재 시간 + 1분 까지 유효
         return expiration;
     }
@@ -173,5 +226,13 @@ public class S3FileService {
             //실패시
             throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
         }
+    }
+
+
+    /**
+     * 파일 고유 ID를 생성 return : 8자리의 UUID
+     */
+    private String createUUID8() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 }

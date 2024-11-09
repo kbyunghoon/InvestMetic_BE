@@ -9,8 +9,7 @@ public enum FilePath {
     USER_PROFILE("user-profile/"),
     STRATEGY_EXCEL("strategy/excel/"),
     STRATEGY_IMAGE("strategy/image/"),
-    NOTICE("notice/"),
-    QNA("qna/");
+    NOTICE("notice/");
 
     private final String path;
 
