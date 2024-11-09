@@ -16,10 +16,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Strategy extends BaseEntity {
 
     @Id
@@ -57,6 +60,25 @@ public class Strategy extends BaseEntity {
 
     private Double averageRating; // 평균별점
 
+    public void updateAverageRating(Double newAverageRating){
+        this.averageRating = newAverageRating;
+    }
 
-
+    @Builder
+    public Strategy(Long strategyId, User user, TradeType tradeType, String strategyName, OperationCycle operationCycle,
+                    BigDecimal minimumInvestmentAmount, String strategyDescription, String proposalFilePath,
+                    IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating) {
+        this.strategyId = strategyId;
+        this.user = user;
+        this.tradeType = tradeType;
+        this.strategyName = strategyName;
+        this.operationCycle = operationCycle;
+        this.minimumInvestmentAmount = minimumInvestmentAmount;
+        this.strategyDescription = strategyDescription;
+        this.proposalFilePath = proposalFilePath;
+        this.isPublic = isPublic;
+        this.isApproved = isApproved;
+        this.subscriptionCount = subscriptionCount;
+        this.averageRating = averageRating;
+    }
 }

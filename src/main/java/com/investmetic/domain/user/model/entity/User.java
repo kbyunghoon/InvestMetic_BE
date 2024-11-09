@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -55,5 +56,27 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
+
+    @Builder
+    public User(String username, String nickname, String email, String password, String imageUrL,
+                String phone,
+                String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
+                UserState userState, Boolean withdrawalStatus, Role role) {
+
+        this.username = username;
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+        this.imageUrL = imageUrL;
+        this.phone = phone;
+        this.birthDate = birthDate;
+        this.ipAddress = ipAddress;
+        this.infoAgreement = infoAgreement;
+        this.joinDate = joinDate;
+        this.withdrawalDate = withdrawalDate;
+        this.userState = userState;
+        this.withdrawalStatus = withdrawalStatus;
+        this.role = role;
+    }
 }
 
