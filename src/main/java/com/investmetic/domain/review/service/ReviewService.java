@@ -10,7 +10,6 @@ import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BaseException;
 import com.investmetic.global.exception.ErrorCode;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,8 +80,9 @@ public class ReviewService {
     // 평균 별점 업데이트 - 리뷰 등록
     private void addUpdateAverageRating(Strategy strategy, int newStarRating) {
         int reviewCount = reviewRepository.countByStrategy(strategy);
-
         double currentAverage = strategy.getAverageRating();
+
+        // 새 별점을 추가한 평균 계산
         double updatedAverage = ((currentAverage * reviewCount) + newStarRating) / (reviewCount + 1);
         saveAverageRating(strategy, updatedAverage);
     }
@@ -90,6 +90,7 @@ public class ReviewService {
     // 평균 별점 업데이트 - 리뷰 수정
     private void updateAverageRating(Strategy strategy, int oldStarRating, int newStarRating) {
         int reviewCount = reviewRepository.countByStrategy(strategy);
+
         double currentAverage = strategy.getAverageRating();
 
         // 이전 별점을 제거하고 새 별점을 추가한 평균 계산
@@ -102,13 +103,10 @@ public class ReviewService {
         int reviewCount = reviewRepository.countByStrategy(strategy);
 
         double currentAverage = strategy.getAverageRating();
-        double updatedAverage;
 
-        if (reviewCount - 1 == 0) {
-            updatedAverage = 0.0;
-        } else {
-            updatedAverage = ((currentAverage * reviewCount) - deletedStarRating) / (reviewCount - 1);
-        }
+        // 이전 별점을 제거한 평균 계산
+        double updatedAverage = (reviewCount == 1) ? 0.0
+                : ((currentAverage * reviewCount) - deletedStarRating) / (reviewCount - 1);
         saveAverageRating(strategy, updatedAverage);
     }
 
