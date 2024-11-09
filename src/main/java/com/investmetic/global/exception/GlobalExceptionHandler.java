@@ -32,6 +32,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 일반적인 모든 예외 처리 (Exception)
+     */
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<BaseResponse<Void>> handleGeneralException(final Exception e) {
+        log.error("Unhandled Exception 발생: {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(BaseResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
+    }
+
+    /**
      * enum 타입이 일치하지 않을 때 발생하는 예외 처리
      *
      * @RequestParam 으로 전달된 enum 타입의 값이 맞지 않을 때 주로 발생
