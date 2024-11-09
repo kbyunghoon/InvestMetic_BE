@@ -21,7 +21,8 @@ public class StrategyRegisterService {
 
     public BaseResponse<PresignedUrlResponseDto> registerStrategy(StrategyRegisterRequestDto requestDto) {
         // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
-//        TradeType tradeType = tradeTypeService.getTradeTypeById(requestDto.getTradeTypeId());
+        // TODO : TradeType 연결
+        // TradeType tradeType = tradeTypeService.getTradeTypeById(requestDto.getTradeTypeId());
         TradeType tradeType = new TradeType();
 
         // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
