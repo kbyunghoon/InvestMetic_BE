@@ -1,4 +1,4 @@
-package com.investmetic.domain.user.repository;
+package com.investmetic.domain.user.repository.mypage;
 
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class UserRepositoryCustomImpl implements UserRepositoryCustom {
+public class UserMyPageRepositoryCustomImpl implements UserMyPageRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
@@ -23,7 +23,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         return Optional.ofNullable(queryFactory.from(user)
                 .select(Projections.fields(UserProfileDto.class,
-                        user.userId, user.username, user.nickname, user.email, user.imageUrL, user.phone,
+                        user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
                         user.infoAgreement))
                 .where(user.email.eq(email))
                 .fetchOne()); // 하나의 객체 반활

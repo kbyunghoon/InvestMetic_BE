@@ -1,20 +1,16 @@
 package com.investmetic.domain.user.dto.request;
 
 import com.investmetic.domain.user.dto.object.ImageMetadata;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /*
      회원 정보 수정 시 사용할 Dto
     data : password, imageUrl, phone, email, nickName, infoAgreement, infoReceive
-
-
  */
 
-@Data
-@ToString
-@AllArgsConstructor
+@Getter
+@NoArgsConstructor
 public class UserModifyDto {
 
     private String nickname;
