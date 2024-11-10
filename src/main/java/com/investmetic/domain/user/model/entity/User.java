@@ -57,7 +57,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-    // 회원 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
+    // FIXME: 회원 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
     public User(String username, String nickname, String email, String password, String imageUrL,
                 String phone,

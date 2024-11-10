@@ -64,7 +64,7 @@ public class Strategy extends BaseEntity {
         this.averageRating = newAverageRating;
     }
 
-    // 전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
+    // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
     public Strategy(Long strategyId, User user, TradeType tradeType, String strategyName, OperationCycle operationCycle,
                     BigDecimal minimumInvestmentAmount, String strategyDescription, String proposalFilePath,
