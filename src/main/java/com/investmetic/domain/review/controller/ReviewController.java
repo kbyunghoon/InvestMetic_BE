@@ -6,6 +6,7 @@ import com.investmetic.domain.review.dto.response.ReviewResponse;
 import com.investmetic.domain.review.service.ReviewService;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -33,7 +34,7 @@ public class ReviewController {
     public BaseResponse<ReviewResponse> addReview(
             @PathVariable Long strategyId,
             @RequestParam Long userId, // 임시로 userId를 쿼리 파라미터로 받음
-            @RequestBody ReviewRequestDto reviewRequestDto) {
+            @RequestBody @Valid ReviewRequestDto reviewRequestDto) {
 
         ReviewResponse result = reviewService.addReview(strategyId, userId, reviewRequestDto);
         return BaseResponse.success(SuccessCode.CREATED, result);
@@ -44,7 +45,7 @@ public class ReviewController {
     public BaseResponse<ReviewResponse> updateReview(
             @PathVariable Long strategyId,
             @PathVariable Long reviewId,
-            @RequestBody ReviewRequestDto reviewRequestDto) {
+            @RequestBody @Valid ReviewRequestDto reviewRequestDto) {
 
         ReviewResponse result = reviewService.updateReview(strategyId, reviewId, reviewRequestDto);
         return BaseResponse.success(SuccessCode.UPDATED, result);
