@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.review.dto.request.ReviewRequestDto;
-import com.investmetic.domain.review.dto.response.ReviewResponseDto;
+import com.investmetic.domain.review.dto.response.ReviewResponse;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
@@ -146,7 +146,7 @@ class ReviewServiceTest {
                 .content("전략 굿")
                 .starRating(4)
                 .build();
-        ReviewResponseDto response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
+        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
                 initialRequest);
 
         em.flush();
@@ -181,7 +181,7 @@ class ReviewServiceTest {
                 .content("전략 굿")
                 .starRating(4)
                 .build();
-        ReviewResponseDto response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
+        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
                 requestDto);
 
         em.flush();
@@ -215,7 +215,7 @@ class ReviewServiceTest {
                     .content("전략 굿")
                     .starRating(i)
                     .build();
-            ReviewResponseDto review = reviewService.addReview(testStrategy.getStrategyId(),
+            ReviewResponse review = reviewService.addReview(testStrategy.getStrategyId(),
                     testUser.getUserId(), requestDto);
             reviewIds.add(review.getReviewId());
         }
