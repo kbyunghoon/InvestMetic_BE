@@ -15,11 +15,11 @@ public class TestEntityFactory {
 
     public static User createTestUser() {
         return User.builder()
-                .username("testUser")
+                .userName("testUser")
                 .nickname("Test Nickname")
                 .email("testuser@example.com")
                 .password("encryptedPassword")
-                .imageUrL("http://example.com/image.jpg")
+                .imageUrl("http://example.com/image.jpg")
                 .phone("123-456-7890")
                 .birthDate("19900101")
                 .ipAddress("192.168.0.1")
