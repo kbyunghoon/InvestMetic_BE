@@ -26,7 +26,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 회원 ID, 기본 키로 자동 증가됨
 
-    private String username; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
+    private String userName; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
 
     private String nickname; // 사용자 닉네임 (표시 이름)
 
@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     private String password; // 비밀번호 (암호화 필요)
 
     @Column(length = 1000)
-    private String imageUrL; // 프로필 이미지 URL
+    private String imageUrl; // 프로필 이미지 URL
 
     private String phone; // 전화번호
 
@@ -57,18 +57,17 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-    // FIXME: 회원 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
-    public User(String username, String nickname, String email, String password, String imageUrL,
+    public User(String userName, String nickname, String email, String password, String imageUrl,
                 String phone,
                 String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
                 UserState userState, Boolean withdrawalStatus, Role role) {
 
-        this.username = username;
+        this.userName = userName;
         this.nickname = nickname;
         this.email = email;
         this.password = password;
-        this.imageUrL = imageUrL;
+        this.imageUrl = imageUrl;
         this.phone = phone;
         this.birthDate = birthDate;
         this.ipAddress = ipAddress;
@@ -79,5 +78,6 @@ public class User extends BaseEntity {
         this.withdrawalStatus = withdrawalStatus;
         this.role = role;
     }
+
 }
 
