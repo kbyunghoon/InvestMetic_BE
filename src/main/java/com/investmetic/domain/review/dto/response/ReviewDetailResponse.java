@@ -27,7 +27,7 @@ public class ReviewDetailResponse {
                 review.getReviewId(),
                 review.getNickname(),
                 review.getContent(),
-                user.getImageUrL(),
+                user.getImageUrl(),
                 review.getCreatedAt(),
                 review.getStarRating(),
                 isOwner
