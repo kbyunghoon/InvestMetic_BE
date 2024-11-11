@@ -56,7 +56,7 @@ class UserMyPageControllerTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email 있는 경우")
-    public void provideUserInfoTest1() throws Exception {
+    void provideUserInfoTest1() throws Exception {
 
         // DB에 유저 생성.
         User user = createOneUser();
@@ -78,7 +78,7 @@ class UserMyPageControllerTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email 없는 경우")
-    public void provideUserInfoTest2() throws Exception {
+    void provideUserInfoTest2() throws Exception {
 
         // DB에 유저 생성.
         User user = createOneUser();
@@ -105,5 +105,4 @@ class UserMyPageControllerTest {
                 .andExpect(jsonPath("$.code").value(2001))// 실패 상태 확인
                 .andDo(print());
     }
-    
 }
