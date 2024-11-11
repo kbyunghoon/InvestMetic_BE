@@ -57,11 +57,12 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-
     @Builder
-    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
-                String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, UserState userState,
-                Role role) {
+    public User(String userName, String nickname, String email, String password, String imageUrl,
+                String phone,
+                String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
+                UserState userState, Boolean withdrawalStatus, Role role) {
+
         this.userName = userName;
         this.nickname = nickname;
         this.email = email;
@@ -72,7 +73,9 @@ public class User extends BaseEntity {
         this.ipAddress = ipAddress;
         this.infoAgreement = infoAgreement;
         this.joinDate = joinDate;
+        this.withdrawalDate = withdrawalDate;
         this.userState = userState;
+        this.withdrawalStatus = withdrawalStatus;
         this.role = role;
     }
 
