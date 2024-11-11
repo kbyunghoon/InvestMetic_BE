@@ -1,6 +1,8 @@
 package com.investmetic.domain.user.dto.request;
 
 import com.investmetic.domain.user.dto.object.ImageMetadata;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserModifyDto {
 
     private String nickname;
@@ -22,8 +24,20 @@ public class UserModifyDto {
 
     private String phone;
 
+    //디자인을 보면 email은 변경하지 못하게 한다. 토큰의 email과 dto의 email이 일치하는지 검증.
     private String email;
 
     private Boolean infoAgreement;
+
+    @Builder
+    public UserModifyDto(String nickname, String password, ImageMetadata imageDto, String phone, String email,
+                         Boolean infoAgreement) {
+        this.nickname = nickname;
+        this.password = password;
+        this.imageDto = imageDto;
+        this.phone = phone;
+        this.email = email;
+        this.infoAgreement = infoAgreement;
+    }
 
 }

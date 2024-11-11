@@ -6,4 +6,5 @@ import java.util.Optional;
 public interface UserMyPageRepositoryCustom {
 
     Optional<UserProfileDto> findByEmailUserInfo(String userName);
+
 }
