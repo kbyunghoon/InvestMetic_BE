@@ -19,10 +19,10 @@ public class TradeTypeService {
         this.s3FileService = s3FileService;
     }
 
-    public String saveTradeType(TradeTypeRequestDTO tradeTypeRequestDTO, Integer size) {
+    public String saveTradeType(TradeTypeRequestDTO tradeTypeRequestDTO) {
         // 클라이언트에서 입력한 파일 경로로 생성한 이미지 경로 저장
         TradeType tradeType=tradeTypeRequestDTO.toEntity();
-        String tradeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, tradeType.getTradeIconURL(), size);
+        String tradeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, tradeType.getTradeIconURL(), tradeTypeRequestDTO.getSize());
         tradeType.changeTradeIconURL(tradeIconURL);
         tradeTypeRepository.save(tradeType);
         return s3FileService.getPreSignedUrl(tradeIconURL);

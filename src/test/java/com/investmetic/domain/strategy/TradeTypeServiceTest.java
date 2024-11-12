@@ -28,6 +28,7 @@ public class TradeTypeServiceTest {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeName("Sample_Trade" + i)
                     .tradeIconURL(String.format("/icons/sample-icon%d.png", i))
+                    .size(1200)
                     .build();
 
             tradeTypeRequestDtoList.add(tradetype);
@@ -38,7 +39,7 @@ public class TradeTypeServiceTest {
     @DisplayName("매매유형 등록 테스트")
     public void registerTradeType() {
         TradeTypeRequestDTO tradeType = tradeTypeRequestDtoList.get(0);
-        String savedTradeType = tradeTypeService.saveTradeType(tradeType, 1200);
+        String savedTradeType = tradeTypeService.saveTradeType(tradeType);
         assertThat(savedTradeType).isNotNull();
         System.out.println("savedTradeType: " + savedTradeType);
         assertThat(savedTradeType.split(".png")[0]+".png").isEqualTo(tradeType.getTradeIconURL());

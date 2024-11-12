@@ -3,7 +3,11 @@ package com.investmetic.domain.strategy.dto.response;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import jakarta.persistence.Column;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class TradeTypeResponseDTO {
     private Long tradeTypeId;
     private String tradeName;

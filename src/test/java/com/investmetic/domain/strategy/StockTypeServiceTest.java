@@ -31,6 +31,7 @@ public class StockTypeServiceTest {
             StockTypeRequestDTO stockTypeRequestDTO = StockTypeRequestDTO.builder()
                     .stockTypeName("Sample_Stock_Type" + i)
                     .stockTypeIconURL(String.format("/icons/sampleStock-icon%d.png", i))
+                    .size(1200)
                     .build();
             stockTypeRequestList.add(stockTypeRequestDTO);
         }
@@ -40,7 +41,7 @@ public class StockTypeServiceTest {
     @DisplayName("종목 등록 테스트")
     public void registerTradeType() {
         StockTypeRequestDTO stockType = stockTypeRequestList.get(0);
-        String savedStockType = stockTypeService.saveStockType(stockType, 1200);
+        String savedStockType = stockTypeService.saveStockType(stockType);
         assertThat(savedStockType).isNotNull();
         assertThat(savedStockType.split(".png")[0]+".png").isEqualTo(stockType.getStockTypeIconURL());
     }
