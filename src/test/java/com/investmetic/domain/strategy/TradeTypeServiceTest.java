@@ -25,9 +25,9 @@ public class TradeTypeServiceTest {
 
         for (int i = 1; i <= 5; i++) {
             TradeType tradetype = TradeType.builder()
-                    .tradeName("Sample Trade " + i)
+                    .tradeName("Sample_Trade" + i)
                     .activateState(true)  // 필드명이 activate_state라면 확인하여 맞춰주세요
-                    .tradeIconPath(String.format("/icons/sample-icon%d.png", i))
+                    .tradeIconURL(String.format("/icons/sample-icon%d.png", i))
                     .build();
 
             tradetypeList.add(tradetype);
@@ -40,6 +40,7 @@ public class TradeTypeServiceTest {
         TradeType tradeType = tradetypeList.get(0);
         String savedTradeType = tradeTypeService.saveTradeType(tradeType, 1200);
         assertThat(savedTradeType).isNotNull();
-
+        System.out.println("savedTradeType: " + savedTradeType);
+        assertThat(savedTradeType.split(".png")[0]+".png").isEqualTo(tradeType.getTradeIconURL());
     }
 }

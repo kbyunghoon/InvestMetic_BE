@@ -15,6 +15,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class StockType extends BaseEntity {
 
     @Id
@@ -27,5 +29,11 @@ public class StockType extends BaseEntity {
     @Column(length = 1000)
     private String stockTypeIconURL; // 종목아이콘 경로
 
+    public void changeStockTypeIconURL(String stockTypeIconURL) {
+        this.stockTypeIconURL = stockTypeIconURL;
+    }
 
+    public void changeActivateState(boolean activateState) {
+        this.activateState = activateState;
+    }
 }
