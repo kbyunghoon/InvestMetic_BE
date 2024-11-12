@@ -60,7 +60,7 @@ public class Strategy extends BaseEntity {
 
     private Double averageRating; // 평균별점
 
-    public void updateAverageRating(Double newAverageRating){
+    public void updateAverageRating(Double newAverageRating) {
         this.averageRating = newAverageRating;
     }
 
