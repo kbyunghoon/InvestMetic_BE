@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.investmetic.domain.strategy.dto.request.StockTypeRequestDTO;
 import com.investmetic.domain.strategy.model.entity.StockType;
 
 import com.investmetic.domain.strategy.service.StockTypeService;
@@ -18,29 +19,27 @@ public class StockTypeServiceTest {
     @Autowired
     private StockTypeService stockTypeService;
 
-    private ArrayList<StockType> stockTypeList;
+    private ArrayList<StockTypeRequestDTO> stockTypeRequestList;
     @Autowired
     private S3FileService s3FileService;
 
     @BeforeEach
     void setUp() {
-        stockTypeList = new ArrayList<StockType>();
+        stockTypeRequestList = new ArrayList<StockTypeRequestDTO>();
 
         for (int i = 1; i <= 5; i++) {
-            StockType stocktype = StockType.builder()
+            StockTypeRequestDTO stockTypeRequestDTO = StockTypeRequestDTO.builder()
                     .stockTypeName("Sample_Stock_Type" + i)
-                    .activateState(true)  // 필드명이 activate_state라면 확인하여 맞춰주세요
                     .stockTypeIconURL(String.format("/icons/sampleStock-icon%d.png", i))
                     .build();
-
-            stockTypeList.add(stocktype);
+            stockTypeRequestList.add(stockTypeRequestDTO);
         }
     }
 
     @Test
     @DisplayName("종목 등록 테스트")
     public void registerTradeType() {
-        StockType stockType = stockTypeList.get(0);
+        StockTypeRequestDTO stockType = stockTypeRequestList.get(0);
         String savedStockType = stockTypeService.saveStockType(stockType, 1200);
         assertThat(savedStockType).isNotNull();
         assertThat(savedStockType.split(".png")[0]+".png").isEqualTo(stockType.getStockTypeIconURL());

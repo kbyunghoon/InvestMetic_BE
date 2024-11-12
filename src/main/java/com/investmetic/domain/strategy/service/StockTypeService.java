@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.service;
 
+import com.investmetic.domain.strategy.dto.request.StockTypeRequestDTO;
 import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.global.util.s3.FilePath;
@@ -18,8 +19,10 @@ public class StockTypeService {
         this.s3FileService = s3FileService;
     }
 
-    public String saveStockType(StockType stockType, Integer size) {
+    public String saveStockType(StockTypeRequestDTO stockTypeRequestDTO, Integer size) {
+        StockType stockType = stockTypeRequestDTO.toEntity();
         String stockTypeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, stockType.getStockTypeIconURL(), size);
+
         stockType.changeStockTypeIconURL(stockTypeIconURL);
         stockTypeRepository.save(stockType);
         return s3FileService.getPreSignedUrl(stockTypeIconURL);

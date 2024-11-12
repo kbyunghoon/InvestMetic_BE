@@ -24,7 +24,7 @@ public class StockType extends BaseEntity {
     private Long stockTypeId;
 
     private String stockTypeName; // 종목명
-    private boolean activateState; // 종목 활성 상태
+    private Boolean activateState; // 종목 활성 상태
 
     @Column(length = 1000)
     private String stockTypeIconURL; // 종목아이콘 경로

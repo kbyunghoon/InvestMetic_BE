@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy;
 
+import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.service.TradeTypeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,27 +18,26 @@ public class TradeTypeServiceTest {
     @Autowired
     private TradeTypeService tradeTypeService;
 
-    private ArrayList<TradeType> tradetypeList;
+    private ArrayList<TradeTypeRequestDTO> tradeTypeRequestDtoList;
 
     @BeforeEach
     void setUp() {
-        tradetypeList = new ArrayList<>();
+        tradeTypeRequestDtoList = new ArrayList<TradeTypeRequestDTO>();
 
         for (int i = 1; i <= 5; i++) {
-            TradeType tradetype = TradeType.builder()
+            TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeName("Sample_Trade" + i)
-                    .activateState(true)  // 필드명이 activate_state라면 확인하여 맞춰주세요
                     .tradeIconURL(String.format("/icons/sample-icon%d.png", i))
                     .build();
 
-            tradetypeList.add(tradetype);
+            tradeTypeRequestDtoList.add(tradetype);
         }
     }
 
     @Test
     @DisplayName("매매유형 등록 테스트")
     public void registerTradeType() {
-        TradeType tradeType = tradetypeList.get(0);
+        TradeTypeRequestDTO tradeType = tradeTypeRequestDtoList.get(0);
         String savedTradeType = tradeTypeService.saveTradeType(tradeType, 1200);
         assertThat(savedTradeType).isNotNull();
         System.out.println("savedTradeType: " + savedTradeType);

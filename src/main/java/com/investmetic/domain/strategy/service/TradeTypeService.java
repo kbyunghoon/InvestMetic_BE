@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.service;
 
+import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.global.util.s3.FilePath;
@@ -18,8 +19,9 @@ public class TradeTypeService {
         this.s3FileService = s3FileService;
     }
 
-    public String saveTradeType(TradeType tradeType, Integer size) {
+    public String saveTradeType(TradeTypeRequestDTO tradeTypeRequestDTO, Integer size) {
         // 클라이언트에서 입력한 파일 경로로 생성한 이미지 경로 저장
+        TradeType tradeType=tradeTypeRequestDTO.toEntity();
         String tradeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, tradeType.getTradeIconURL(), size);
         tradeType.changeTradeIconURL(tradeIconURL);
         tradeTypeRepository.save(tradeType);
