@@ -26,7 +26,7 @@ public class StrategyDetailController {
     public ResponseEntity<BaseResponse<StrategyStatisticsResponse>> getStrategyStatistics(
             @PathVariable Long strategyId) {
         StrategyStatisticsResponse result = strategyDetailService.getStatistics(strategyId);
-        return BaseResponse.success(SuccessCode.OK, result);
+        return BaseResponse.success(result);
     }
 
     @GetMapping("/api/strategies/{strategyId}/daily-analysis")
@@ -43,7 +43,7 @@ public class StrategyDetailController {
             @PageableDefault(size = 5, sort = "monthlyDate", direction = Direction.DESC) Pageable pageable) {
         PageResponseDto<MonthlyAnalysisResponse> result = strategyDetailService.
                 getMonthlyAnalysis(strategyId, pageable);
-        return BaseResponse.success(SuccessCode.OK, result);
+        return BaseResponse.success(result);
     }
 
 
