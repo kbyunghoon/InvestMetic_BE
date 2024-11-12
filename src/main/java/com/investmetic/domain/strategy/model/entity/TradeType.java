@@ -14,7 +14,7 @@ public class TradeType extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long tradeTypeId;
     private String tradeName;
-    private boolean activate_state;
+    private Boolean activate_state;
 
     @Column(length = 1000)
     private String tradeIconPath;
