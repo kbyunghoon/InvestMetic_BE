@@ -8,7 +8,7 @@ import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.investmetic.global.common.PageResponseDto;
-import com.investmetic.global.exception.BaseException;
+import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,7 +26,7 @@ public class StrategyDetailService {
     public StrategyStatisticsResponse getStatistics(Long strategyId) {
 
         StrategyStatistics stats = strategyStatisticsRepository.findByStrategy(strategyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.STRATEGY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
         return StrategyStatisticsResponse.from(stats);
     }
