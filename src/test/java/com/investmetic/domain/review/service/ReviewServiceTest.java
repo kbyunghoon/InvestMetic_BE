@@ -13,7 +13,7 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
-import com.investmetic.global.exception.BaseException;
+import com.investmetic.global.exception.BusinessException;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +22,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
+@TestPropertySource(locations = "classpath:application-test.properties")
 class ReviewServiceTest {
 
     @Autowired
@@ -68,7 +70,7 @@ class ReviewServiceTest {
 
         Long invalidStrategyId = -1L;
 
-        assertThrows(BaseException.class, () ->
+        assertThrows(BusinessException.class, () ->
                 reviewService.addReview(invalidStrategyId, testUser.getUserId(), requestDto)
         );
     }
@@ -83,7 +85,7 @@ class ReviewServiceTest {
 
         Long invalidReviewId = -1L;
 
-        assertThrows(BaseException.class, () ->
+        assertThrows(BusinessException.class, () ->
                 reviewService.updateReview(testStrategy.getStrategyId(), invalidReviewId, updateDto)
         );
     }
