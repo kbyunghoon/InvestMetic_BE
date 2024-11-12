@@ -13,22 +13,24 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/strategies/{strategyId}")
 public class StrategyDetailController {
 
     private final StrategyDetailService strategyDetailService;
 
-    @GetMapping("/api/strategies/{strategyId}/statistics")
+    @GetMapping("/statistics")
     public ResponseEntity<BaseResponse<StrategyStatisticsResponse>> getStrategyStatistics(
             @PathVariable Long strategyId) {
         StrategyStatisticsResponse result = strategyDetailService.getStatistics(strategyId);
         return BaseResponse.success(result);
     }
 
-    @GetMapping("/api/strategies/{strategyId}/daily-analysis")
+    @GetMapping("/daily-analysis")
     public ResponseEntity<BaseResponse<PageResponseDto<DailyAnalysisResponse>>> getDailyAnalysis(
             @PathVariable Long strategyId,
             @PageableDefault(size = 5, sort = "dailyDate", direction = Direction.DESC) Pageable pageable) {
@@ -36,7 +38,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
-    @GetMapping("/api/strategies/{strategyId}/monthly-analysis")
+    @GetMapping("/monthly-analysis")
     public ResponseEntity<BaseResponse<PageResponseDto<MonthlyAnalysisResponse>>> getMonthlyAnalysis(
             @PathVariable Long strategyId,
             @PageableDefault(size = 5, sort = "monthlyDate", direction = Direction.DESC) Pageable pageable) {
@@ -44,6 +46,5 @@ public class StrategyDetailController {
                 getMonthlyAnalysis(strategyId, pageable);
         return BaseResponse.success(result);
     }
-
 
 }
