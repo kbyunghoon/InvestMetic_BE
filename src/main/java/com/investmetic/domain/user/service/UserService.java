@@ -36,5 +36,4 @@ public class UserService {
 
         return BaseResponse.success();
     }
-
 }

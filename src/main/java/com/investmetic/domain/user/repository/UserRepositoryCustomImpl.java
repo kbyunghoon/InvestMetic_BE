@@ -3,7 +3,6 @@ package com.investmetic.domain.user.repository;
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.entity.QUser;
-import com.investmetic.domain.user.model.entity.User;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;

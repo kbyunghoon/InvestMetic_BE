@@ -1,7 +1,5 @@
 package com.investmetic.domain.user.service;
 
-import com.investmetic.global.exception.BaseResponse;
-import com.investmetic.global.exception.ErrorCode;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

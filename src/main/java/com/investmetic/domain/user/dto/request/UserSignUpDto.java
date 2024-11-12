@@ -3,8 +3,6 @@ package com.investmetic.domain.user.dto.request;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,23 +11,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Getter
 @Builder
 public class UserSignUpDto {
-
     private String username;
-
     private String nickname;
-
     private String phone;
-
     private String birthdate;
-
     private String password;
-
     private String email;
-
     private Role role;
-
     private Boolean infoAgreement; //정보제공 동의
-
 
     public static User toEntity(UserSignUpDto userSignUpDto, BCryptPasswordEncoder passwordEncoder) {
         return User.builder()

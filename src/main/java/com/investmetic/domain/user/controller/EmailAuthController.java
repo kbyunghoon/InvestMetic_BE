@@ -6,7 +6,6 @@ import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.exception.SuccessCode;
 import jakarta.mail.MessagingException;
-import java.security.NoSuchAlgorithmException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +23,9 @@ public class EmailAuthController {
 
     // 이메일 인증 코드 전송
     @GetMapping("/email/{email_addr}/authcode")
-    public BaseResponse<String> sendEmailPath(@PathVariable String email_addr) throws MessagingException {
+    public BaseResponse<String> sendEmailPath(
+            @PathVariable String email_addr) throws MessagingException {
+
         emailService.sendEmail(email_addr);
         return BaseResponse.success();
     }
@@ -33,10 +34,10 @@ public class EmailAuthController {
     @PostMapping("/email/{email_addr}/authcode")
     public BaseResponse<String> sendEmailAndCode(
             @PathVariable String email_addr,
-            @RequestBody EmailRequestDto emailRequestDto) throws NoSuchAlgorithmException {
+            @RequestBody EmailRequestDto emailRequestDto) {
 
         if (emailService.verifyEmailCode(email_addr, emailRequestDto.getCode())) {
-            return BaseResponse.success(SuccessCode.CREATED,emailRequestDto.getEmail());
+            return BaseResponse.success(SuccessCode.CREATED, emailRequestDto.getEmail());
         }
 
         return BaseResponse.fail(ErrorCode.VERIFICATION_FAILED); //인증코드가 일치하지 않을 경우
