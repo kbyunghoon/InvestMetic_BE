@@ -14,5 +14,5 @@ public class BaseException extends RuntimeException {
      * 예외 상황을 설명하는 BaseResponseCode 인스턴스.
      * 예외의 구체적인 코드와 메시지 전달
      */
-    private final BaseResponseCode baseResponseCode;
+    private final ErrorCode errorCode;
 }

@@ -22,7 +22,7 @@ public class Review extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
-    private Long id; // 단일 PK
+    private Long reviewId; // 단일 PK
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id", nullable = false)
@@ -39,5 +39,20 @@ public class Review extends BaseEntity {
 
     private int starRating; //별점
 
+    public static Review createReview(Strategy strategy, User user, String content, int starRating) {
+        Review review = new Review();
+        review.strategy = strategy;
+        review.user = user;
+        review.nickname = user.getNickname();  // User의 닉네임을 가져와 설정
+        review.content = content;
+        review.starRating = starRating;
+        return review;
+    }
+
+    // 리뷰 내용과 별점 수정
+    public void updateReview(String content, int starRating) {
+        this.content = content;
+        this.starRating = starRating;
+    }
 
 }

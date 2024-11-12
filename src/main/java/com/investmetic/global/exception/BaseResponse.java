@@ -10,35 +10,39 @@ import lombok.Getter;
  */
 @Getter
 public class BaseResponse<T> {
+
     private final Boolean isSuccess; // 상태 코드에 따른 Boolean
-    private final String message; // 에러 설명
+    private final String message;    // 에러 설명 또는 성공 메시지
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T result; // 요청 성공 시 반환되는 결과 데이터
+    private final T result;          // 요청 성공 시 반환되는 결과 데이터
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private int code; // 오류 발생 시 반환되는 오류 코드
+    private final Integer code;      // 성공 또는 오류 코드
 
-    /**
-     * 실패 응답을 생성
-     *
-     * @param baseResponseCode 응답 코드 및 메시지를 포함한 BaseResponseCode 객체
-     */
-    public BaseResponse(BaseResponseCode baseResponseCode) {
-        this.isSuccess = false;
-        this.code = baseResponseCode.getCode();
-        this.message = baseResponseCode.getMessage();
-    }
-
-    /**
-     * 성공 응답을 생성
-     *
-     * @param message 성공 메시지
-     * @param result 요청 성공 시 반환할 데이터
-     */
-    public BaseResponse(String message, T result) {
-        this.isSuccess = true;
+    // 생성자
+    private BaseResponse(Boolean isSuccess, Integer code, String message, T result) {
+        this.isSuccess = isSuccess;
+        this.code = code;
         this.message = message;
         this.result = result;
+    }
+
+    // 성공 응답 생성자
+    public static <T> BaseResponse<T> success() {
+        return new BaseResponse<>(true, null, SuccessCode.OK.getMessage(), null);
+    }
+
+    public static <T> BaseResponse<T> success(T data) {
+        return new BaseResponse<>(true, null, SuccessCode.OK.getMessage(), data);
+    }
+
+    public static <T> BaseResponse<T> success(SuccessCode code, T data) {
+        return new BaseResponse<>(true, null, code.getMessage(), data); // 성공 시 code는 null로 설정
+    }
+
+    // 실패 응답 생성자
+    public static <T> BaseResponse<T> fail(ErrorCode code) {
+        return new BaseResponse<>(false, code.getStatusCode(), code.getMessage(), null);
     }
 }

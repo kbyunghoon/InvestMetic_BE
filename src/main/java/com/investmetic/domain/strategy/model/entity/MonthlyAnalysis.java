@@ -25,7 +25,7 @@ public class MonthlyAnalysis extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    private String YearMonth; // YYYY-DD
+    private String yearMonth; // YYYY-DD
 
     private Long monthlyAveragePrincipal; //  원금
 
