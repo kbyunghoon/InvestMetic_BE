@@ -6,7 +6,6 @@ import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatistics
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
-import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
