@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,8 @@ public class StrategyController {
 
     @PostMapping("/register")
     @Operation(summary = "전략 등록", description = "새로운 전략 등록 API")
-    public BaseResponse<PresignedUrlResponseDto> registerStrategy(@RequestBody StrategyRegisterRequestDto requestDto) {
+    public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
+            @RequestBody StrategyRegisterRequestDto requestDto) {
         return strategyRegisterService.registerStrategy(requestDto);
     }
 }

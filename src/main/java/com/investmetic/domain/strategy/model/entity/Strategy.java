@@ -3,7 +3,7 @@ package com.investmetic.domain.strategy.model.entity;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmountEnum;
-import com.investmetic.domain.strategy.model.TradingStrategyType;
+import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Column;
@@ -16,7 +16,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,7 +41,7 @@ public class Strategy extends BaseEntity {
     private String strategyName; // 전략명
 
     @Enumerated(EnumType.STRING)
-    private TradingStrategyType tradingStrategyType; // 운용주기
+    private OperationCycle operationCycle; // 운용주기
 
     @Enumerated(EnumType.STRING)
     private MinimumInvestmentAmountEnum minimumInvestmentAmount; // 최소운용가능금액
@@ -63,12 +62,21 @@ public class Strategy extends BaseEntity {
 
     private Double averageRating; // 평균별점
 
+    public void updateAverageRating(Double newAverageRating) {
+        this.averageRating = newAverageRating;
+    }
+
+    // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
-    public Strategy(String strategyName, TradeType tradeType, TradingStrategyType tradingStrategyType,
-                    String proposalFilePath, MinimumInvestmentAmountEnum minimumInvestmentAmount) {
-        this.strategyName = strategyName;
+    public Strategy(Long strategyId, User user, TradeType tradeType, String strategyName, OperationCycle operationCycle,
+                    MinimumInvestmentAmountEnum minimumInvestmentAmount, String strategyDescription,
+                    String proposalFilePath,
+                    IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating) {
+        this.strategyId = strategyId;
+        this.user = user;
         this.tradeType = tradeType;
-        this.tradingStrategyType = tradingStrategyType;
+        this.strategyName = strategyName;
+        this.operationCycle = operationCycle;
         this.minimumInvestmentAmount = minimumInvestmentAmount;
         this.proposalFilePath = proposalFilePath;
     }

@@ -4,13 +4,18 @@ import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.exception.SuccessCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.formula.functions.T;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,12 +23,18 @@ import org.springframework.stereotype.Service;
 public class StrategyRegisterService {
     private final S3FileService s3FileService;
     private final StrategyRepository strategyRepository;
+    private final TradeTypeRepository tradeTypeRepository;
+    private final UserRepository userRepository;
 
-    public BaseResponse<PresignedUrlResponseDto> registerStrategy(StrategyRegisterRequestDto requestDto) {
+    public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
+            StrategyRegisterRequestDto requestDto) {
+//        TODO: 추후 삭제
+
+        User user = userRepository.findById(327L)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
-        // TODO : TradeType 연결
-        // TradeType tradeType = tradeTypeService.getTradeTypeById(requestDto.getTradeTypeId());
-        TradeType tradeType = new TradeType();
+        TradeType tradeType = tradeTypeRepository.findByTradeTypeId(requestDto.getTradeTypeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
 
         // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
         String proposalFilePath = s3FileService.getS3Path(
@@ -35,9 +46,10 @@ public class StrategyRegisterService {
 
         // 3. Strategy 생성 및 저장
         Strategy strategy = Strategy.builder()
+                .user(user)
                 .strategyName(requestDto.getStrategyName())
                 .tradeType(tradeType)
-                .tradingStrategyType(requestDto.getTradingStrategyType())
+                .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
                 .proposalFilePath(proposalFilePath)
                 .build();

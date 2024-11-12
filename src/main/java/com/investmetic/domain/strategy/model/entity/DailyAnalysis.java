@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.lang.Long;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +25,7 @@ public class DailyAnalysis extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
-    private LocalDate date; // 날짜
+    private LocalDate dailyDate; // 날짜
 
     private Long transaction; // 입출금 거래
 
@@ -40,13 +39,13 @@ public class DailyAnalysis extends BaseEntity {
 
     private Long valuationProfitLoss; // 평가손익
 
-    private Long kpRatio; // KP Ratio
+    private Double kpRatio; // KP Ratio
 
-    private Long smScore; // SM Score
+    private Double smScore; // SM Score
 
     private Long referencePrice; // 기준가
 
-    private Long cumulativeTransactionAmount; // 누적 거래금액
+    private Long cumulativeTransactionAmount; // 누적 입출금
 
     private Long deposit; // 입금
 
@@ -56,19 +55,19 @@ public class DailyAnalysis extends BaseEntity {
 
     private Long cumulativeWithdrawal; // 누적 출금
 
-    private Long dailyProfitLossRate; // 일간 손익률
+    private Double dailyProfitLossRate; // 일간 손익률
 
     private Long maxDailyProfit; // 최대 일간 이익
 
-    private Long maxDailyProfitRate; // 최대 일간 이익률
+    private Double maxDailyProfitRate; // 최대 일간 이익률
 
-    private Long maxDailyLossRate; // 최대 일간 손실률
+    private Double maxDailyLossRate; // 최대 일간 손실률
 
     private Long totalProfit; // 총 이익
 
     private Integer profitableDays; // 이익일수
 
-    private Long averageProfit; // 평균 이익
+    private Double averageProfit; // 평균 이익
 
     private Long totalLoss; // 총 손실
 
@@ -78,39 +77,38 @@ public class DailyAnalysis extends BaseEntity {
 
     private Long cumulativeProfitLoss; // 누적 손익
 
-    private Long cumulativeProfitLossRate; // 누적 손익률
+    private Double cumulativeProfitLossRate; // 누적 손익률
 
     private Long maxCumulativeProfitLoss; // 최대 누적손익
 
-    private Long maxCumulativeProfitLossRate; // 최대 누적손익률
+    private Double maxCumulativeProfitLossRate; // 최대 누적손익률
 
-    private Long averageProfitLoss; // 평균손익
+    private Long averageProfitLoss; // 평균손익비율
 
-    private Long peakValue; // 최고값
+    private Double averageProfitLossRatio; // 평균손익비율
 
-    private Integer daysSincePeak; // 최고값 이후 일수
+    private Long peak; // 최고값
 
-    private Long currentDrawdown; // 현재 낙폭
+    private Long peakRatio; // 최고값 비율
 
-    private Long currentDrawdownRate; // 현재 낙폭률
+    private Integer daysSincePeak; // 고점후 경과일
 
-    private Long maxDrawdown; // 최대 낙폭
+    private Long currentDrawdown; // 현재 자본인하금액
 
-    private Long maxDrawdownRate; // 최대 낙폭률
+    private Double currentDrawdownRate; // 현재 자본인하율
+
+    private Long maxDrawdown; // 최대 자본인하금액
+
+    private Double maxDrawdownRate; // 최대 자본인하율
 
     private Double winRate; // 승률
 
-    private Long profitFactor; // Profit Factor
+    private Double profitFactor; // Profit Factor
 
-    private Long roa; // ROA
+    private Double roa; // ROA
 
-    private Long averageProfitLossRatio; // 평균 손익비율
+    private Double coefficientOfVariation; // 변동계수
 
-    private Long coefficientOfVariation; // 변동계수
+    private Double sharpRatio; // Sharp 비율
 
-    private Long sharpeRatio; // Sharpe 비율
-
-    private Long dailyProfitRate; // 일간 손익률
-
-    private Long profitRate; // 손익률
 }
