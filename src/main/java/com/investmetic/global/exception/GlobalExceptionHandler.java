@@ -18,17 +18,27 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class GlobalExceptionHandler {
 
     /**
-     * 커스텀 예외 처리
+     * BusinessException 처리
      *
-     * @param e 발생한 BaseException 인스턴스
+     * @param e 발생한 BusinessException 인스턴스
      * @return HTTP 상태 코드와 함께 BaseResponse 형식의 오류 응답
      */
-    @ExceptionHandler(BaseException.class)
-    protected ResponseEntity<BaseResponse<Void>> handleBaseException(final BaseException e) {
-        log.error("BaseException(커스텀 예외 처리) : {}", e.getMessage(), e);
+    @ExceptionHandler(BusinessException.class)
+    protected ResponseEntity<BaseResponse<Void>> handleBusinessException(final BusinessException e) {
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(BaseResponse.fail(e.getErrorCode()));
+    }
+
+    /**
+     * 일반적인 모든 예외 처리 (Exception)
+     */
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<BaseResponse<Void>> handleGeneralException(final Exception e) {
+        log.error("Unhandled Exception 발생: {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(BaseResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR));
     }
 
     /**

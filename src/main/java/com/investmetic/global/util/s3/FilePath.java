@@ -10,8 +10,7 @@ public enum FilePath {
     STRATEGY_EXCEL("strategy/excel/"),
     STRATEGY_PROPOSAL("strategy/proposal/"),
     STRATEGY_IMAGE("strategy/image/"),
-    NOTICE("notice/"),
-    QNA("qna/");
+    NOTICE("notice/");
 
     private final String path;
 
