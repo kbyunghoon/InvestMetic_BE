@@ -8,7 +8,7 @@ import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
-import com.investmetic.global.exception.BaseException;
+import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,7 +68,7 @@ class UserMyPageServiceTest {
         UserProfileDto presentUserProfile = userMyPageService.provideUserInfo(oneUser.getEmail());
         assertTrue(presentUserProfile != null); // DB에 방금 만든 1명이 있는지.
 
-        BaseException e = assertThrows(BaseException.class,
+        BusinessException e = assertThrows(BusinessException.class,
                 () -> userMyPageService.provideUserInfo("asdf@hanmail.com"));
         assertTrue(e.getErrorCode().getMessage().equals(ErrorCode.USER_INFO_NOT_FOUND.getMessage()));
 

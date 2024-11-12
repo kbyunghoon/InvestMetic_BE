@@ -2,7 +2,7 @@ package com.investmetic.domain.user.service;
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
-import com.investmetic.global.exception.BaseException;
+import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class UserMyPageService {
 
         //BaseResponse.fail를 사용할 만한 것들은 일단 다 예외로 던지기.
         return userMyPageRepository.findByEmailUserInfo(email)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_INFO_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
     }
 
 }

@@ -11,7 +11,7 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
-import com.investmetic.global.exception.BaseException;
+import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,9 +33,10 @@ public class ReviewService {
     @Transactional
     public ReviewResponse addReview(Long strategyId, Long userId, ReviewRequestDto reviewRequestDto) {
         Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.STRATEGY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(ErrorCode.ENTITY_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
 
         Review review = reviewRequestDto.toEntity(user, strategy);
 
@@ -51,10 +52,10 @@ public class ReviewService {
     @Transactional
     public ReviewResponse updateReview(Long strategyId, Long reviewId, ReviewRequestDto reviewRequestDto) {
         Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.STRATEGY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BaseException(ErrorCode.REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
         int oldStarRating = review.getStarRating();
         int newStarRating = reviewRequestDto.getStarRating();
@@ -70,10 +71,10 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Long strategyId, Long reviewId) {
         Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.STRATEGY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new BaseException(ErrorCode.REVIEW_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
 
         int deletedStarRating = review.getStarRating();
 
@@ -123,14 +124,15 @@ public class ReviewService {
     // 리뷰 목록 조회
     public ReviewListResponse getReviewList(Long strategyId, Long userId, Pageable pageable) {
         Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.STRATEGY_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new BaseException(ErrorCode.ENTITY_NOT_FOUND));
-        Page<ReviewDetailResponse> reviews = reviewRepository.findByStrategy(strategy,pageable)
-                .map(review -> ReviewDetailResponse.from(review,user));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        Page<ReviewDetailResponse> reviews = reviewRepository.findByStrategy(strategy, pageable)
+                .map(review -> ReviewDetailResponse.from(review, user));
 
         PageResponseDto<ReviewDetailResponse> responsePageResponseDto = new PageResponseDto<>(reviews);
 
-        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(),responsePageResponseDto);
+        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(), responsePageResponseDto);
     }
 }
