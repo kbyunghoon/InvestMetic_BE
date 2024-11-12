@@ -27,21 +27,23 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @Transactional
 @Import(S3MockConfig.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserMyPageServiceTest {
 
     private static final String BUCKET_NAME = "fastcampus-team3";
@@ -116,6 +118,7 @@ class UserMyPageServiceTest {
          * <br>
          * 실제 S3Client에서는 delete시에 S3버킷에 해당 키와 일치하는 데이터가 없어도 정상 응답 옴.
          * */
+        @Order(1)
         @Test
         @DisplayName("모든 값이 들어있을 떄.")
         void updateUserInfoTest1() {

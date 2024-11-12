@@ -1,4 +1,4 @@
-package com.investmetic.domain.user.controller;
+package com.investmetic.domain.controller;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,7 +33,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +50,6 @@ import org.springframework.util.MultiValueMap;
 @AutoConfigureMockMvc
 @Transactional
 @Import(S3MockConfig.class)
-@ActiveProfiles("test")
 class UserMyPageControllerTest {
 
     private static final String BUCKET_NAME = "fastcampus-team3";

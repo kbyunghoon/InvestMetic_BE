@@ -66,8 +66,6 @@ class UserMyPageRepositoryTest {
         assertTrue(userProfileDto.isPresent());
         assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
         assertTrue(userProfileDto.get().getEmail().equals(user.getEmail())); //Email 검증
-
-        System.out.println(userProfileDto.get()); //확인 용.
     }
 
     @Test
@@ -140,26 +138,31 @@ class UserMyPageRepositoryTest {
         // null 값에 대한 Test에서 사용될 인자.
         static Stream<Arguments> userModifyDtos() {
             return Stream.of(
-                    // 이미지만 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
-                    //닉네임만 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).nickname("테스트").build()),
-                    // 핸드폰 번호 변경, 기존 이미지 삭제
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).phone("01099999999").build()),
-                    // 정보 수신 동의 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).infoAgreement(Boolean.FALSE).build()),
-                    // 비밀 번호 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).password("testtest!!").build())
+
+                    Arguments.arguments("이미지만 변경",UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
+                            .imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
+
+                    Arguments.arguments("닉네임만 변경",UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .nickname("테스트").build()),
+
+                    Arguments.arguments("핸드폰 번호 변경, 기존 이미지 삭제", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
+                            .phone("01099999999").build()),
+
+                    Arguments.arguments("정보 수신 동의 변경", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .infoAgreement(Boolean.FALSE).build()),
+
+                    Arguments.arguments("비밀 번호 변경",UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .password("testtest!!").build())
             );
         }
 
 
 
-        @ParameterizedTest(name = "UserModifyDto : {0}")
+        @ParameterizedTest(name = "{0}")
         @MethodSource("userModifyDtos")
         @DisplayName(" - Entity update 로직 null 제외 검증.")
         //userModifyDto에 변경하지 않을 필드는 null로 들어옴.
-        public void testUpdateUser2(UserModifyDto userModifyDto){
+        public void testUpdateUser2(String displayname ,UserModifyDto userModifyDto){
 
             User user = createOneUser();
 
@@ -195,10 +198,8 @@ class UserMyPageRepositoryTest {
         Optional<User> user =userRepository.findByEmail("asdf");
         assertThat(user.isPresent()).isTrue();
 
-        System.out.println(user.get().getImageUrl().isEmpty());
         assertThat(user.get().getImageUrl()).isEmpty();
         assertThat(user.get().getImageUrl()).isNotNull();
-
     }
 
 
