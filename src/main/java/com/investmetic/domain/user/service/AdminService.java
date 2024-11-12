@@ -1,6 +1,6 @@
 package com.investmetic.domain.user.service;
 
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
+import com.investmetic.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final UserMyPageRepository userRepository;
+    private final UserRepository userRepository;
+
 
 }

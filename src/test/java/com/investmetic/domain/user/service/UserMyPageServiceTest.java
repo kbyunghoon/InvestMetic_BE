@@ -14,7 +14,7 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.config.S3MockConfig;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -44,7 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import(S3MockConfig.class)
 class UserMyPageServiceTest {
 
-    private static final String BUCKET_NAME = "jrw-toyproject-imgs";
+    private static final String BUCKET_NAME = "fastcampus-team3";
 
     @Autowired
     private UserMyPageService userMyPageService;
@@ -56,27 +56,11 @@ class UserMyPageServiceTest {
     private EntityManager em;
 
 
-    //지금은 userMyPageRepository 사용하고 나중에 회원가입 생기면 userService로만 Test해보기.
+    //지금은 userRepository 사용하고 나중에 회원가입 생기면 userService로만 Test해보기.
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userRepository;
 
-    private User createOneUser() {
-        User user = User.builder()
-                .userName("정룡우")
-                .nickname("jeongRyongWoo")
-                .email("jlwoo092513@gmail.com")
-                .password("123456")
-                .imageUrl("https://jrw-toyproject-imgs.s3.ap-northeast-2.amazonaws.com/IMG-3925.JPG")
-                .phone("01012345678")
-                .birthDate("000925")
-                .ipAddress("127.0.0.1")
-                .infoAgreement(Boolean.FALSE)
-                .userState(UserState.ACTIVE)
-                .role(Role.INVESTOR_ADMIN)
-                .build();
-        userMyPageRepository.save(user);
-        return user;
-    }
+
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
@@ -116,7 +100,7 @@ class UserMyPageServiceTest {
         @BeforeAll
         static void setUp(@Autowired S3Mock s3Mock, @Autowired AmazonS3 amazonS3) {
             s3Mock.start();
-            amazonS3.createBucket("jrw-toyproject-imgs");
+            amazonS3.createBucket(BUCKET_NAME);
         }
 
         @AfterAll
@@ -146,6 +130,7 @@ class UserMyPageServiceTest {
                     .nickname("자자ㅏㅈ")
                     .phone("01012345678")
                     .password("9999")
+                    .imageChange(Boolean.TRUE)
                     .build();
 
             //기존 회원 프로필 s3이미지 객체의 key
@@ -181,11 +166,16 @@ class UserMyPageServiceTest {
         // null 값에 대한 Test에서 사용될 인자.
         static Stream<Arguments> userModifyDtos() {
             return Stream.of(
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").nickname("테스트").build()),
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").phone("01099999999").build()),
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").infoAgreement(Boolean.TRUE).build()),
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").password("testtest!!").build())
+                    // 이미지만 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
+                    //닉네임만 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).nickname("테스트").build()),
+                    // 핸드폰 번호 변경, 기존 이미지 삭제
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).phone("01099999999").build()),
+                    // 정보 수신 동의 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).infoAgreement(Boolean.FALSE).build()),
+                    // 비밀 번호 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).password("testtest!!").build())
             );
         }
 
@@ -211,7 +201,7 @@ class UserMyPageServiceTest {
                     , objectMetadata));
 
 
-            // 이미지 변경을 하는 경우에.
+            // 새로운 이미지로 업데이트 하는 경우.
             if(userModifyDto.getImageDto() != null) {
                 //새롭게 저장될 s3객체 URL에 새로운 이미지의 이름이 들어가 있는지 확인.
                 assertThat(userMyPageService.changeUserInfo(userModifyDto, oneUser.getEmail()))
@@ -242,7 +232,7 @@ class UserMyPageServiceTest {
 
             // TODO : bcryptpasswordencoder Bean으로 등록되면 확인 다시하기.
             if(userModifyDto.getPassword() != null) {
-                Optional<User> dbUser =  userMyPageRepository.findByEmail(userModifyDto.getEmail());
+                Optional<User> dbUser =  userRepository.findByEmail(userModifyDto.getEmail());
                 assertThat(dbUser.isPresent()).isTrue();
                 assertThat(dbUser.get().getPassword()).isEqualTo(userModifyDto.getPassword());
             }
@@ -296,10 +286,25 @@ class UserMyPageServiceTest {
             // 실제로 파일을 올리는 것은 front에서 실행하므로 이미지 파일이 올라갔는지에 대한 기능 추가하여 test
 //            amazonS3.getObject(new GetObjectRequest(BUCKET_NAME, key));
         }
+    }
 
 
-
-
+    private User createOneUser() {
+        User user = User.builder()
+                .userName("정룡우")
+                .nickname("jeongRyongWoo")
+                .email("jlwoo092513@gmail.com")
+                .password("123456")
+                .imageUrl("https://"+BUCKET_NAME+".s3.ap-northeast-2.amazonaws.com/IMG-3925.JPG")
+                .phone("01012345678")
+                .birthDate("000925")
+                .ipAddress("127.0.0.1")
+                .infoAgreement(Boolean.FALSE)
+                .userState(UserState.ACTIVE)
+                .role(Role.INVESTOR_ADMIN)
+                .build();
+        userRepository.save(user);
+        return user;
     }
 
 

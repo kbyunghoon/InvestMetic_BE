@@ -4,11 +4,11 @@ import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.service.UserMyPageService;
 import com.investmetic.global.exception.BaseResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,10 +32,12 @@ public class UserMyPageController {
     }
 
 
-    @PatchMapping("/profile/{email}")
-    public ResponseEntity<BaseResponse<String>> updateUserInfo(@RequestBody UserModifyDto userModifyDto, @PathVariable String email) {
+    @PatchMapping("/profile")
+    public ResponseEntity<BaseResponse<String>> updateUserInfo(@Valid @RequestBody UserModifyDto userModifyDto) {
 
-        //현재는 userModifyDto.getEmail로 나중에는 jwt, SecurityContext로.
+        // TODO : 현재는 userModifyDto.getEmail로 나중에는 jwt, SecurityContext로.
+        String email = userModifyDto.getEmail();
+
         return BaseResponse.success(userService.changeUserInfo(userModifyDto, email));
     }
 }

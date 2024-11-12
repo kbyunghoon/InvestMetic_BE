@@ -109,8 +109,10 @@ public class User extends BaseEntity {
             this.infoAgreement = userModifyDto.getInfoAgreement();
         }
 
-        // null 가능.
-        this.imageUrl = imageUrl;
+        // 기본 이미지를 이용하거나 새로운 사진을 업로드하는 경우.
+        if(userModifyDto.getImageChange()){
+            this.imageUrl = imageUrl;
+        }
     }
 
 }

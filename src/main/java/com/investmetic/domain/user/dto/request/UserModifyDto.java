@@ -1,6 +1,8 @@
 package com.investmetic.domain.user.dto.request;
 
 import com.investmetic.domain.user.dto.object.ImageMetadata;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +22,7 @@ public class UserModifyDto {
     private String password;
 
     // imageDto의 정보로 Service에서 유효성 검사 진행 후 presigned url 요청, 기존의 s3에 저장된 사진 제거.
+    @Valid
     private ImageMetadata imageDto;
 
     private String phone;
@@ -27,17 +30,22 @@ public class UserModifyDto {
     //디자인을 보면 email은 변경하지 못하게 한다. 토큰의 email과 dto의 email이 일치하는지 검증.
     private String email;
 
+    //Null일 경우 변경 안함.
     private Boolean infoAgreement;
+
+    @NotNull
+    private Boolean imageChange;
 
     @Builder
     public UserModifyDto(String nickname, String password, ImageMetadata imageDto, String phone, String email,
-                         Boolean infoAgreement) {
+                         Boolean infoAgreement,  Boolean imageChange) {
         this.nickname = nickname;
         this.password = password;
         this.imageDto = imageDto;
         this.phone = phone;
         this.email = email;
         this.infoAgreement = infoAgreement;
+        this.imageChange = imageChange;
     }
 
 }

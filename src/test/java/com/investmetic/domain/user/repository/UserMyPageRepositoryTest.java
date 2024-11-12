@@ -9,7 +9,6 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -27,11 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Transactional
 class UserMyPageRepositoryTest {
-    @Autowired
-    private UserMyPageRepository userMyPageRepository;
 
     @Autowired
     private EntityManager em;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private User createOneUser() {
         User user = User.builder()
@@ -48,7 +48,7 @@ class UserMyPageRepositoryTest {
                 .userState(UserState.ACTIVE)
                 .role(Role.INVESTOR_ADMIN)
                 .build();
-        userMyPageRepository.save(user);
+        userRepository.save(user);
         return user;
     }
 
@@ -61,7 +61,7 @@ class UserMyPageRepositoryTest {
         User user = createOneUser();
 
         //Email은 jwt나 SecurityContext에서 가져오기
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
         assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
@@ -75,11 +75,11 @@ class UserMyPageRepositoryTest {
     public void testProfile2() {
         // 유저 생성
         User user = createOneUser();
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
         assertTrue(userProfileDto.isPresent());
 
         // DB에 없는 Email
-        Optional<UserProfileDto> userNotFound = userMyPageRepository.findByEmailUserInfo(
+        Optional<UserProfileDto> userNotFound = userRepository.findByEmailUserInfo(
                 user.getEmail() + "@gmail.com");
         assertTrue(userNotFound.isEmpty());
     }
@@ -101,7 +101,7 @@ class UserMyPageRepositoryTest {
 
             User user = createOneUser();
 
-            Optional<User> existUser = userMyPageRepository.findByEmail(user.getEmail());
+            Optional<User> existUser = userRepository.findByEmail(user.getEmail());
 
             //생성한 유저 email로 DB를 찾아서 있는지 확인
             assertThat(existUser.isPresent()).isTrue();
@@ -112,6 +112,7 @@ class UserMyPageRepositoryTest {
                     .password("dirtyCheck!!")
                     .phone("01099999999")
                     .imageDto(new ImageMetadata("TestImage.jpa", "image/jpg", 5000))
+                    .imageChange(Boolean.TRUE)
                     .build();
 
             //영속성에 있는 exixtUser의 값을 바꾸고 flush -> dirty checking
@@ -121,7 +122,7 @@ class UserMyPageRepositoryTest {
             em.clear();
 
             //저장된 user확인
-            Optional<User> updateProfile = userMyPageRepository.findByEmail(user.getEmail());
+            Optional<User> updateProfile = userRepository.findByEmail(user.getEmail());
 
             assertThat(updateProfile.isPresent()).isTrue();
 
@@ -136,16 +137,22 @@ class UserMyPageRepositoryTest {
         }
 
 
-        // 아래 테스트에 쓰일 userModifyDtos메서드
+        // null 값에 대한 Test에서 사용될 인자.
         static Stream<Arguments> userModifyDtos() {
             return Stream.of(
-                    Arguments.arguments(UserModifyDto.builder().imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
-                    Arguments.arguments(UserModifyDto.builder().nickname("테스트").build()),
-                    Arguments.arguments(UserModifyDto.builder().phone("01099999999").build()),
-                    Arguments.arguments(UserModifyDto.builder().infoAgreement(Boolean.TRUE).build()),
-                    Arguments.arguments(UserModifyDto.builder().password("testtest!!").build())
+                    // 이미지만 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
+                    //닉네임만 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).nickname("테스트").build()),
+                    // 핸드폰 번호 변경, 기존 이미지 삭제
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).phone("01099999999").build()),
+                    // 정보 수신 동의 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).infoAgreement(Boolean.FALSE).build()),
+                    // 비밀 번호 변경
+                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).password("testtest!!").build())
             );
         }
+
 
 
         @ParameterizedTest(name = "UserModifyDto : {0}")
@@ -156,7 +163,7 @@ class UserMyPageRepositoryTest {
 
             User user = createOneUser();
 
-            Optional<User> existUser = userMyPageRepository.findByEmail(user.getEmail());
+            Optional<User> existUser = userRepository.findByEmail(user.getEmail());
 
             //생성한 유저 email로 DB를 찾아서 있는지 확인
             assertThat(existUser.isPresent()).isTrue();
@@ -170,7 +177,7 @@ class UserMyPageRepositoryTest {
             em.clear();
 
             //저장된 user 확인.
-            Optional<User> updateProfile = userMyPageRepository.findByEmail(user.getEmail());
+            Optional<User> updateProfile = userRepository.findByEmail(user.getEmail());
 
             assertThat(updateProfile.isPresent()).isTrue();
 
@@ -183,9 +190,9 @@ class UserMyPageRepositoryTest {
 
     @Test
     void testest(){
-        userMyPageRepository.save(User.builder().email("asdf").imageUrl("").build());
+        userRepository.save(User.builder().email("asdf").imageUrl("").build());
 
-        Optional<User> user =userMyPageRepository.findByEmail("asdf");
+        Optional<User> user =userRepository.findByEmail("asdf");
         assertThat(user.isPresent()).isTrue();
 
         System.out.println(user.get().getImageUrl().isEmpty());
