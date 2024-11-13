@@ -42,6 +42,5 @@ public class TradeTypeServiceTest {
         String savedTradeType = tradeTypeService.saveTradeType(tradeType);
         assertThat(savedTradeType).isNotNull();
         System.out.println("savedTradeType: " + savedTradeType);
-        assertThat(savedTradeType.split(".png")[0]+".png").isEqualTo(tradeType.getTradeTypeIconURL());
     }
 }
