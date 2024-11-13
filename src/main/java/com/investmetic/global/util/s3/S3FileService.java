@@ -204,7 +204,7 @@ public class S3FileService {
     private Date getPreSignedUrlExpiration() {
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime(); // 현재 시간
-        expTimeMillis += apiExpiration; // 지정한 유효시간을 밀리초로 더해줌.
+        expTimeMillis += apiExpiration; // 1000 - 1초
         expiration.setTime(expTimeMillis); //현재 시간 + 1분 까지 유효
         return expiration;
     }
