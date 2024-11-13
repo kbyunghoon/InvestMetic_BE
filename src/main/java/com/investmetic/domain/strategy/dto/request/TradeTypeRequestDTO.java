@@ -9,23 +9,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class TradeTypeRequestDTO {
-    private String tradeName;
+    private String tradeTypeName;
 
     @Column(length = 1000)
-    private String tradeIconURL;
+    private String tradeTypeIconURL;
     int size;
     @Builder
-    public TradeTypeRequestDTO(String tradeName, Boolean activateState, String tradeIconURL, int size) {
-        this.tradeName = tradeName;
-        this.tradeIconURL = tradeIconURL;
+    public TradeTypeRequestDTO(String tradeName, Boolean activateState, String tradeTypeIconURL, int size) {
+        this.tradeTypeName = tradeName;
+        this.tradeTypeIconURL = tradeTypeIconURL;
         this.size = size;
     }
 
     public TradeType toEntity() {
         return TradeType.builder()
-                .tradeName(tradeName)
+                .tradeTypeName(tradeTypeName)
                 .activateState(true)
-                .tradeIconURL(tradeIconURL)
+                .tradeIconURL(tradeTypeIconURL)
                 .build();
     }
 
