@@ -5,19 +5,14 @@ import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class StockTypeService {
     private final StockTypeRepository stockTypeRepository;
     private final S3FileService s3FileService;
-
-    @Autowired
-    public StockTypeService(StockTypeRepository stockTypeRepository, S3FileService s3FileService) {
-        this.stockTypeRepository = stockTypeRepository;
-        this.s3FileService = s3FileService;
-    }
 
     public String saveStockType(StockTypeRequestDTO stockTypeRequestDTO) {
         StockType stockType = stockTypeRequestDTO.toEntity();

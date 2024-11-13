@@ -14,6 +14,7 @@ public class TradeTypeRequestDTO {
     @Column(length = 1000)
     private String tradeTypeIconURL;
     int size;
+
     @Builder
     public TradeTypeRequestDTO(String tradeName, Boolean activateState, String tradeTypeIconURL, int size) {
         this.tradeTypeName = tradeName;

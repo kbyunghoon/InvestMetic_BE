@@ -18,13 +18,13 @@ public class StockTypeRequestDTO {
     private int size;
 
 
-
     @Builder
     public StockTypeRequestDTO(String stockTypeName, String stockTypeIconURL, int size){
         this.stockTypeName = stockTypeName;
         this.stockTypeIconURL = stockTypeIconURL;
         this.size = size;
     }
+
     public StockType toEntity(){
         return StockType.builder()
                 .stockTypeName(stockTypeName)
@@ -32,12 +32,4 @@ public class StockTypeRequestDTO {
                 .stockTypeIconURL(stockTypeIconURL).build();
     }
 
-    @Override
-    public String toString() {
-        return "StockTypeRequestDTO{" +
-                "stockTypeName='" + stockTypeName + '\'' +
-                ", size=" + size +
-                ", stockTypeIconURL='" + stockTypeIconURL + '\'' +
-                '}';
-    }
 }

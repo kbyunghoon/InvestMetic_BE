@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class TradeTypeServiceTest {
+class TradeTypeServiceTest {
     @Autowired
     private TradeTypeService tradeTypeService;
 
@@ -37,7 +37,7 @@ public class TradeTypeServiceTest {
 
     @Test
     @DisplayName("매매유형 등록 테스트")
-    public void registerTradeType() {
+    void registerTradeType() {
         TradeTypeRequestDTO tradeType = tradeTypeRequestDtoList.get(0);
         String savedTradeType = tradeTypeService.saveTradeType(tradeType);
         assertThat(savedTradeType).isNotNull();
