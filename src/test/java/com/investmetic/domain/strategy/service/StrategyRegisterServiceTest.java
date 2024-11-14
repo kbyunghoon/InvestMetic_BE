@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,8 @@ import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.dto.ProposalFileDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.List;
@@ -115,19 +118,19 @@ class StrategyRegisterServiceTest {
         assertEquals(presignedUrl, responseDto.getPresignedUrl());
     }
 
-//    @Test
-//    @DisplayName("유저 확인 테스트")
-//    void notFoundUserTest() {
-//        // given
-//        when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
-//
-//        // when & then
-//        assertThrows(BusinessException.class, () -> strategyRegisterService.registerStrategy(requestDto),
-//                ErrorCode.ENTITY_NOT_FOUND.getMessage());
-//    }
+    @Test
+    @DisplayName("유저 검증 테스트")
+    void notFoundUserTest() {
+        // given
+        when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
+
+        // when & then
+        assertThrows(BusinessException.class, () -> strategyRegisterService.registerStrategy(requestDto),
+                ErrorCode.ENTITY_NOT_FOUND.getMessage());
+    }
 
     @Test
-    @DisplayName("loadStrategyRegistrationInfo - TradeType과 StockType 목록 요청 테스트")
+    @DisplayName("TradeType과 StockType 목록 요청 테스트")
     void loadStrategyRegistrationInfoTest() {
         when(tradeTypeRepository.findByActivateStateTrue()).thenReturn(tradeTypeList);
         when(stockTypeRepository.findAll()).thenReturn(stockTypeList);
