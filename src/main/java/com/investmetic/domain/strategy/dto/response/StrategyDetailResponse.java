@@ -28,7 +28,7 @@ public class StrategyDetailResponse {
     private double winRate;                         // 승률
     private int subscriptionCount;                  // 구독 수
     private boolean isSubscribed;                   // 구독 여부
-    private String imageUrl;                        // 트레이더 프로필 이미지
+    private String traderImgUrl;                        // 트레이더 프로필 이미지
     private String nickname;                        // 트레이더 이름
     private String minimumInvestmentAmount;         // 최소 운용 금액
     private long initialInvestment;                 // 투자 원금
@@ -44,7 +44,7 @@ public class StrategyDetailResponse {
                                   List<String> stockTypeNames, String tradeTypeName, OperationCycle operationCycle,
                                   String strategyDescription, double cumulativeProfitRate, double maxDrawdownRate,
                                   double averageProfitLossRate, double profitFactor, double winRate,
-                                  int subscriptionCount, String imageUrl, String nickname,
+                                  int subscriptionCount, String traderImgUrl, String nickname,
                                   MinimumInvestmentAmount minimumInvestmentAmount, long initialInvestment,
                                   double kpRatio,
                                   double smScore, LocalDate finalProfitLossDate, LocalDateTime createdAt) {
@@ -62,7 +62,7 @@ public class StrategyDetailResponse {
         this.winRate = winRate;
         this.subscriptionCount = subscriptionCount;
         this.isSubscribed = false;
-        this.imageUrl = imageUrl;
+        this.traderImgUrl = traderImgUrl;
         this.nickname = nickname;
         this.minimumInvestmentAmount = minimumInvestmentAmount.getDescription();
         this.initialInvestment = initialInvestment;
