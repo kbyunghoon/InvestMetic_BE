@@ -13,12 +13,19 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class UserProfileDto {
+
     private Long userId;
-    private String username;
+
+    private String userName;
+
     private String email;
-    private String imageUrL;
+
+    private String imageUrl;
+
     private String nickname;
+
     private String phone;
+
     private Boolean infoAgreement;
     private String passWord;
 

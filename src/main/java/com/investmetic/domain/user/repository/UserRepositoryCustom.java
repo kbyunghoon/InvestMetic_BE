@@ -9,5 +9,8 @@ public interface UserRepositoryCustom {
     Optional<UserProfileDto> findByNicknameUserInfo(String nickname);
     Optional<UserProfileDto> findByPhoneUserInfo(String phone);
 
+    boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
+    boolean existsByPhone(String phone);
 }
 

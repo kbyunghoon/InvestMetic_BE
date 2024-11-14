@@ -5,8 +5,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
- * ErrorCode API 응답에서 발생할 수 있는 오류 코드와 메시지 enum
- * 각 오류 상황에 대한 HttpStatus, 오류 코드, 설명 메시지
+ * ErrorCode API 응답에서 발생할 수 있는 오류 코드와 메시지 enum 각 오류 상황에 대한 HttpStatus, 오류 코드, 설명 메시지
  */
 @Getter
 @AllArgsConstructor
@@ -34,6 +33,7 @@ public enum ErrorCode {
     PASSWORD_RESET_FAILED(HttpStatus.BAD_REQUEST, 2202, "비밀번호 재설정에 실패하였습니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, 2203, "사용할 수 없는 닉네임입니다."),
     INVALID_EMAIL(HttpStatus.BAD_REQUEST, 2204, "사용할 수 없는 이메일입니다."),
+    INVALID_PHONE(HttpStatus.BAD_REQUEST,2207,"사용할 수 없는 전화번호입니다."),
     EMAIL_NOT_FOUND_FOR_PHONE_NUMBER(HttpStatus.BAD_REQUEST, 2205, "입력한 핸드폰 번호에 해당하는 이메일을 찾을 수 없습니다. 다시 입력해 주세요."),
     USER_STATISTICS_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, 2301, "사용자 통계 데이터를 조회할 수 없습니다."),
     TRADER_LIST_RETRIEVAL_FAILED(HttpStatus.NOT_FOUND, 2302, "트레이더 목록 조회에 실패하였습니다."),
@@ -56,7 +56,14 @@ public enum ErrorCode {
     DAILY_ANALYSIS_REGISTER_FAILED(HttpStatus.BAD_REQUEST, 3014, "해당 날짜 데이터 삭제를 실패했습니다."),
     ACCOUNT_IMAGE_QUERY_FAILED(HttpStatus.BAD_REQUEST, 3015, "실계좌 이미지 조회에 실패했습니다."),
     ACCOUNT_IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, 3016, "실계좌 이미지 등록/수정에 실패했습니다."),
-    ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다.");
+    ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
+
+
+    // 전략리뷰 관련오류(3300번대 );
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다.");
+
+
+
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드

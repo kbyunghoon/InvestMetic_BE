@@ -3,10 +3,10 @@ package com.investmetic.domain.user.controller;
 import com.investmetic.domain.user.dto.request.EmailRequestDto;
 import com.investmetic.domain.user.service.EmailService;
 import com.investmetic.global.exception.BaseResponse;
-import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.exception.SuccessCode;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,23 +23,20 @@ public class EmailAuthController {
 
     // 이메일 인증 코드 전송
     @GetMapping("/email/{email_addr}/authcode")
-    public BaseResponse<String> sendEmailPath(
+    public ResponseEntity<BaseResponse<String>> sendEmailPath(
             @PathVariable String email_addr) throws MessagingException {
 
         emailService.sendEmail(email_addr);
-        return BaseResponse.success();
+        return BaseResponse.success(SuccessCode.OK);
     }
 
     // 인증 코드 검증
     @PostMapping("/email/{email_addr}/authcode")
-    public BaseResponse<String> sendEmailAndCode(
+    public ResponseEntity<BaseResponse<Boolean>> sendEmailAndCode(
             @PathVariable String email_addr,
             @RequestBody EmailRequestDto emailRequestDto) {
+        boolean response = emailService.verifyEmailCode(email_addr, emailRequestDto.getCode());
+        return BaseResponse.success(response);
 
-        if (emailService.verifyEmailCode(email_addr, emailRequestDto.getCode())) {
-            return BaseResponse.success(SuccessCode.CREATED, emailRequestDto.getEmail());
-        }
-
-        return BaseResponse.fail(ErrorCode.VERIFICATION_FAILED); //인증코드가 일치하지 않을 경우
     }
 }

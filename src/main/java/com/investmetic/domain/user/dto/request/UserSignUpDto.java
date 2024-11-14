@@ -22,7 +22,7 @@ public class UserSignUpDto {
 
     public static User toEntity(UserSignUpDto userSignUpDto, BCryptPasswordEncoder passwordEncoder) {
         return User.builder()
-                .username(userSignUpDto.getUsername())
+                .userName(userSignUpDto.getUsername())
                 .nickname(userSignUpDto.getNickname())
                 .phone(userSignUpDto.getPhone())
                 .birthDate(userSignUpDto.getBirthdate())

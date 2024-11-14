@@ -1,6 +1,8 @@
 package com.investmetic.domain.user.service;
 
 
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.RedisUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -75,11 +77,10 @@ public class EmailService {
     // 코드 검증
     public Boolean verifyEmailCode(String email, String code) {
         String codeFoundByEmail = redisUtil.getData(email);
-        System.out.println(codeFoundByEmail);
-        if (codeFoundByEmail == null) {
-            return false;
+        if (!codeFoundByEmail.equals(code)) {
+           throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
         }
-        return codeFoundByEmail.equals(code);
+        return true;
     }
 
 }
