@@ -20,12 +20,12 @@ class TradeTypeServiceTest {
 
     @BeforeEach
     void setUp() {
-        tradeTypeRequestDtoList = new ArrayList<TradeTypeRequestDTO>();
+        tradeTypeRequestDtoList = new ArrayList<>();
 
         for (int i = 1; i <= 5; i++) {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeTypeName("Sample_Trade" + i)
-                    .tradeIconURL(String.format("/icons/sample-icon%d.png", i))
+                    .tradeTypeIconURL(String.format("/icons/sample-icon%d.png", i))
                     .size(1200)
                     .build();
 

@@ -12,6 +12,7 @@ import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.global.exception.BaseResponse;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class StrategyServiceTest {
         ResponseEntity<BaseResponse<RegisterInfoResponseDto>> response = strategyService.loadStrategyRegistrationInfo();
 
         assertThat(response).isNotNull();
-        assertThat(response.getBody().getIsSuccess()).isTrue();
+        assertThat(Objects.requireNonNull(response.getBody()).getIsSuccess()).isTrue();
 
         RegisterInfoResponseDto responseDto = response.getBody().getResult();
         assertThat(responseDto).isNotNull();
@@ -68,7 +69,7 @@ class StrategyServiceTest {
 
         TradeTypeDto tradeTypeDto = responseDto.getTradeTypes().get(0);
         assertThat(tradeTypeDto.getTradeTypeName()).isEqualTo("TradeType1");
-        assertThat(tradeTypeDto.getTradeIconUrl()).isEqualTo("https://example.com/TradeType1.png");
+        assertThat(tradeTypeDto.getTradeTypeIconURL()).isEqualTo("https://example.com/TradeType1.png");
 
         StockTypeDto stockTypeDto = responseDto.getStockTypes().get(0);
         assertThat(stockTypeDto.getStockTypeName()).isEqualTo("StockType1");

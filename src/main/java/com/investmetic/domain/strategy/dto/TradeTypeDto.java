@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 public class TradeTypeDto {
     private Long tradeTypeId;
     private String tradeTypeName;
-    private String tradeIconUrl;
+    private String tradeTypeIconURL;
 
     // Entity -> DTO
     public static TradeTypeDto fromEntity(TradeType tradeType) {
         return new TradeTypeDto(
                 tradeType.getTradeTypeId(),
                 tradeType.getTradeTypeName(),
-                tradeType.getTradeIconURL()
+                tradeType.getTradeTypeIconURL()
         );
     }
 }

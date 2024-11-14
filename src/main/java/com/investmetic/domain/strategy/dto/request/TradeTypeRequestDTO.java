@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TradeTypeRequestDTO {
     private String tradeTypeName;
-    private String tradeIconURL;
+    private String tradeTypeIconURL;
     private int size;
 
     @Builder
-    public TradeTypeRequestDTO(String tradeTypeName, String tradeIconURL, int size) {
+    public TradeTypeRequestDTO(String tradeTypeName, String tradeTypeIconURL, int size) {
         this.tradeTypeName = tradeTypeName;
-        this.tradeIconURL = tradeIconURL;
+        this.tradeTypeIconURL = tradeTypeIconURL;
         this.size = size;
     }
 
@@ -24,7 +24,7 @@ public class TradeTypeRequestDTO {
         return TradeType.builder()
                 .tradeTypeName(tradeTypeName)
                 .activateState(true) // 기본값으로 활성 상태 설정
-                .tradeIconURL(tradeIconURL)
+                .tradeTypeIconURL(tradeTypeIconURL)
                 .build();
     }
 }
