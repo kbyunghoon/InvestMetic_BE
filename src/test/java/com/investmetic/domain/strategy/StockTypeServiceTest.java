@@ -37,12 +37,6 @@ class StockTypeServiceTest {
     }
 
     @Test
-    @DisplayName("종목 조회 테스트")
-    void getAllStockTypes() {
-
-    }
-
-    @Test
     @DisplayName("종목 등록 테스트")
     void registerTradeType() {
         StockTypeRequestDTO stockType = stockTypeRequestList.get(0);

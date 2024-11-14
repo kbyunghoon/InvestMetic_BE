@@ -14,19 +14,20 @@ public class TradeTypeRequestDTO {
 
     @Column(length = 1000)
     private String tradeTypeIconURL;
-    int size;
+    private int size;
 
     @Builder
-    public TradeTypeRequestDTO(String tradeName, Boolean activateState, String tradeTypeIconURL, int size) {
-        this.tradeTypeName = tradeName;
+    public TradeTypeRequestDTO(String tradeTypeName, String tradeTypeIconURL, int size) {
+        this.tradeTypeName = tradeTypeName;
         this.tradeTypeIconURL = tradeTypeIconURL;
         this.size = size;
     }
 
+    // DTO -> Entity 변환 메서드
     public TradeType toEntity() {
         return TradeType.builder()
                 .tradeTypeName(tradeTypeName)
-                .activateState(true)
+                .activateState(true) // 기본값으로 활성 상태 설정
                 .tradeTypeIconURL(tradeTypeIconURL)
                 .build();
     }
