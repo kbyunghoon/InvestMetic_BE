@@ -37,7 +37,7 @@ public class TestEntityFactory {
         return TradeType.builder()
                 .tradeTypeName("Test Trade")
                 .activateState(true)
-                .tradeIconURL("http://~~")
+                .tradeTypeIconURL("http://~~")
                 .build();
     }
 

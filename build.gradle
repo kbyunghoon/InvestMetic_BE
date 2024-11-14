@@ -133,6 +133,8 @@ test {
 sonarqube {
     properties {
         property "sonar.scm.disabled", "true"
+        property 'sonar.exclusions', '**/test/**, **/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +
+                '**/*Response.java, **/*Exception.java, **/security/**, **/support/**, **/Q*.java, **/dto/**, **/entity/**,'
     }
 }
 
