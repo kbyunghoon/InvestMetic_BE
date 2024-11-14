@@ -12,10 +12,9 @@ public class SubscriptionRepositoryCustomImpl implements SubscriptionRepositoryC
 
     @Override
     public boolean existsByStrategyIdAndUserId(Long strategyId, Long userId) {
-        Integer result = jpaQueryFactory.selectOne()
+        return jpaQueryFactory.selectOne()
                 .from(subscription)
                 .where(subscription.strategy.strategyId.eq(strategyId), subscription.user.userId.eq(userId))
-                .fetchFirst();
-        return result != null;
+                .fetchFirst() != null;
     }
 }
