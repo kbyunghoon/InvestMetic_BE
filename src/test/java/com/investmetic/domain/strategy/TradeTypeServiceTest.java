@@ -1,17 +1,15 @@
 package com.investmetic.domain.strategy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
-import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.service.TradeTypeService;
+import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class TradeTypeServiceTest {
