@@ -3,8 +3,6 @@ package com.investmetic.domain.strategy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.dto.request.StockTypeRequestDTO;
-import com.investmetic.domain.strategy.model.entity.StockType;
-
 import com.investmetic.domain.strategy.service.StockTypeService;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.ArrayList;
@@ -39,7 +37,7 @@ class StockTypeServiceTest {
 
     @Test
     @DisplayName("종목 등록 테스트")
-    public void registerTradeType() {
+    void registerTradeType() {
         StockTypeRequestDTO stockType = stockTypeRequestList.get(0);
         String savedStockType = stockTypeService.saveStockType(stockType);
         assertThat(savedStockType).isNotNull();

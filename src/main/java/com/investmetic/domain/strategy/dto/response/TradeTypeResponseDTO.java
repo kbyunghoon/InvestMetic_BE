@@ -28,7 +28,7 @@ public class TradeTypeResponseDTO {
         return TradeTypeResponseDTO.builder()
                 .tradeTypeId(tradeType.getTradeTypeId())
                 .tradeName(tradeType.getTradeTypeName())
-                .tradeIconURL(tradeType.getTradeIconURL())
+                .tradeIconURL(tradeType.getTradeTypeIconURL())
                 .activateState(tradeType.getActivateState())
                 .build();
     }
