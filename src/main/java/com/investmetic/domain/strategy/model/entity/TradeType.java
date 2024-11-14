@@ -21,10 +21,10 @@ public class TradeType extends BaseEntity {
     private Boolean activateState;
 
     @Column(length = 1000)
-    private String tradeIconURL;
+    private String tradeTypeIconURL;
 
-    public void changeTradeIconURL(String tradeIconURL) {
-        this.tradeIconURL = tradeIconURL;
+    public void changeTradeIconURL(String tradeTypeIconURL) {
+        this.tradeTypeIconURL = tradeTypeIconURL;
     }
 
     public void changeActivateState(boolean activateState) {

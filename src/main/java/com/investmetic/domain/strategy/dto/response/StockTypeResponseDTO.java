@@ -2,8 +2,13 @@ package com.investmetic.domain.strategy.dto.response;
 
 import com.investmetic.domain.strategy.model.entity.StockType;
 import jakarta.persistence.Column;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockTypeResponseDTO {
     private Long stockTypeId;
 

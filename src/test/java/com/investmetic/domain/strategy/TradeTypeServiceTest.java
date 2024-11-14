@@ -1,7 +1,6 @@
 package com.investmetic.domain.strategy;
 
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
-import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.service.TradeTypeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

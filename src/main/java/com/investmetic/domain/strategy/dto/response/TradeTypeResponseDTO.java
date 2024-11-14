@@ -2,12 +2,13 @@ package com.investmetic.domain.strategy.dto.response;
 
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import jakarta.persistence.Column;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TradeTypeResponseDTO {
     private Long tradeTypeId;
     private String tradeName;
@@ -28,7 +29,7 @@ public class TradeTypeResponseDTO {
         return TradeTypeResponseDTO.builder()
                 .tradeTypeId(tradeType.getTradeTypeId())
                 .tradeName(tradeType.getTradeTypeName())
-                .tradeIconURL(tradeType.getTradeIconURL())
+                .tradeIconURL(tradeType.getTradeTypeIconURL())
                 .activateState(tradeType.getActivateState())
                 .build();
     }
