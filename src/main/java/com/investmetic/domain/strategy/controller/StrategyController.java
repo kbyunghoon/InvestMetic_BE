@@ -6,6 +6,7 @@ import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,15 +23,16 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "전략 API", description = "전략 관련 API")
 public class StrategyController {
     private final StrategyRegisterService strategyRegisterService;
-    private final StrategyService strategyService;
 
     @PostMapping("/register")
     @Operation(summary = "전략 등록", description = "새로운 전략 등록 API")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
             @RequestBody StrategyRegisterRequestDto requestDto) {
-        return strategyRegisterService.registerStrategy(requestDto);}
+        return BaseResponse.success(SuccessCode.CREATED, strategyRegisterService.registerStrategy(requestDto));
+    }
+
     @GetMapping("/register")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
-        return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
-        }
+        return BaseResponse.success(strategyRegisterService.loadStrategyRegistrationInfo());
+    }
 }

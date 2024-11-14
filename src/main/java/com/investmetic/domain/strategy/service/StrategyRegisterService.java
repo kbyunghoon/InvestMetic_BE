@@ -1,21 +1,23 @@
 package com.investmetic.domain.strategy.service;
 
+import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.TradeTypeDto;
+import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
-import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
-import com.investmetic.global.exception.SuccessCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,9 +26,10 @@ public class StrategyRegisterService {
     private final S3FileService s3FileService;
     private final StrategyRepository strategyRepository;
     private final TradeTypeRepository tradeTypeRepository;
+    private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
 
-    public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
+    public PresignedUrlResponseDto registerStrategy(
             StrategyRegisterRequestDto requestDto) {
 //        TODO: 추후 삭제
 
@@ -55,6 +58,34 @@ public class StrategyRegisterService {
                 .build();
 
         strategyRepository.save(strategy);
-        return BaseResponse.success(SuccessCode.CREATED, new PresignedUrlResponseDto(presignedUrl));
+        return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
+    }
+
+    public RegisterInfoResponseDto loadStrategyRegistrationInfo() {
+        List<TradeTypeDto> tradeTypesDto = getActiveTradeTypes();
+        List<StockTypeDto> stockTypesDto = getAllStockTypes();
+        return buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
+    }
+
+    private List<TradeTypeDto> getActiveTradeTypes() {
+        return tradeTypeRepository.findByActivateStateTrue().stream()
+                .map(TradeTypeDto::fromEntity)
+                .toList();
+    }
+
+    private List<StockTypeDto> getAllStockTypes() {
+        return stockTypeRepository.findAll().stream()
+                .map(StockTypeDto::from)
+                .toList();
+    }
+
+    private RegisterInfoResponseDto buildRegisterInfoResponse(
+            List<TradeTypeDto> tradeTypes,
+            List<StockTypeDto> stockTypes
+    ) {
+        return RegisterInfoResponseDto.builder()
+                .tradeTypes(tradeTypes)
+                .stockTypes(stockTypes)
+                .build();
     }
 }
