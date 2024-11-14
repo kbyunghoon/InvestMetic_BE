@@ -45,7 +45,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.strategyName,
                         // 종목 아이콘 URL 리스트 서브쿼리
                         Expressions.constant(stockTypeIconURLs), // List를 Expression으로 변환
-                        tradeType.tradeIconURL,
+                        tradeType.tradeTypeIconURL,
                         Expressions.constant(stockTypeNames), // List를 Expression으로 변환
                         tradeType.tradeTypeName,
                         strategy.operationCycle,

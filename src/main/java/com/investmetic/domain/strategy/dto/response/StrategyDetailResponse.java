@@ -16,7 +16,7 @@ public class StrategyDetailResponse {
 
     private String strategyName;                    // 전략명
     private List<String> stockTypeIconURLs;         // 종목 아이콘 이미지 경로 리스트
-    private String tradeIconURL;                   // 매매 유형 이미지 경로
+    private String tradeTypeIconURL;                   // 매매 유형 이미지 경로
     private List<String> stockTypeNames;            // 투자 종목 이름 리스트
     private String tradeTypeName;                   // 투자 종류 (자동, 반자동, 수동)
     private OperationCycle operationCycle;         // 투자 주기 (데이, 포지션)
@@ -40,7 +40,7 @@ public class StrategyDetailResponse {
 
 
     @QueryProjection
-    public StrategyDetailResponse(String strategyName, List<String> stockTypeIconURLs, String tradeIconURL,
+    public StrategyDetailResponse(String strategyName, List<String> stockTypeIconURLs, String tradeTypeIconURL,
                                   List<String> stockTypeNames, String tradeTypeName, OperationCycle operationCycle,
                                   String strategyDescription, double cumulativeProfitRate, double maxDrawdownRate,
                                   double averageProfitLossRate, double profitFactor, double winRate,
@@ -50,7 +50,7 @@ public class StrategyDetailResponse {
                                   double smScore, LocalDate finalProfitLossDate, LocalDateTime createdAt) {
         this.strategyName = strategyName;
         this.stockTypeIconURLs = stockTypeIconURLs;
-        this.tradeIconURL = tradeIconURL;
+        this.tradeTypeIconURL = tradeTypeIconURL;
         this.stockTypeNames = stockTypeNames;
         this.tradeTypeName = tradeTypeName;
         this.operationCycle = operationCycle;
