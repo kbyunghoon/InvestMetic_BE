@@ -16,14 +16,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.math.BigDecimal;
+import jakarta.persistence.OneToOne;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Strategy extends BaseEntity {
 
     @Id
@@ -37,6 +38,10 @@ public class Strategy extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trade_type_id", nullable = false)
     private TradeType tradeType; // 매매유형
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "strategyStatistics_id")
+    private StrategyStatistics strategyStatistics;
 
     private String strategyName; // 전략명
 
@@ -68,12 +73,14 @@ public class Strategy extends BaseEntity {
 
     // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
-    public Strategy(Long strategyId, User user, TradeType tradeType, String strategyName, OperationCycle operationCycle,
-                    MinimumInvestmentAmount minimumInvestmentAmount, String strategyDescription, String proposalFilePath,
+    public Strategy(Long strategyId, User user,TradeType tradeType,StrategyStatistics strategyStatistics, String strategyName, OperationCycle operationCycle,
+                    MinimumInvestmentAmount minimumInvestmentAmount, String strategyDescription,
+                    String proposalFilePath,
                     IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating) {
         this.strategyId = strategyId;
         this.user = user;
         this.tradeType = tradeType;
+        this.strategyStatistics = strategyStatistics;
         this.strategyName = strategyName;
         this.operationCycle = operationCycle;
         this.minimumInvestmentAmount = minimumInvestmentAmount;
