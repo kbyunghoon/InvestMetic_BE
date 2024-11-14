@@ -40,10 +40,9 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // 종목 이름목록
         List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
 
-        StrategyDetailResponse strategyDetailResponse = queryFactory
+        return queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
-                        // 종목 아이콘 URL 리스트 서브쿼리
                         Expressions.constant(stockTypeIconURLs), // List를 Expression으로 변환
                         tradeType.tradeTypeIconURL,
                         Expressions.constant(stockTypeNames), // List를 Expression으로 변환
@@ -70,14 +69,12 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
-
-        return strategyDetailResponse;
     }
 
     private @NotNull List<String> getStockTypeIconURLs(List<Tuple> stockTypes, StringPath stockType) {
         return stockTypes.stream()
                 .map(tuple -> tuple.get(stockType))
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }
