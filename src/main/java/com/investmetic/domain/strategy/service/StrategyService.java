@@ -5,10 +5,8 @@ import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
-import com.investmetic.global.exception.BaseResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,13 +15,10 @@ public class StrategyService {
     private final TradeTypeRepository tradeTypeRepository;
     private final StockTypeRepository stockTypeRepository;
 
-    public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
+    public RegisterInfoResponseDto loadStrategyRegistrationInfo() {
         List<TradeTypeDto> tradeTypesDto = getActiveTradeTypes();
         List<StockTypeDto> stockTypesDto = getAllStockTypes();
-
-        RegisterInfoResponseDto responseDto = buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
-
-        return BaseResponse.success(responseDto);
+        return buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
     }
 
     private List<TradeTypeDto> getActiveTradeTypes() {

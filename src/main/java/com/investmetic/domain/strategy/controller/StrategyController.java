@@ -17,6 +17,6 @@ public class StrategyController {
 
     @GetMapping("/register")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
-        return strategyService.loadStrategyRegistrationInfo();
+        return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
     }
 }
