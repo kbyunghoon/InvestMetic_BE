@@ -26,8 +26,8 @@ class TradeTypeServiceTest {
 
         for (int i = 1; i <= 5; i++) {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
-                    .tradeName("Sample_Trade" + i)
-                    .tradeTypeIconURL(String.format("/icons/sample-icon%d.png", i))
+                    .tradeTypeName("Sample_Trade" + i)
+                    .tradeIconURL(String.format("/icons/sample-icon%d.png", i))
                     .size(1200)
                     .build();
 
