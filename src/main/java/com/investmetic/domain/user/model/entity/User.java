@@ -91,12 +91,7 @@ public class User extends BaseEntity {
      */
     public void updateUser(UserModifyDto userModifyDto, String imageUrl) {
 
-        // 필드가 null이 아닌 경우에만 업데이트
-        if (userModifyDto.getPassword() != null) {
-            // 개인정보 수정 페이지 들어가기 전에 패스워드 인증하고 들어가므로 바로 바꿀 수 있게 한다.
-            this.password = userModifyDto.getPassword();
-        }
-
+        // 핸드폰 번호 수정.
         if (userModifyDto.getPhone() != null) {
             this.phone = userModifyDto.getPhone();
         }
@@ -113,6 +108,11 @@ public class User extends BaseEntity {
         if(userModifyDto.getImageChange()){
             this.imageUrl = imageUrl;
         }
+    }
+
+    // 해당 유저의 패스워드를 재설정한다.(회원 정보 페이지 비밀번호 수정, 로그인 페이지 비밀번호 재설정)
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 
 }

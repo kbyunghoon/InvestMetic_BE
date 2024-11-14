@@ -202,6 +202,17 @@ class UserMyPageRepositoryTest {
         assertThat(user.get().getImageUrl()).isNotNull();
     }
 
+    @Test
+    @DisplayName("회원 비밀번호 체크 - 비밀번호 가져오기.")
+    void getPassword(){
+        User u = createOneUser();
+
+        Optional<String> password = userRepository.findPasswordByEmail(u.getEmail());
+        assertThat(password.isPresent()).isTrue();
+
+        assertThat(password.get()).isEqualTo(u.getPassword());
+    }
+
 
 
 }

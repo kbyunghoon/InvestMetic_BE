@@ -1,9 +1,11 @@
 package com.investmetic.domain.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -27,29 +29,29 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
 @Import(S3MockConfig.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserMyPageServiceTest {
 
     private static final String BUCKET_NAME = "fastcampus-team3";
 
     @Autowired
     private UserMyPageService userMyPageService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
     private AmazonS3 amazonS3;
@@ -71,9 +73,9 @@ class UserMyPageServiceTest {
 
         UserProfileDto userProfileDto = userMyPageService.provideUserInfo(oneUser.getEmail());
 
-        assertTrue(oneUser.getEmail().equals(userProfileDto.getEmail()));
-        assertTrue(oneUser.getImageUrl().equals(userProfileDto.getImageUrl()));
-        assertTrue(oneUser.getPhone().equals(userProfileDto.getPhone()));
+        assertEquals(oneUser.getEmail(), userProfileDto.getEmail());
+        assertEquals(oneUser.getImageUrl(), userProfileDto.getImageUrl());
+        assertEquals(oneUser.getPhone(), userProfileDto.getPhone());
     }
 
 
@@ -84,11 +86,11 @@ class UserMyPageServiceTest {
         User oneUser = createOneUser(); // 1명 DB에 생성
 
         UserProfileDto presentUserProfile = userMyPageService.provideUserInfo(oneUser.getEmail());
-        assertTrue(presentUserProfile != null); // DB에 방금 만든 1명이 있는지.
+        assertNotNull(presentUserProfile); // DB에 방금 만든 1명이 있는지.
 
         BusinessException e = assertThrows(BusinessException.class,
                 () -> userMyPageService.provideUserInfo("asdf@hanmail.com"));
-        assertTrue(e.getErrorCode().getMessage().equals(ErrorCode.USER_INFO_NOT_FOUND.getMessage()));
+        assertEquals(e.getErrorCode().getMessage(), ErrorCode.USER_INFO_NOT_FOUND.getMessage());
 
 
     }
@@ -118,7 +120,6 @@ class UserMyPageServiceTest {
          * <br>
          * 실제 S3Client에서는 delete시에 S3버킷에 해당 키와 일치하는 데이터가 없어도 정상 응답 옴.
          * */
-        @Order(1)
         @Test
         @DisplayName("모든 값이 들어있을 떄.")
         void updateUserInfoTest1() {
@@ -169,23 +170,27 @@ class UserMyPageServiceTest {
         // null 값에 대한 Test에서 사용될 인자.
         static Stream<Arguments> userModifyDtos() {
             return Stream.of(
-                    // 이미지만 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
-                    //닉네임만 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).nickname("테스트").build()),
-                    // 핸드폰 번호 변경, 기존 이미지 삭제
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE).phone("01099999999").build()),
-                    // 정보 수신 동의 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).infoAgreement(Boolean.FALSE).build()),
-                    // 비밀 번호 변경
-                    Arguments.arguments(UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE).password("testtest!!").build())
+                    Arguments.arguments("이미지만 변경",UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
+                            .imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
+
+                    Arguments.arguments("닉네임만 변경", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .nickname("테스트").build()),
+
+                    Arguments.arguments("핸드폰 번호 변경, 기존 이미지 삭제", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
+                            .phone("01099999999").build()),
+
+                    Arguments.arguments("정보 수신 동의 변경", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .infoAgreement(Boolean.FALSE).build()),
+
+                    Arguments.arguments("비밀 번호 변경", UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
+                            .password("testtest!!").build())
             );
         }
 
-        @ParameterizedTest(name = "UserModifyDto : {0}")
+        @ParameterizedTest(name ="{0}")
         @MethodSource("userModifyDtos")
         @DisplayName("null 값에 대한 Test")
-        public void updateUserInfoTest2(UserModifyDto userModifyDto) {
+        public void updateUserInfoTest2(String testName, UserModifyDto userModifyDto) {
 
             User oneUser = createOneUser();
 
@@ -233,11 +238,10 @@ class UserMyPageServiceTest {
                 assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getImageUrl()).contains(userModifyDto.getImageDto().getImageName());
             }
 
-            // TODO : bcryptpasswordencoder Bean으로 등록되면 확인 다시하기.
             if(userModifyDto.getPassword() != null) {
                 Optional<User> dbUser =  userRepository.findByEmail(userModifyDto.getEmail());
                 assertThat(dbUser.isPresent()).isTrue();
-                assertThat(dbUser.get().getPassword()).isEqualTo(userModifyDto.getPassword());
+                assertThat(passwordEncoder.matches(userModifyDto.getPassword(), dbUser.get().getPassword())).isTrue();
             }
 
             if(userModifyDto.getPhone() != null) {
@@ -283,11 +287,46 @@ class UserMyPageServiceTest {
             em.flush();
             em.close();
 
-
+            // 롤백 확인.
             assertThat(userMyPageService.provideUserInfo(oneUser.getEmail()).getNickname()).isNotEqualTo(userModifyDto.getNickname());
+        }
+    }
 
-            // 실제로 파일을 올리는 것은 front에서 실행하므로 이미지 파일이 올라갔는지에 대한 기능 추가하여 test
-//            amazonS3.getObject(new GetObjectRequest(BUCKET_NAME, key));
+
+    @Nested
+    @DisplayName("회원 비밀번호 검증(개인 정보 수정 페이지)")
+    class PasswordCheck{
+
+        @Test
+        @DisplayName("정상 응답")
+        void passwordCheck1() {
+
+            User oneUser = createOneUser();
+
+            assertThatCode(()-> userMyPageService.checkPassword(oneUser.getEmail(), "123456"))
+                    .doesNotThrowAnyException();
+        }
+
+
+        @Test
+        @DisplayName("email에 해당하는 회원 없음.")
+        void passwordCheck2() {
+
+            assertThatThrownBy(()->userMyPageService.checkPassword("asdf", "123456"))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.USERS_NOT_FOUND.getMessage());
+        }
+
+
+        @Test
+        @DisplayName("비밀번호가 맞지 않음.")
+        void passwordCheck3() {
+
+            User oneUser = createOneUser();
+
+            assertThatThrownBy(()->userMyPageService.checkPassword(oneUser.getEmail(), "notvalid"))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.PASSWORD_AUTHENTICATION_FAILED.getMessage());
         }
     }
 
@@ -297,7 +336,7 @@ class UserMyPageServiceTest {
                 .userName("정룡우")
                 .nickname("jeongRyongWoo")
                 .email("jlwoo092513@gmail.com")
-                .password("123456")
+                .password(passwordEncoder.encode("123456"))
                 .imageUrl("https://"+BUCKET_NAME+".s3.ap-northeast-2.amazonaws.com/IMG-3925.JPG")
                 .phone("01012345678")
                 .birthDate("000925")

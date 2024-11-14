@@ -9,6 +9,7 @@ import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class UserMyPageService {
 
     private final S3FileService s3FileService;
 
+    private final BCryptPasswordEncoder passwordEncoder;
+
     /**
      * 개인 정보 제공
      */
@@ -30,6 +33,7 @@ public class UserMyPageService {
         return userRepository.findByEmailUserInfo(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
     }
+
 
 
     /**
@@ -43,7 +47,6 @@ public class UserMyPageService {
         String s3Path = null;
 
         // TODO : jwt, securityContext 에서 email 가져오기.
-        // TODO : bcryptpasswordencoder Bean으로 등록되면 확인 다시하기.
 
         // dto에 담긴 email과 토큰상의 email이 같은지 확인.
         if (!userModifyDto.getEmail().equals(email)) {
@@ -57,9 +60,8 @@ public class UserMyPageService {
 
 
         // 회원이 기존 사진을 변경하는 경우.
-        if (userModifyDto.getImageChange()){
-
-            // 1 새로운 사진을 올리는 경우.
+        if(userModifyDto.getImageChange()){
+            // 1.1 새로운 사진을 올리는 경우.
             if(userModifyDto.getImageDto() != null){
 
                 String filename = userModifyDto.getImageDto().getImageName(); // 확장자 포함 파일 이름 - 프론트랑 상의하기.
@@ -68,26 +70,43 @@ public class UserMyPageService {
                 s3Path = s3FileService.getS3Path(FilePath.USER_PROFILE, filename, fileSize);
                 /*
                  * 이미지 유효성 검사 후 s3경로 반환, 불통 시 RuntimeException 반환
-                 * 유효성 검사에서 예외날 수 있으므로 이미지 파일 검사 수 s3delete 요청하기.
+                 * 유효성 검사에서 예외날 수 있으므로 이미지 파일 검사 후 s3delete 요청하기.
                  * */
             }
+            // 1.2 새로운 사진을 안올리는 경우는 프로필을 기본 프로필 이미지로 바꾸겠다는 의미.
 
-            // 2 새로운 사진을 안올리는 경우는 프로필을 기본 프로필 이미지로 바꾸겠다는 의미.
-
-
-            // 1 기존의 프로필 사진이 있다면 기존의 프로필 사진 제거.
+            // 2.1 기존의 프로필 사진이 있다면 기존의 프로필 사진 제거.
             if(user.getImageUrl() != null){
                 s3FileService.deleteFromS3(user.getImageUrl()); //실패 시 RuntimeException
             }
 
-            // 2 기존의 프로필 사진이 없다면 그대로 통과 (s3Path 값을 가지고 있음)
+            // 2.2 기존의 프로필 사진이 없다면 그대로 통과 (s3Path 값을 가지고 있음)
+        }
 
+        //비밀 번호가 있으면 암호화 하여 저장.
+        if(userModifyDto.getPassword()!=null){
+            user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
         }
 
         // 영속화된 User 객체에 회원 정보 update - 더티체킹
         user.updateUser(userModifyDto, s3Path);
 
         return s3Path == null ? null : s3FileService.getPreSignedUrl(s3Path);
+    }
+
+
+
+    public void checkPassword(String email, String rawPassword){
+
+        // 이메일에 해당하는 패스워드 찾아오기.
+        String encodedPassword = userRepository.findPasswordByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
+        //패스워드가 일치하지 않으면 throw
+        if(!passwordEncoder.matches(rawPassword, encodedPassword)){
+            throw new BusinessException(ErrorCode.PASSWORD_AUTHENTICATION_FAILED);
+        }
+
     }
 
 }
