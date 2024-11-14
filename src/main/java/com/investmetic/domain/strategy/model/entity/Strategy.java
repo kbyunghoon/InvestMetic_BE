@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -65,7 +66,8 @@ public class Strategy extends BaseEntity {
 
     private Integer subscriptionCount; // 구독수
 
-    private Double averageRating; // 평균별점
+    @ColumnDefault("0")
+    private Double averageRating = 0.0; // 평균별점
 
     public void updateAverageRating(Double newAverageRating) {
         this.averageRating = newAverageRating;
