@@ -3,10 +3,78 @@ plugins {
     id "org.sonarqube" version "5.1.0.4882"
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'jacoco'
 }
 
 group = 'com.threestar'
 version = '0.0.1-SNAPSHOT'
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+test {
+    jacoco {
+        destinationFile = layout.buildDirectory.file("jacoco/jacoco.exec").get().asFile
+    }
+
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter'
+    }
+
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+
+        html.outputLocation.set(layout.buildDirectory.dir("jacoco/html"))
+        xml.outputLocation.set(layout.buildDirectory.file("jacoco/jacoco.xml"))
+    }
+
+    // 이 설정을 열어주면 Code Coverage가 일정 이상이어야 Build됨
+    // finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.30
+            }
+        }
+
+        rule {
+            enabled = true
+            element = 'CLASS'
+
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.50
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.50
+            }
+
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 300
+            }
+
+            excludes = [
+                    '*.test.*'
+            ]
+        }
+    }
+}
 
 java {
     toolchain {
@@ -61,6 +129,16 @@ dependencies {
 
 }
 
-tasks.named('test') {
+test {
     useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
 }
+
+sonarqube {
+    properties {
+        property "sonar.scm.disabled", "true"
+        property 'sonar.exclusions', '**/test/**, **/resources/**, **/*Application*.java, **/*Controller*.java, **/*Config.java' +
+                '**/*Response.java, **/*Exception.java, **/security/**, **/support/**, **/Q*.java, **/dto/**, **/entity/**,'
+    }
+}
+
