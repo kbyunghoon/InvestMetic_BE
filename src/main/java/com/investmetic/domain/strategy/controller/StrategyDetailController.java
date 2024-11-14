@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
+import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatisticsResponse;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,5 +48,14 @@ public class StrategyDetailController {
                 getMonthlyAnalysis(strategyId, pageable);
         return BaseResponse.success(result);
     }
+
+    @GetMapping("/detail")
+    public ResponseEntity<BaseResponse<StrategyDetailResponse>> getStrategyDetail(
+            @PathVariable Long strategyId,
+            @RequestParam Long userId) {
+        StrategyDetailResponse result = strategyDetailService.getStrategyDetail(strategyId, userId);
+        return BaseResponse.success(result);
+    }
+
 
 }
