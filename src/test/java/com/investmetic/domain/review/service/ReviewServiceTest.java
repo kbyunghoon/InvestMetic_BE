@@ -57,20 +57,19 @@ class ReviewServiceTest {
         testStrategy = strategyRepository.save(TestEntityFactory.createTestStrategy(testUser, testTradeType));
     }
 
+    private void addReviewWithInvalidStrategyId() {
+        reviewService.addReview(-1L, testUser.getUserId(),
+                ReviewRequestDto.builder().content("Great strategy!").starRating(5).build());
+    }
 
     @DisplayName("전략을 찾을 수 없을 때 예외 발생")
     @Test
-    public void givenInvalidStrategyId_whenAddReview_thenThrowsException() {
-        ReviewRequestDto requestDto = ReviewRequestDto.builder()
-                .content("Great strategy!")
-                .starRating(5)
-                .build();
+    void givenInvalidStrategyId_whenAddReview_thenThrowsException() {
+        assertThrows(BusinessException.class, this::addReviewWithInvalidStrategyId);
+    }
 
-        Long invalidStrategyId = -1L;
-
-        assertThrows(BusinessException.class, () ->
-                reviewService.addReview(invalidStrategyId, testUser.getUserId(), requestDto)
-        );
+    private void updateReviewWithInvalidId(ReviewRequestDto updateDto) {
+        reviewService.updateReview(testStrategy.getStrategyId(), -1L, updateDto);
     }
 
     @DisplayName("리뷰를 찾을 수 없을 때 예외 발생")
@@ -81,11 +80,7 @@ class ReviewServiceTest {
                 .starRating(4)
                 .build();
 
-        Long invalidReviewId = -1L;
-
-        assertThrows(BusinessException.class, () ->
-                reviewService.updateReview(testStrategy.getStrategyId(), invalidReviewId, updateDto)
-        );
+        assertThrows(BusinessException.class, () -> updateReviewWithInvalidId(updateDto));
     }
 
     @DisplayName("리뷰 등록 시 리뷰 개수와 평균 별점 업데이트")

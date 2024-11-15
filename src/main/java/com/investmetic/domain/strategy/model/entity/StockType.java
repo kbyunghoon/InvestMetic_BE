@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +15,9 @@ import lombok.Setter;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class StockType extends BaseEntity {
 
     @Id
@@ -22,10 +25,17 @@ public class StockType extends BaseEntity {
     private Long stockTypeId;
 
     private String stockTypeName; // 종목명
-    private boolean activate_state; // 종목 활성 상태
+
+    private Boolean activateState; // 종목 활성 상태
 
     @Column(length = 1000)
     private String stockTypeIconURL; // 종목아이콘 경로
 
+    public void changeStockTypeIconURL(String stockTypeIconURL) {
+        this.stockTypeIconURL = stockTypeIconURL;
+    }
 
+    public void changeActivateState(boolean activateState) {
+        this.activateState = activateState;
+    }
 }
