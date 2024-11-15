@@ -18,41 +18,54 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserSignUpDto signUp(UserSignUpDto userSignUpDto) {
-        if (userRepository.findByNicknameUserInfo(userSignUpDto.getNickname()).isPresent()) {
-            throw new BusinessException(ErrorCode.INVALID_NICKNAME);
-        }
-        if (userRepository.findByEmailUserInfo(userSignUpDto.getEmail()).isPresent()) {
-            throw new BusinessException(ErrorCode.INVALID_EMAIL);
-        }
-        if (userRepository.findByPhoneUserInfo(userSignUpDto.getPhone()).isPresent()) {
-            throw new BusinessException(ErrorCode.INVALID_EMAIL);
-        }
+    //회원가입
+    public void signUp(UserSignUpDto userSignUpDto) {
+        extracted(userSignUpDto);
 
         User createUser = UserSignUpDto.toEntity(userSignUpDto, bCryptPasswordEncoder);
         userRepository.save(createUser);
+    }
 
-        return userSignUpDto;
+    private void extracted(UserSignUpDto userSignUpDto) {
+
+        if (userRepository.findByNicknameUserInfo(userSignUpDto.getNickname()).isPresent()) {
+            throw new BusinessException(ErrorCode.INVALID_NICKNAME);
+        }
+
+        if (userRepository.findByEmailUserInfo(userSignUpDto.getEmail()).isPresent()) {
+            throw new BusinessException(ErrorCode.INVALID_EMAIL);
+        }
+
+        if (userRepository.findByPhoneUserInfo(userSignUpDto.getPhone()).isPresent()) {
+            throw new BusinessException(ErrorCode.INVALID_PHONE);
+        }
+
     }
 
     public boolean checkNicknameDuplicate(String nickname) {
+
         if (!userRepository.existsByNickname(nickname)) {
             throw new BusinessException(ErrorCode.INVALID_NICKNAME);
         }
+
         return userRepository.existsByNickname(nickname);
     }
 
     public boolean checkEmailDuplicate(String email) {
-       if(!userRepository.existsByEmail(email)) {
-           throw new BusinessException(ErrorCode.INVALID_EMAIL);
-       }
+
+        if (!userRepository.existsByEmail(email)) {
+            throw new BusinessException(ErrorCode.INVALID_EMAIL);
+        }
+
         return userRepository.existsByEmail(email);
     }
 
     public boolean checkPhoneDuplicate(String phone) {
-        if(!userRepository.existsByPhone(phone)) {
+
+        if (!userRepository.existsByPhone(phone)) {
             throw new BusinessException(ErrorCode.INVALID_PHONE);
         }
+
         return userRepository.existsByPhone(phone);
     }
 }

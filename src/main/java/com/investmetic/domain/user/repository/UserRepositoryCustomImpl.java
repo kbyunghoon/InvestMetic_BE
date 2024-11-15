@@ -49,7 +49,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(Projections.fields(UserProfileDto.class,
                         user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
                         user.infoAgreement))
-                .where(user.nickname.eq(phone))
+                .where(user.phone.eq(phone))
                 .fetchOne());
     }
 

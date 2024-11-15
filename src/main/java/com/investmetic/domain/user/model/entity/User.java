@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,15 +20,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-
 public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 회원 ID, 기본 키로 자동 증가됨
 
+    @Column(name="user_name")
     private String userName; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
 
     private String nickname; // 사용자 닉네임 (표시 이름)

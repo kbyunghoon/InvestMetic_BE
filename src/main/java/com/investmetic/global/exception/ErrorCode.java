@@ -57,7 +57,7 @@ public enum ErrorCode {
     ACCOUNT_IMAGE_QUERY_FAILED(HttpStatus.BAD_REQUEST, 3015, "실계좌 이미지 조회에 실패했습니다."),
     ACCOUNT_IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, 3016, "실계좌 이미지 등록/수정에 실패했습니다."),
     ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
-
+    STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST,3018,"전략 통계가 존재하지 않습니다."),
 
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다.");

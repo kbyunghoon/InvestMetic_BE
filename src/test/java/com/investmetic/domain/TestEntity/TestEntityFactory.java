@@ -46,13 +46,12 @@ public class TestEntityFactory {
                 .tradeType(tradeType)
                 .strategyName("매매 전략")
                 .operationCycle(OperationCycle.DAY)
-                .minimumInvestmentAmount(MinimumInvestmentAmount.UNDER_10K)
+                .minimumInvestmentAmount(MinimumInvestmentAmount.ABOVE_100M)
                 .strategyDescription("전략상세")
                 .proposalFilePath("http://~")
                 .isPublic(IsPublic.PUBLIC)
                 .isApproved(IsApproved.APPROVED)
                 .subscriptionCount(100)
-                .averageRating(0.0)
                 .build();
     }
 }

@@ -22,10 +22,11 @@ public class UserController {
 
     //회원가입
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<UserSignUpDto>> signup(
+    public ResponseEntity<BaseResponse<Void>> signup(
             @RequestBody UserSignUpDto userSignUpDto) {
-        UserSignUpDto userSignUpDto1 = userService.signUp(userSignUpDto);
-        return BaseResponse.success(SuccessCode.CREATED, userSignUpDto1);
+        userService.signUp(userSignUpDto);
+
+        return BaseResponse.success(SuccessCode.CREATED);
 
     }
 
@@ -33,7 +34,9 @@ public class UserController {
     @GetMapping("/check/nickname")
     public ResponseEntity<BaseResponse<Boolean>> checkNicknameDuplicate(
             @RequestParam String nickname) {
+
         boolean response = userService.checkNicknameDuplicate(nickname);
+
         return BaseResponse.success(response);
     }
 
@@ -41,7 +44,9 @@ public class UserController {
     @GetMapping("/check/email")
     public ResponseEntity<BaseResponse<Boolean>> checkEmailDuplicate(
             @RequestParam String email) {
+
         boolean response = userService.checkEmailDuplicate(email);
+
         return BaseResponse.success(response);
     }
 
@@ -49,7 +54,9 @@ public class UserController {
     @GetMapping("/check/phone")
     public ResponseEntity<BaseResponse<Boolean>> checkPhoneDuplicate(
             @RequestParam String phone) {
+
         boolean isDuplicate = userService.checkPhoneDuplicate(phone);
+
         return BaseResponse.success(isDuplicate);
     }
 }
