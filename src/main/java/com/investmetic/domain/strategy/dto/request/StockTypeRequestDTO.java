@@ -2,13 +2,13 @@ package com.investmetic.domain.strategy.dto.request;
 
 import com.investmetic.domain.strategy.model.entity.StockType;
 import jakarta.persistence.Column;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StockTypeRequestDTO {
     private String stockTypeName; // 종목명
 
@@ -19,13 +19,14 @@ public class StockTypeRequestDTO {
 
 
     @Builder
-    public StockTypeRequestDTO(String stockTypeName, String stockTypeIconURL, int size){
+    public StockTypeRequestDTO(String stockTypeName, String stockTypeIconURL, int size) {
         this.stockTypeName = stockTypeName;
         this.stockTypeIconURL = stockTypeIconURL;
         this.size = size;
     }
 
-    public StockType toEntity(){
+    public StockType toEntity() {
+
         return StockType.builder()
                 .stockTypeName(stockTypeName)
                 .activateState(true)
