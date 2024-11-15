@@ -14,12 +14,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,5 +46,16 @@ public class Question extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private QnaState qnaState; // 답변 상태
+
+    public static Question createQuestion(User user, Strategy strategy, String title, String content) {
+        Question question = new Question();
+        question.user = user;
+        question.strategy = strategy;
+        question.targetName = strategy.getUser().getNickname();
+        question.title = title;
+        question.qnaState = QnaState.WAITING;
+        question.content = content;
+        return question;
+    }
 
 }

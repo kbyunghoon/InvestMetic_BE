@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,7 +31,9 @@ public class Notice extends BaseEntity {
     @Column(length = 3000)
     private String content; //공지사항내용
 
-    @Column(length = 1000)
-    private String fileUrl; //파일경로
-
+    public Notice(User user, String title, String content) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+    }
 }

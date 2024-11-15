@@ -60,10 +60,12 @@ public enum ErrorCode {
 
 
     // 전략리뷰 관련오류(3300번대 );
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다.");
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다."),
 
 
 
+    //문의 관련 오류(5000번대 );
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "해당 문의를 찾을 수 없습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드

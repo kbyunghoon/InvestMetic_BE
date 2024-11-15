@@ -1,6 +1,5 @@
 package com.investmetic.domain.qna.model.entity;
 
-import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +29,13 @@ public class Answer extends BaseEntity {
 
     @Column(length = 5000)
     private String content; // 답변내용
+
+    public static Answer createAnswer(Question question, String content){
+        Answer answer = new Answer();
+        answer.question = question;
+        answer.content = content;
+        return answer;
+    }
 
 
 }
