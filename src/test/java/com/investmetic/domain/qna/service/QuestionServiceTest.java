@@ -4,7 +4,6 @@ import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
-import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -18,9 +17,6 @@ class QuestionServiceTest {
     private UserRepository userRepository;
     @Autowired
     private  StrategyRepository strategyRepository;
-
-    @Autowired
-    private TradeTypeRepository tradeTypeRepository;
 
 
     @Test
