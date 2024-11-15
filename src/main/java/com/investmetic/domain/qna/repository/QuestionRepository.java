@@ -2,8 +2,6 @@ package com.investmetic.domain.qna.repository;
 
 import com.investmetic.domain.qna.model.entity.Question;
 import com.investmetic.domain.strategy.model.entity.Strategy;
-import com.investmetic.domain.user.model.entity.User;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
