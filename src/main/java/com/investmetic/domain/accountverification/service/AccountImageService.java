@@ -37,7 +37,7 @@ public class AccountImageService {
         for (AccountImageRequestDto accountImageRequestDto : requestDtoList) {
             String filePath = s3FileService.getS3Path(
                     FilePath.STRATEGY_IMAGE,
-                    accountImageRequestDto.getFileName() + "_" + accountImageRequestDto.getDate(),
+                    accountImageRequestDto.getFileName() + "_" + accountImageRequestDto.getTitle(),
                     accountImageRequestDto.getFileSize()
             );
 
@@ -51,7 +51,7 @@ public class AccountImageService {
 
             AccountVerification accountVerification = AccountVerification.builder()
                     .strategy(strategy)
-                    .title(accountImageRequestDto.getDate())
+                    .title(accountImageRequestDto.getTitle())
                     .accountVerificationUrl(filePath)
                     .build();
 

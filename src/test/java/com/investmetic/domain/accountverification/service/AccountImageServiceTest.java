@@ -55,7 +55,7 @@ class AccountImageServiceTest {
 
         AccountImageRequestDto requestDto = AccountImageRequestDto.builder()
                 .fileName("test-image")
-                .date("2024-11-15")
+                .title("테스트")
                 .fileSize(1024)
                 .build();
 
