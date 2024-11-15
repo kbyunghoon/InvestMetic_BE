@@ -11,7 +11,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Optional<Question> findByStrategyAndQuestionId(Strategy strategy, Long questionId);
 
-    List<Question> findAllByUser(User user);
-    List<Question> findAllByStrategy(Strategy strategy);
+//    List<Question> findAllByUser(User user);
+//    List<Question> findAllByStrategy(Strategy strategy);
 
 }

@@ -52,27 +52,27 @@ public class QuestionService {
         questionRepository.delete(question);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-    //유저가 작성한 모든 문의 삭제 - 회원 탈퇴 or 추방
-    @Transactional
-    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByUser(Long userId){
-        User user = userRepository.findById(userId)
-                        .orElseThrow(()-> new BusinessException(ErrorCode.USERS_NOT_FOUND));
-
-        List<Question> questions = questionRepository.findAllByUser(user);
-        questionRepository.deleteAll(questions);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    //특정 전략과 관련된 모든 문의 삭제 - 전략 삭제
-    @Transactional
-    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByStrategy(Long strategyId) {
-        Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
-
-        List<Question> questions = questionRepository.findAllByStrategy(strategy);
-        questionRepository.deleteAll(questions);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//    //유저가 작성한 모든 문의 삭제 - 회원 탈퇴 or 추방
+//    @Transactional
+//    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByUser(Long userId){
+//        User user = userRepository.findById(userId)
+//                        .orElseThrow(()-> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+//
+//        List<Question> questions = questionRepository.findAllByUser(user);
+//        questionRepository.deleteAll(questions);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
+//
+//    //특정 전략과 관련된 모든 문의 삭제 - 전략 삭제
+//    @Transactional
+//    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByStrategy(Long strategyId) {
+//        Strategy strategy = strategyRepository.findById(strategyId)
+//                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+//
+//        List<Question> questions = questionRepository.findAllByStrategy(strategy);
+//        questionRepository.deleteAll(questions);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 
 
 }
