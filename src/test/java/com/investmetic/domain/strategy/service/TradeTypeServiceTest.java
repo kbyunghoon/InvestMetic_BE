@@ -1,9 +1,8 @@
-package com.investmetic.domain.strategy;
+package com.investmetic.domain.strategy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
-import com.investmetic.domain.strategy.service.TradeTypeService;
 import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
