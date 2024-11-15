@@ -23,16 +23,16 @@ public class StockTypeController {
     public ResponseEntity<BaseResponse<PageResponseDto<StockTypeResponseDTO>>> getAllStockTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
             @RequestParam boolean activateState) {
-        PageResponseDto<StockTypeResponseDTO> responseData =  stockTypeService.getStockTypes(pageable, activateState);
+        PageResponseDto<StockTypeResponseDTO> responseData = stockTypeService.getStockTypes(pageable, activateState);
 
-        return BaseResponse.success(SuccessCode.OK,responseData);
+        return BaseResponse.success(SuccessCode.OK, responseData);
     }
 
     @PostMapping("/stock-type")
     public ResponseEntity<BaseResponse<String>> addStockType(@RequestBody StockTypeRequestDTO stockType) {
-        String preSignedURL=stockTypeService.saveStockType(stockType);
+        String preSignedURL = stockTypeService.saveStockType(stockType);
 
-        return BaseResponse.success(SuccessCode.CREATED,preSignedURL);
+        return BaseResponse.success(SuccessCode.CREATED, preSignedURL);
     }
 
 }

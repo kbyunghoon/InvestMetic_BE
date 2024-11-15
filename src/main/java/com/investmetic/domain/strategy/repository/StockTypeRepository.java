@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StockTypeRepository extends JpaRepository<StockType, Long> {
-    Page<StockType> findByactivateState(Boolean activateState, Pageable pageable);
+    Page<StockType> findByActivateState(Boolean activateState, Pageable pageable);
 }

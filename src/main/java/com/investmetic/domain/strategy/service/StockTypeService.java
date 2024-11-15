@@ -28,7 +28,7 @@ public class StockTypeService {
     }
 
     public PageResponseDto<StockTypeResponseDTO> getStockTypes(Pageable pageable, Boolean activateState) {
-        Page<StockTypeResponseDTO> stocks = stockTypeRepository.findByactivateState(activateState, pageable)
+        Page<StockTypeResponseDTO> stocks = stockTypeRepository.findByActivateState(activateState, pageable)
                 .map(StockTypeResponseDTO::from);
 
         return new PageResponseDto<>(stocks);

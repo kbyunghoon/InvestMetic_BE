@@ -17,15 +17,17 @@ public class StockTypeResponseDTO {
 
     @Column(length = 1000)
     private String stockTypeIconURL;
+
     @Builder
-    public StockTypeResponseDTO(Long stockTypeId, String stockTypeName, Boolean activateState, String stockTypeIconURL) {
+    public StockTypeResponseDTO(Long stockTypeId, String stockTypeName, Boolean activateState,
+                                String stockTypeIconURL) {
         this.stockTypeId = stockTypeId;
         this.stockTypeName = stockTypeName;
         this.activateState = activateState;
         this.stockTypeIconURL = stockTypeIconURL;
     }
 
-    public static StockTypeResponseDTO from(StockType stockType){
+    public static StockTypeResponseDTO from(StockType stockType) {
         return StockTypeResponseDTO.builder()
                 .stockTypeId(stockType.getStockTypeId())
                 .stockTypeName(stockType.getStockTypeName())

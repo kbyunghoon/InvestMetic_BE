@@ -57,8 +57,7 @@ class StrategyServiceTest {
         when(tradeTypeRepository.findByActivateStateTrue()).thenReturn(tradeTypeList);
         when(stockTypeRepository.findAll()).thenReturn(stockTypeList);
 
-        ResponseEntity<BaseResponse<RegisterInfoResponseDto>> response = strategyService.loadStrategyRegistrationInfo();
-
+        ResponseEntity<BaseResponse<RegisterInfoResponseDto>> response =BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
         assertThat(response).isNotNull();
         assertThat(Objects.requireNonNull(response.getBody()).getIsSuccess()).isTrue();
 

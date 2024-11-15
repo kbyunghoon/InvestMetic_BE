@@ -25,7 +25,7 @@ public class TradeTypeResponseDTO {
         this.tradeIconURL = tradeIconURL;
     }
 
-    public TradeTypeResponseDTO from(TradeType tradeType) {
+    public static TradeTypeResponseDTO from(TradeType tradeType) {
         return TradeTypeResponseDTO.builder()
                 .tradeTypeId(tradeType.getTradeTypeId())
                 .tradeName(tradeType.getTradeTypeName())
