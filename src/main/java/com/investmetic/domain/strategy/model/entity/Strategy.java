@@ -17,6 +17,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,16 +68,25 @@ public class Strategy extends BaseEntity {
 
     private Integer subscriptionCount; // 구독수
 
-    @ColumnDefault("0")
+    @ColumnDefault("0.0")
     private Double averageRating = 0.0; // 평균별점
 
     public void updateAverageRating(Double newAverageRating) {
         this.averageRating = newAverageRating;
     }
 
+    @PrePersist
+    @PreUpdate
+    private void setDefaultAverageRating() {
+        if (this.averageRating == null) {
+            this.averageRating = 0.0;
+        }
+    }
+
     // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
-    public Strategy(Long strategyId, User user,TradeType tradeType,StrategyStatistics strategyStatistics, String strategyName, OperationCycle operationCycle,
+    public Strategy(Long strategyId, User user, TradeType tradeType, StrategyStatistics strategyStatistics,
+                    String strategyName, OperationCycle operationCycle,
                     MinimumInvestmentAmount minimumInvestmentAmount, String strategyDescription,
                     String proposalFilePath,
                     IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating) {
