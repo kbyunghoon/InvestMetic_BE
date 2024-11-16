@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -20,6 +19,7 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.MultiPresignedUrlResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -34,6 +34,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
@@ -130,37 +135,57 @@ class AccountVerificationServiceTest {
         verify(accountVerificationRepository, never()).save(any(AccountVerification.class));
     }
 
-    /**
-     * 특정 전략 ID로 계좌 인증 이미지를 조회하는 메서드 테스트. accountVerificationRepository가 데이터를 반환할 경우, 정상적 결과 반환 확인.
-     */
+
     @Test
-    void 실계좌_인증_조회() {
-        when(accountVerificationRepository.findByStrategy_StrategyId(1L))
-                .thenReturn(List.of(accountVerification1, accountVerification2));
+    void 실계좌_인증_조회_성공_테스트() {
+        // Given
+        Long strategyId = 1L;
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
 
-        List<AccountImagesResponseDto> result = accountVerificationService.getAccountImagesByStrategyId(1L);
+        // Mock 설정
+        Page<AccountVerification> mockPage = new PageImpl<>(List.of(accountVerification1, accountVerification2),
+                pageable, 2);
+        when(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)).thenReturn(mockPage);
 
-        assertThat(result)
-                .isNotNull()
-                .hasSize(2)
-                .extracting(AccountImagesResponseDto::getTitle)
-                .containsExactly("Verification 1", "Verification 2");
+        // When
+        PageResponseDto<AccountImagesResponseDto> response = accountVerificationService.getAccountImagesByStrategyId(
+                strategyId, pageable);
 
-        verify(accountVerificationRepository).findByStrategy_StrategyId(1L);
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getContent()).hasSize(2);
+        assertThat(response.getPage()).isEqualTo(1); // 1부터 시작하도록 설정한 것 확인
+        assertThat(response.getSize()).isEqualTo(10);
+        assertThat(response.getTotalElements()).isEqualTo(2);
+        assertThat(response.getTotalPages()).isEqualTo(1);
+        assertThat(response.isFirst()).isTrue();
+        assertThat(response.isLast()).isTrue();
+        assertThat(response.getContent().get(0).getTitle()).isEqualTo("Verification 1");
+        assertThat(response.getContent().get(1).getTitle()).isEqualTo("Verification 2");
     }
 
-    /**
-     * 계좌 인증 내역이 없을 경우 빈 리스트 반환 테스트. 주어진 전략 ID로 데이터가 없을 경우, 빈 리스트인지 확인.
-     */
     @Test
-    void 실계좌_인증_내역_없을_경우() {
-        when(accountVerificationRepository.findByStrategy_StrategyId(anyLong()))
-                .thenReturn(List.of());
+    void 실계좌_정보_조회_결과_없음_테스트() {
+        // Given
+        Long strategyId = 2L;
+        Pageable pageable = PageRequest.of(0, 10);
 
-        List<AccountImagesResponseDto> result = accountVerificationService.getAccountImagesByStrategyId(2L);
+        // Mock 설정: 빈 페이지 반환
+        Page<AccountVerification> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+        when(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)).thenReturn(emptyPage);
 
-        assertThat(result).isNotNull().isEmpty();
+        // When
+        PageResponseDto<AccountImagesResponseDto> response = accountVerificationService.getAccountImagesByStrategyId(
+                strategyId, pageable);
 
-        verify(accountVerificationRepository).findByStrategy_StrategyId(2L);
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getContent()).isEmpty();
+        assertThat(response.getPage()).isEqualTo(1); // 1부터 시작하도록 설정한 것 확인
+        assertThat(response.getSize()).isEqualTo(10);
+        assertThat(response.getTotalElements()).isZero();
+        assertThat(response.getTotalPages()).isZero();
+        assertThat(response.isFirst()).isTrue();
+        assertThat(response.isLast()).isTrue();
     }
 }

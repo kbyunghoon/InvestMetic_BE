@@ -3,12 +3,16 @@ package com.investmetic.domain.accountverification.controller;
 import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
 import com.investmetic.domain.accountverification.service.AccountVerificationService;
 import com.investmetic.domain.strategy.dto.request.AccountImageRequestDto;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.MultiPresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,8 +39,10 @@ public class AccountVerificationController {
 
     @GetMapping("/{strategyId}/account-images")
     @Operation(summary = "트레이더 전략 실계좌 인증 조회 기능", description = "<a href='https://field-sting-eff.notion.site/57b368c56b1340b1bd9c72ca52090c51?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<BaseResponse<List<AccountImagesResponseDto>>> fetchAccountImages(
-            @PathVariable Long strategyId) {
-        return BaseResponse.success(accountVerificationService.getAccountImagesByStrategyId(strategyId));
+    public ResponseEntity<BaseResponse<PageResponseDto<AccountImagesResponseDto>>> fetchAccountImages(
+            @PathVariable Long strategyId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        return BaseResponse.success(accountVerificationService.getAccountImagesByStrategyId(strategyId, pageable));
     }
 }

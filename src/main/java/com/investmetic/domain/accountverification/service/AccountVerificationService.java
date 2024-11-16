@@ -6,6 +6,7 @@ import com.investmetic.domain.accountverification.repository.AccountVerification
 import com.investmetic.domain.strategy.dto.request.AccountImageRequestDto;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.MultiPresignedUrlResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BusinessException;
@@ -14,8 +15,8 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,18 +70,8 @@ public class AccountVerificationService {
     }
 
     @Transactional(readOnly = true)
-    public List<AccountImagesResponseDto> getAccountImagesByStrategyId(Long strategyId) {
-        return accountVerificationRepository.findByStrategy_StrategyId(strategyId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
-
-    private AccountImagesResponseDto convertToDto(AccountVerification accountVerification) {
-        return AccountImagesResponseDto.builder()
-                .id(accountVerification.getAccountVerificationId())
-                .title(accountVerification.getTitle())
-                .imageUrl(accountVerification.getAccountVerificationUrl())
-                .build();
+    public PageResponseDto<AccountImagesResponseDto> getAccountImagesByStrategyId(Long strategyId, Pageable pageable) {
+        return new PageResponseDto<>(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)
+                .map(AccountImagesResponseDto::from));
     }
 }
