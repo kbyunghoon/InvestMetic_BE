@@ -7,7 +7,7 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
@@ -24,9 +24,9 @@ class UserMyPageServiceTest {
     private UserMyPageService userMyPageService;
 
 
-    //지금은 userMyPageRepository 사용하고 나중에 회원가입 생기면 userService로만 Test해보기.
+    //지금은 userRepository 사용하고 나중에 회원가입 생기면 userService로만 Test해보기.
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userRepository;
 
     private User createOneUser() {
         User user = User.builder()
@@ -42,7 +42,7 @@ class UserMyPageServiceTest {
                 .userState(UserState.ACTIVE)
                 .role(Role.INVESTOR_ADMIN)
                 .build();
-        userMyPageRepository.save(user);
+        userRepository.save(user);
         return user;
     }
 
@@ -74,6 +74,4 @@ class UserMyPageServiceTest {
 
 
     }
-
-
 }

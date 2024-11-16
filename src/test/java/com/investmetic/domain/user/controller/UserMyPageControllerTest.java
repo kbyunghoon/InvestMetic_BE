@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
+import com.investmetic.domain.user.repository.UserRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class UserMyPageControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userRepository;
 
 
     private User createOneUser() {
@@ -49,7 +49,7 @@ class UserMyPageControllerTest {
                 .userState(UserState.ACTIVE)
                 .role(Role.INVESTOR_ADMIN)
                 .build();
-        userMyPageRepository.save(user);
+        userRepository.save(user);
         return user;
     }
 

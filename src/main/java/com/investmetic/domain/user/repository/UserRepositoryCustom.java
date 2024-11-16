@@ -2,16 +2,19 @@ package com.investmetic.domain.user.repository;
 
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.Optional;
 
 public interface UserRepositoryCustom {
 
     Optional<UserProfileDto> findByEmailUserInfo(String userName);
+    Optional<UserProfileDto> findByNicknameUserInfo(String nickname);
+    Optional<UserProfileDto> findByPhoneUserInfo(String phone);
+    Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageRequest);
 
-    Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto pageRequestDto, Pageable pageRequest);
 
-
+    boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
+    boolean existsByPhone(String phone);
 }

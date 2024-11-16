@@ -1,7 +1,7 @@
 package com.investmetic.domain.user.controller;
 
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
-import com.investmetic.domain.user.service.AdminService;
+import com.investmetic.domain.user.service.UserAdminService;
 import com.investmetic.global.exception.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
 
-    private final AdminService adminService;
+    private final UserAdminService adminService;
 
     @GetMapping("/admin/a")
     public ResponseEntity<?> a(Pageable pageable, UserAdminPageRequestDto userAdminPageRequestDto) {

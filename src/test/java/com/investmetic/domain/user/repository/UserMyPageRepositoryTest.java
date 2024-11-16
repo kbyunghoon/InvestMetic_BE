@@ -6,7 +6,6 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class UserMyPageRepositoryTest {
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userReposiroty;
 
     private User createOneUser() {
         User user = User.builder()
@@ -36,7 +35,7 @@ class UserMyPageRepositoryTest {
                 .userState(UserState.ACTIVE)
                 .role(Role.INVESTOR_ADMIN)
                 .build();
-        userMyPageRepository.save(user);
+        userReposiroty.save(user);
         return user;
     }
 
@@ -49,7 +48,7 @@ class UserMyPageRepositoryTest {
         User user = createOneUser();
 
         //Email은 jwt나 SecurityContext에서 가져오기
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userReposiroty.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
         assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
@@ -63,11 +62,11 @@ class UserMyPageRepositoryTest {
     public void testProfile2() {
         // 유저 생성
         User user = createOneUser();
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userReposiroty.findByEmailUserInfo(user.getEmail());
         assertTrue(userProfileDto.isPresent());
 
         // DB에 없는 Email
-        Optional<UserProfileDto> userNotFound = userMyPageRepository.findByEmailUserInfo(
+        Optional<UserProfileDto> userNotFound = userReposiroty.findByEmailUserInfo(
                 user.getEmail() + "@gmail.com");
         assertTrue(userNotFound.isEmpty());
     }

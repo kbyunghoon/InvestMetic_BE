@@ -12,9 +12,10 @@ public class UserAdminPageRequestDto {
 
     private String condition;
 
+    //ADMIN, TRADER, INVESTOR
     private String role;
 
-    UserAdminPageRequestDto(String keyword, String condition, String role) {
+    public UserAdminPageRequestDto(String keyword, String condition, String role) {
         this.keyword = keyword;
         this.condition = condition;
         this.role = role;

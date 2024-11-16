@@ -1,11 +1,12 @@
 package com.investmetic.domain.user.dto.response;
 
 
+import com.investmetic.domain.user.model.Role;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
-@NoArgsConstructor
+@ToString
 public class UserProfileDto {
 
     private Long userId;
@@ -21,5 +22,7 @@ public class UserProfileDto {
     private String phone;
 
     private Boolean infoAgreement;
+
+    private Role role;
 
 }

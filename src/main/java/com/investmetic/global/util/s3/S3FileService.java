@@ -65,7 +65,7 @@ public class S3FileService {
     public String getS3Path(FilePath filePath, String fileName, int size) {
 
         //전략 엑셀.
-        if (filePath.equals(FilePath.STRATEGY_EXCEL)) {
+        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
             //확장자가 틀리거나 500MB이상 인지 확인
             if (!filterExcelExtension(fileName) || !(size < 1024 * 1024 * 500)) {
                 throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
