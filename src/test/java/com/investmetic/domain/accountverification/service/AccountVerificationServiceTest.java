@@ -12,8 +12,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
-import com.investmetic.domain.accountverification.repository.AccountVerficationRepository;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
 import com.investmetic.domain.strategy.dto.request.AccountImageRequestDto;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
@@ -52,7 +53,7 @@ class AccountVerificationServiceTest {
     private TradeTypeRepository tradeTypeRepository;
 
     @Mock
-    private AccountVerficationRepository accountVerficationRepository;
+    private AccountVerificationRepository accountVerificationRepository;
 
     @InjectMocks
     private AccountVerificationService accountVerificationService;
@@ -62,6 +63,9 @@ class AccountVerificationServiceTest {
     private AccountVerification accountVerification2;
     private List<AccountImageRequestDto> requestDtoList;
 
+    /**
+     * 테스트용 Strategy와 AccountVerification 엔티티를 생성 및 요청 DTO 초기화
+     */
     @BeforeEach
     void setUp() {
         strategy = Strategy.builder()
@@ -69,7 +73,6 @@ class AccountVerificationServiceTest {
                 .strategyName("Test Strategy")
                 .build();
 
-        // 테스트용 AccountVerification 엔티티 생성
         accountVerification1 = AccountVerification.builder()
                 .strategy(strategy)
                 .title("Verification 1")
@@ -92,70 +95,72 @@ class AccountVerificationServiceTest {
         requestDtoList.add(requestDto);
     }
 
+    /**
+     * 전략이 데이터베이스에 존재할 경우, 계좌 인증 이미지 등록 성공 테스트
+     */
     @Test
     void 실계좌_인증_이미지_등록_성공_테스트() {
-        // Given: 전략이 데이터베이스에 존재하는 경우
         when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
         when(s3FileService.getS3Path(eq(FilePath.STRATEGY_IMAGE), anyString(), anyInt()))
                 .thenReturn("s3://bucket/path/to/image");
         when(s3FileService.getPreSignedUrl("s3://bucket/path/to/image"))
                 .thenReturn("https://presigned.url");
 
-        // When: 메서드를 호출할 때
         MultiPresignedUrlResponseDto response = accountVerificationService.registerStrategyAccountImages(1L,
                 requestDtoList);
 
-        // Then: 결과 검증
         assertThat(response.getPresignedUrls()).hasSize(1);
         assertThat(response.getPresignedUrls().get(0).getPresignedUrl()).isEqualTo("https://presigned.url");
 
-        // 전략 조회 및 저장 호출 여부 검증
         verify(strategyRepository, times(1)).findById(1L);
-        verify(accountVerficationRepository, times(1)).save(any(AccountVerification.class));
+        verify(accountVerificationRepository, times(1)).save(any(AccountVerification.class));
     }
 
+    /**
+     * 계좌 인증 이미지 등록 시 전략이 존재하지 않을 경우 예외 발생 테스트. 전략이 데이터베이스에 존재하지 않을 경우, BusinessException 예외 발생해야 함.
+     */
     @Test
     void 실계좌_인증_이미지_등록_전략_없을_경우() {
-        // Given: 전략이 데이터베이스에 존재하지 않는 경우
         when(strategyRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // When & Then: 예외가 발생해야 함
         assertThatThrownBy(() -> accountVerificationService.registerStrategyAccountImages(1L, requestDtoList))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.STRATEGY_NOT_FOUND.getMessage());
 
-        // 전략 조회 실패 시 저장이 호출되지 않았는지 검증
-        verify(accountVerficationRepository, never()).save(any(AccountVerification.class));
+        verify(accountVerificationRepository, never()).save(any(AccountVerification.class));
     }
 
+    /**
+     * 특정 전략 ID로 계좌 인증 이미지를 조회하는 메서드 테스트. accountVerificationRepository가 데이터를 반환할 경우, 정상적 결과 반환 확인.
+     */
     @Test
     void 실계좌_인증_조회() {
-        // Given: accountVerificationRepository에서 특정 strategyId로 조회 시 데이터 반환 설정
-        when(accountVerficationRepository.findByStrategy_StrategyId(1L))
+        when(accountVerificationRepository.findByStrategy_StrategyId(1L))
                 .thenReturn(List.of(accountVerification1, accountVerification2));
 
-        // When: fetchAccountImages 메서드 호출
-        List<AccountVerification> result = accountVerificationService.fetchAccountImages(1L);
+        List<AccountImagesResponseDto> result = accountVerificationService.getAccountImagesByStrategyId(1L);
 
-        // Then: 체이닝을 사용하여 결과 검증
         assertThat(result)
                 .isNotNull()
                 .hasSize(2)
-                .extracting(AccountVerification::getTitle)
+                .extracting(AccountImagesResponseDto::getTitle)
                 .containsExactly("Verification 1", "Verification 2");
 
-        verify(accountVerficationRepository).findByStrategy_StrategyId(1L);
+        verify(accountVerificationRepository).findByStrategy_StrategyId(1L);
     }
 
+    /**
+     * 계좌 인증 내역이 없을 경우 빈 리스트 반환 테스트. 주어진 전략 ID로 데이터가 없을 경우, 빈 리스트인지 확인.
+     */
     @Test
     void 실계좌_인증_내역_없을_경우() {
-        when(accountVerficationRepository.findByStrategy_StrategyId(anyLong()))
+        when(accountVerificationRepository.findByStrategy_StrategyId(anyLong()))
                 .thenReturn(List.of());
 
-        List<AccountVerification> result = accountVerificationService.fetchAccountImages(2L);
+        List<AccountImagesResponseDto> result = accountVerificationService.getAccountImagesByStrategyId(2L);
 
         assertThat(result).isNotNull().isEmpty();
 
-        verify(accountVerficationRepository).findByStrategy_StrategyId(2L);
+        verify(accountVerificationRepository).findByStrategy_StrategyId(2L);
     }
 }

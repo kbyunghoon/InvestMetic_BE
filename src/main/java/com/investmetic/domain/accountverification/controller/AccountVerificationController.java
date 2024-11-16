@@ -1,6 +1,6 @@
 package com.investmetic.domain.accountverification.controller;
 
-import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
 import com.investmetic.domain.accountverification.service.AccountVerificationService;
 import com.investmetic.domain.strategy.dto.request.AccountImageRequestDto;
 import com.investmetic.global.dto.MultiPresignedUrlResponseDto;
@@ -34,8 +34,9 @@ public class AccountVerificationController {
     }
 
     @GetMapping("/{strategyId}/account-images")
-    @Operation(summary = "트레이더 전략 실계좌 인증 조회 기능", description = "<a href='https://field-sting-eff.notion.site/fe8187f51c9c4a199622b932a1985458?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<BaseResponse<List<AccountVerification>>> fetchAccountImages(@PathVariable Long strategyId) {
-        return BaseResponse.success(accountVerificationService.fetchAccountImages(strategyId));
+    @Operation(summary = "트레이더 전략 실계좌 인증 조회 기능", description = "<a href='https://field-sting-eff.notion.site/57b368c56b1340b1bd9c72ca52090c51?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<List<AccountImagesResponseDto>>> fetchAccountImages(
+            @PathVariable Long strategyId) {
+        return BaseResponse.success(accountVerificationService.getAccountImagesByStrategyId(strategyId));
     }
 }

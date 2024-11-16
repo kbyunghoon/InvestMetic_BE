@@ -4,6 +4,6 @@ import com.investmetic.domain.accountverification.model.entity.AccountVerificati
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AccountVerficationRepository extends JpaRepository<AccountVerification, Long> {
+public interface AccountVerificationRepository extends JpaRepository<AccountVerification, Long> {
     List<AccountVerification> findByStrategy_StrategyId(Long strategyId);
 }
