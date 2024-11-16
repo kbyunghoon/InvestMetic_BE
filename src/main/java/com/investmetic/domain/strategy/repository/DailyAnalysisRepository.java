@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long> {
+public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long>, DailyAnalysisRepositoryCustom {
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId")
     Page<DailyAnalysis> findByStrategyId(@Param("strategyId") Long strategyId, Pageable pageable);
 }

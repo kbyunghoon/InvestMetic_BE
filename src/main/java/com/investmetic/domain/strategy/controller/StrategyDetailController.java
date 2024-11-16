@@ -2,8 +2,10 @@ package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
+import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatisticsResponse;
+import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
@@ -57,5 +59,12 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
-
+    @GetMapping("/analysis")
+    public ResponseEntity<BaseResponse<StrategyAnalysisResponse>> getStrategyAnalyisis(
+            @PathVariable Long strategyId,
+            @RequestParam AnalysisOption option1,
+            @RequestParam AnalysisOption option2) {
+        StrategyAnalysisResponse result = strategyDetailService.getStrategyAnalysis(strategyId, option1, option2);
+        return BaseResponse.success(result);
+    }
 }
