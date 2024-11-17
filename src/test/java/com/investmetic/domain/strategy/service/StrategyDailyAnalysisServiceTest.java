@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
-class StrategyAnalysisServiceTest {
+class StrategyDailyAnalysisServiceTest {
 
     @Mock
     private DailyAnalysisRepository dailyAnalysisRepository;
