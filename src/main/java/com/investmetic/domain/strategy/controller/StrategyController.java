@@ -42,7 +42,7 @@ public class StrategyController {
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
-    @Operation(summary = "트레이더 전략 일간 분석 등록 기능", description = "<a href='@Operation(summary = \"전략 등록 페이지 진입 시 요청\", description = \"<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>\")' target='_blank'>API 명세서</a>")
+    @Operation(summary = "트레이더 전략 일간 분석 등록 기능", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> addTraderEntries(
             @PathVariable Long strategyId,
             @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos
