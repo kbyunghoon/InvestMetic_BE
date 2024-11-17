@@ -62,9 +62,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Strategy> strategies;
-
     @Builder
     public User(String userName, String nickname, String email, String password, String imageUrl,
                 String phone,

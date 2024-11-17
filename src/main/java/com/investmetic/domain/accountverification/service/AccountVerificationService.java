@@ -27,6 +27,7 @@ public class AccountVerificationService {
     private final StrategyRepository strategyRepository;
     private final AccountVerificationRepository accountVerificationRepository;
 
+    @Transactional
     public MultiPresignedUrlResponseDto registerStrategyAccountImages(
             Long strategyId,
             List<AccountImageRequestDto> requestDtoList) {
