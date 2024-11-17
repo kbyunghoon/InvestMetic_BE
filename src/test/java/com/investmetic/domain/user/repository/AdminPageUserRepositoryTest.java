@@ -2,15 +2,17 @@ package com.investmetic.domain.user.repository;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.investmetic.domain.user.dto.object.ColumnCondition;
+import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
+import com.investmetic.domain.user.model.ActionType;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.global.exception.BusinessException;
-import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.domain.user.model.entity.UserHistory;
+import jakarta.persistence.EntityManager;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,6 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -33,52 +37,56 @@ public class AdminPageUserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EntityManager em;
 
-    private final List<Role> roles = new ArrayList<>(List.of(Role.INVESTOR
-            , Role.INVESTOR_ADMIN
-            , Role.TRADER
-            , Role.TRADER_ADMIN
-            , Role.SUPER_ADMIN));
+    @Autowired
+    private UserHistoryRepository userHistoryRepository;
 
-
-    @BeforeEach
-    public void createUsers50() {
-        for (int i = 0; i < 50; i++) {
-
-            DecimalFormat dc = new DecimalFormat("##");
-
-            User user = User.builder()
-                    .userName("정룡우" + i)
-                    .nickname("jeongRyongWoo" + i)
-                    .email("jlwoo0925" + i + "@gmail.com")
-                    .password("asdf" + i)
-                    .imageUrl("jrw_projectS3/profile/정룡우.img")
-                    .phone("010123456" + dc.format(i))
-                    .birthDate("000925")
-                    .ipAddress("127.0.0.1")
-                    .infoAgreement(Boolean.FALSE)
-                    .joinDate(LocalDate.now())
-                    .userState(UserState.ACTIVE)
-                    .role(roles.get(i%5))
-                    .build();
-            userRepository.save(user);
-        }
-    }
 
     /**
      * null, "" ," " 요청 시 @Valid등으로도 test하도록.
-
      * */
     @Nested
     @DisplayName("관리자페이지 회원 목록")
     class UserList {
+
+        private final List<Role> roles = new ArrayList<>(List.of(Role.INVESTOR
+                , Role.INVESTOR_ADMIN
+                , Role.TRADER
+                , Role.TRADER_ADMIN
+                , Role.SUPER_ADMIN));
+
+        @BeforeEach
+        public void createUsers50() {
+            for (int i = 0; i < 50; i++) {
+
+                DecimalFormat dc = new DecimalFormat("##");
+
+                User user = User.builder()
+                        .userName("정룡우" + i)
+                        .nickname("jeongRyongWoo" + i)
+                        .email("jlwoo0925" + i + "@gmail.com")
+                        .password("asdf" + i)
+                        .imageUrl("jrw_projectS3/profile/정룡우.img")
+                        .phone("010123456" + dc.format(i))
+                        .birthDate("000925")
+                        .ipAddress("127.0.0.1")
+                        .infoAgreement(Boolean.FALSE)
+                        .joinDate(LocalDate.now())
+                        .userState(UserState.ACTIVE)
+                        .role(roles.get(i%5))
+                        .build();
+                userRepository.save(user);
+            }
+        }
 
         @Test
         @DisplayName("정상 회원 조회")
         void adminUserListTest1() {
 
             //given - 회원 목록 페이지 들어갔을때.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(null,null,"ALL");
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null,null, RoleCondition.ALL);
             Pageable pageable = PageRequest.of(0, 9);
 
             //when
@@ -107,7 +115,7 @@ public class AdminPageUserRepositoryTest {
         void adminUserListTest2() {
 
             // given - INVESTOR_ADMIN 과 TRADER_ADMIN 탐색.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(null,null,"ADMIN");
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null,null,RoleCondition.ADMIN);
 
             Pageable pageable = PageRequest.of(0, 9);
 
@@ -128,7 +136,7 @@ public class AdminPageUserRepositoryTest {
             String setKeyword = "3";
 
             // given - TRADER와 TRADER_ADMIN 탐색, 닉네임에 3이 들어가는 것만.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(setKeyword, "NICKNAME", "TRADER");
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(setKeyword, ColumnCondition.NICKNAME, RoleCondition.TRADER);
             Pageable pageable = PageRequest.of(0, 9);
 
             // when
@@ -152,7 +160,7 @@ public class AdminPageUserRepositoryTest {
 
             String setKeyword = "1";
             // given  TRADER와 TRADER_ADMIN 탐색, 닉네임에 3이 들어가는 것만.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(setKeyword,"NAME","INVESTOR");
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(setKeyword,ColumnCondition.NAME,RoleCondition.INVESTOR);
             Pageable pageable = PageRequest.of(0, 9);
 
             // when
@@ -174,16 +182,23 @@ public class AdminPageUserRepositoryTest {
         @DisplayName("condition에 잘못된 값 입력 시")
         void adminUserListTest5(){
 
-            //condition은 있는데 keyword가 null이면 기본 회원 조회.
+            // condition은 있는데 keyword가 null이면 기본 회원 조회.
             String setKeyword = "asdf";
-            // given - condition이 잘못된 값 일경우.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(setKeyword, "CREATED_DATE","INVESTOR");
+            // given - condition이 잘못된 값일 경우 조건 검색 안들어감.
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(setKeyword, ColumnCondition.ID,RoleCondition.ALL);
             Pageable pageable = PageRequest.of(0, 9);
 
-            // when, then
-            assertThatThrownBy(()->userRepository.getAdminUsersPage(requestDto, pageable))
-                    .isInstanceOf(BusinessException.class)
-                    .hasMessage(ErrorCode.HANDLE_ACCESS_DENIED.getMessage());
+            UserAdminPageRequestDto requestDtoDefault = UserAdminPageRequestDto.createDto(null,null,RoleCondition.ALL);
+
+            // when
+            Page<UserProfileDto> users = userRepository.getAdminUsersPage(requestDto, pageable);
+            Page<UserProfileDto> usersDefault = userRepository.getAdminUsersPage(requestDtoDefault, pageable);
+
+            // then
+            for(int i = 0; i<users.getContent().size(); i++){
+                assertThat(users.getContent().get(i).getNickname())
+                        .isEqualTo(usersDefault.getContent().get(i).getNickname());
+            }
         }
 
         @Test
@@ -191,14 +206,67 @@ public class AdminPageUserRepositoryTest {
         void adminUserListTest6(){
 
             String setKeyword = "3";
-            // given - condition이 잘못된 값 일경우.
-            UserAdminPageRequestDto requestDto = new UserAdminPageRequestDto(setKeyword, "NICKNAME","SUPER_ADMIN");
+            // given - role값이 잘못된 값 일경우 모든 회원 조회와 같음.
+            UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(setKeyword, ColumnCondition.NICKNAME,RoleCondition.INVESTOR_ADMIN);
             Pageable pageable = PageRequest.of(0, 9);
 
+            UserAdminPageRequestDto requestDtoALL = UserAdminPageRequestDto.createDto(setKeyword, ColumnCondition.NICKNAME,RoleCondition.ALL);
+
+            // when
+            Page<UserProfileDto> usersInvestorAdmin = userRepository.getAdminUsersPage(requestDto, pageable);
+            Page<UserProfileDto> usersALL = userRepository.getAdminUsersPage(requestDtoALL, pageable);
+
+            // then
+            for(int i = 0; i<usersInvestorAdmin.getContent().size(); i++){
+                assertThat(usersInvestorAdmin.getContent().get(i).getRole())
+                        .isEqualTo(usersALL.getContent().get(i).getRole());
+
+                assertThat(usersInvestorAdmin.getContent().get(i).getNickname())
+                        .contains(setKeyword);
+            }
+        }
+    }
+
+
+    @Nested
+    @DisplayName("회원 등급 변경.")
+    class RoleChange{
+
+        private User createOneUser() {
+            User user = User.builder()
+                    .userName("testUser")
+                    .nickname("testNickname")
+                    .phone("01012345678")
+                    .birthDate("19900101")
+                    .password("password")
+                    .email("test@example.com")
+                    .role(Role.INVESTOR)
+                    .infoAgreement(true)
+                    .build();
+
+            userRepository.save(user);
+            return user;
+        }
+
+        @ParameterizedTest
+        @DisplayName("등급 변경 repository test")
+        @EnumSource(value = Role.class, names = {"INVESTOR_ADMIN"})
+        void adminUserRoleTest1(Role role) {
+            //given
+            User user = createOneUser();
+
+            em.flush();
+
+            user.changeRole(role);
+            userHistoryRepository.save(UserHistory.createEntity(user, ActionType.PROMOTION));
+
+            em.flush();
+            em.close();
+
             // when, then
-            assertThatThrownBy(()->userRepository.getAdminUsersPage(requestDto, pageable))
-                    .isInstanceOf(BusinessException.class)
-                    .hasMessage(ErrorCode.HANDLE_ACCESS_DENIED.getMessage());
+            assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).get(0).getActionType()).isEqualTo(ActionType.PROMOTION);
+            assertThat(userRepository.findByEmailUserInfo(user.getEmail()).isPresent()).isEqualTo(true);
+            assertThat(userRepository.findByEmailUserInfo(user.getEmail()).get().getRole()).isEqualTo(role);
         }
     }
 }

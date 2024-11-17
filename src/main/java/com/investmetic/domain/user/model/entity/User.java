@@ -10,8 +10,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id
@@ -58,6 +61,9 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
+    @OneToMany(mappedBy = "user", cascade={},orphanRemoval = false)
+    private List<UserHistory> userHistory; //회원 변경 이력
+
     @Builder
     public User(String userName, String nickname, String email, String password, String imageUrl,
                 String phone,
@@ -77,6 +83,10 @@ public class User extends BaseEntity {
         this.withdrawalDate = withdrawalDate;
         this.userState = userState;
         this.withdrawalStatus = withdrawalStatus;
+        this.role = role;
+    }
+
+    public void changeRole(Role role) {
         this.role = role;
     }
 

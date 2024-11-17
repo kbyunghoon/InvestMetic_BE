@@ -3,10 +3,10 @@ package com.investmetic.domain.user.dto.response;
 
 import com.investmetic.domain.user.model.Role;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
 @Getter
-@ToString
+@NoArgsConstructor
 public class UserProfileDto {
 
     private Long userId;

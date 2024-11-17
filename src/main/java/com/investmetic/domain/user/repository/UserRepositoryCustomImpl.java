@@ -2,6 +2,8 @@ package com.investmetic.domain.user.repository;
 
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
+import com.investmetic.domain.user.dto.object.ColumnCondition;
+import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
@@ -41,7 +43,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
         return Optional.ofNullable(queryFactory.from(user)
                 .select(Projections.fields(UserProfileDto.class,
                         user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
-                        user.infoAgreement))
+                        user.infoAgreement, user.role))
                 .where(user.email.eq(email))
                 .fetchOne());
     }
@@ -99,38 +101,39 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
     }
 
 
-    private BooleanExpression keywordCondition(String condition , String keyword) {
+    private BooleanExpression keywordCondition(ColumnCondition condition , String keyword) {
 
-        // condition, keyword가 null, "", 빈 문자열이면  null 반환
+        // condition 이 null, keyword가 null, "", 빈 문자열이면  null 반환
         // 기본 페이지에서는 condition이 null로 설정 되도록.
-        if (StringUtils.isBlank(condition) || StringUtils.isBlank(keyword)) {
+        if ( condition == null || StringUtils.isBlank(keyword)) {
             return null;
         }
 
         // condition에 따라 조건 컬럼 검색.
         return switch (condition) {
-            case "NICKNAME" -> user.nickname.contains(keyword);
-            case "EMAIL" -> user.email.contains(keyword);
-            case "PHONE" -> user.phone.contains(keyword);
-            case "NAME" -> user.userName.contains(keyword);
+            case NICKNAME -> user.nickname.contains(keyword);
+            case EMAIL -> user.email.contains(keyword);
+            case PHONE -> user.phone.contains(keyword);
+            case NAME -> user.userName.contains(keyword);
 
-            default -> throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
+            // 아무런 값에도 맞지않는 값이 들어왔을 경우 null.
+            default -> null;
         };
     }
 
     //회원 등급 조건 조회.
-    private BooleanExpression roleCondition(String role){
+    private BooleanExpression roleCondition(RoleCondition role){
 
         return switch (role) {
 
             //모든 회원을 보여줄 경우 SUPER_ADMIN은 빼고 보여줌.
-            case "ALL" -> user.role.ne(Role.SUPER_ADMIN);
-            case "ADMIN" -> user.role.eq(Role.TRADER_ADMIN).or(user.role.eq(Role.INVESTOR_ADMIN));
-            case "TRADER" -> user.role.eq(Role.TRADER_ADMIN).or(user.role.eq(Role.TRADER));
-            case "INVESTOR" -> user.role.eq(Role.INVESTOR_ADMIN).or(user.role.eq(Role.INVESTOR));
+            case ALL -> user.role.ne(Role.SUPER_ADMIN);
+            case INVESTOR -> user.role.eq(Role.INVESTOR_ADMIN).or(user.role.eq(Role.INVESTOR));
+            case TRADER -> user.role.eq(Role.TRADER_ADMIN).or(user.role.eq(Role.TRADER));
+            case ADMIN -> user.role.eq(Role.TRADER_ADMIN).or(user.role.eq(Role.INVESTOR_ADMIN));
 
-            // 아무런 값에도 맞지않는 값이 들어왔을 경우 error 보내기. - 회원 정보 보호.
-            default -> throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
+            // 아무런 값에도 맞지않는 값이 들어왔을 경우 null.
+            default -> user.role.ne(Role.SUPER_ADMIN);
         };
     }
 
