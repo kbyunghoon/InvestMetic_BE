@@ -38,7 +38,7 @@ public class UserModifyDto {
 
     @Builder
     public UserModifyDto(String nickname, String password, ImageMetadata imageDto, String phone, String email,
-                         Boolean infoAgreement,  Boolean imageChange) {
+                         Boolean infoAgreement, Boolean imageChange) {
         this.nickname = nickname;
         this.password = password;
         this.imageDto = imageDto;

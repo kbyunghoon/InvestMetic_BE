@@ -170,7 +170,6 @@ class UserMyPageServiceTest {
             //presigned url에 test.jpg가 들어가 있는지 확인(presigned url api제작할 때 aws에 요청 보내지 않음. 내부에서 제작함.)
             assertThat(userMyPageService.changeUserInfo(userModifyDto, oneUser.getEmail())).contains("test.jpg");
 
-
             assertThat(userMyPageService.provideUserInfo(oneUser.getEmail()).getNickname()).isEqualTo(
                     userModifyDto.getNickname());
 
@@ -206,22 +205,28 @@ class UserMyPageServiceTest {
             }
             //presigned url에 test.jpg가 들어가 있는지 확인(presigned url api제작할 때 aws에 요청 보내지 않음. 내부에서 제작함.)
 
-
             if (userModifyDto.getNickname() != null) {
                 assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getNickname()).isEqualTo(
                         userModifyDto.getNickname());
             }
-
+            //
             if (userModifyDto.getInfoAgreement() != null) {
                 assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getInfoAgreement()).isEqualTo(
                         userModifyDto.getInfoAgreement());
             }
 
-            if (userModifyDto.getImageDto() != null) {
-                assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getImageUrl()).contains(
-                        userModifyDto.getImageDto().getImageName());
+            // image가 뀌었을 경우 검증
+            if (userModifyDto.getImageChange()) {
+
+                if (userModifyDto.getImageDto() != null) {
+                    assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getImageUrl()).contains(
+                            userModifyDto.getImageDto().getImageName());
+                } else {
+                    assertThat(userMyPageService.provideUserInfo(userModifyDto.getEmail()).getImageUrl()).isNull();
+                }
             }
 
+            // password가 변경되었을 경우 검증
             if (userModifyDto.getPassword() != null) {
                 Optional<User> dbUser = userRepository.findByEmail(userModifyDto.getEmail());
                 assertThat(dbUser).isPresent();
@@ -245,7 +250,8 @@ class UserMyPageServiceTest {
             ImageMetadata imageMetadata = new ImageMetadata("test.jpg", "image/jpg", 1024 * 1024 * 1024);
 
             UserModifyDto userModifyDto = UserModifyDto.builder().email(oneUser.getEmail()).imageDto(imageMetadata)
-                    .infoAgreement(Boolean.FALSE).nickname("자자ㅏㅈ").phone("01012345678").password("9999").build();
+                    .infoAgreement(Boolean.FALSE).nickname("자자ㅏㅈ").phone("01012345678").password("9999")
+                    .imageChange(Boolean.TRUE).build();
 
             //기존 회원 프로필 s3이미지 객체의 key
             String contentType = "image/jpg";
@@ -253,10 +259,10 @@ class UserMyPageServiceTest {
             ObjectMetadata objectMetadata = new ObjectMetadata();
             objectMetadata.setContentType(contentType);
 
-            // 이미지 저장 빼기.
+            // 이미지 저장 빼기. 에러발생.
 
             //이미지 사이즈에서 예외 터짐.
-            assertThatThrownBy(() -> {userMyPageService.changeUserInfo(userModifyDto, oneUser.getEmail());}).isInstanceOf(
+            assertThatThrownBy(() -> userMyPageService.changeUserInfo(userModifyDto, oneUser.getEmail())).isInstanceOf(
                     RuntimeException.class);
 
             em.flush();
@@ -298,8 +304,9 @@ class UserMyPageServiceTest {
 
             User oneUser = createOneUser();
 
-            assertThatThrownBy(() -> {userMyPageService.checkPassword(oneUser.getEmail(), "notvalid");}).isInstanceOf(
-                            BusinessException.class)
+            assertThatThrownBy(() -> {
+                userMyPageService.checkPassword(oneUser.getEmail(), "notvalid");
+            }).isInstanceOf(BusinessException.class)
                     .hasMessageContaining(ErrorCode.PASSWORD_AUTHENTICATION_FAILED.getMessage());
         }
     }

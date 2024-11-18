@@ -35,10 +35,8 @@ public class UserMyPageService {
     }
 
 
-
     /**
-     * 회원 정보 수정 Transactional(readOnly = false),
-     * 이메일은 변경 불가합니다.
+     * 회원 정보 수정 Transactional(readOnly = false), 이메일은 변경 불가합니다.
      */
     @Transactional
     public String changeUserInfo(UserModifyDto userModifyDto, String email) {
@@ -57,12 +55,10 @@ public class UserMyPageService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-
-
         // 회원이 기존 사진을 변경하는 경우.
-        if(userModifyDto.getImageChange()){
+        if (Boolean.TRUE.equals(userModifyDto.getImageChange())) {
             // 1.1 새로운 사진을 올리는 경우.
-            if(userModifyDto.getImageDto() != null){
+            if (userModifyDto.getImageDto() != null) {
 
                 String filename = userModifyDto.getImageDto().getImageName(); // 확장자 포함 파일 이름 - 프론트랑 상의하기.
                 int fileSize = userModifyDto.getImageDto().getSize(); // 일단 바이트
@@ -75,8 +71,9 @@ public class UserMyPageService {
             }
             // 1.2 새로운 사진을 안올리는 경우는 프로필을 기본 프로필 이미지로 바꾸겠다는 의미.
 
+            // XXX : presignedUrl 성공 후에 삭제 될 수 있게 생각해보기(가장 안전할 듯.)
             // 2.1 기존의 프로필 사진이 있다면 기존의 프로필 사진 제거.
-            if(user.getImageUrl() != null){
+            if (user.getImageUrl() != null) {
                 s3FileService.deleteFromS3(user.getImageUrl()); //실패 시 RuntimeException
             }
 
@@ -84,29 +81,27 @@ public class UserMyPageService {
         }
 
         //비밀 번호가 있으면 암호화 하여 저장.
-        if(userModifyDto.getPassword()!=null){
+        if (userModifyDto.getPassword() != null) {
             user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
         }
 
-        // 영속화된 User 객체에 회원 정보 update - 더티체킹
+        // 영속화된 User 객체에 회원 정보 update
         user.updateUser(userModifyDto, s3Path);
 
         return s3Path == null ? null : s3FileService.getPreSignedUrl(s3Path);
     }
 
 
-
-    public void checkPassword(String email, String rawPassword){
+    public void checkPassword(String email, String rawPassword) {
 
         // 이메일에 해당하는 패스워드 찾아오기.
         String encodedPassword = userRepository.findPasswordByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
         //패스워드가 일치하지 않으면 throw
-        if(!passwordEncoder.matches(rawPassword, encodedPassword)){
+        if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
             throw new BusinessException(ErrorCode.PASSWORD_AUTHENTICATION_FAILED);
         }
-
     }
 
 }
