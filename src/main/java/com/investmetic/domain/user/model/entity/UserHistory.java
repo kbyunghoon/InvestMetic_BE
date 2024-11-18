@@ -11,25 +11,34 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
 
+    // 부모 엔티티 삭제시 같이 없어짐.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private String adminName;
-
     @Enumerated(EnumType.STRING)
     private ActionType actionType;
+
+    private UserHistory(User user, ActionType actionType){
+        this.user = user;
+        this.actionType = actionType;
+    }
+
+    public static UserHistory createEntity(User user, ActionType actionType){
+        return new UserHistory(user, actionType);
+    }
 
 }

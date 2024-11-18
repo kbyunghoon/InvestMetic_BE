@@ -48,13 +48,18 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     @Override
     public StrategyDetailResponse findStrategyDetail(Long strategyId) {
 
-        List<Tuple> stockTypeInfos = getStockTypeInfos(strategyId);
+        List<Tuple> stockTypes = queryFactory
+                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
+                .from(stockTypeGroup)
+                .join(stockTypeGroup.stockType, stockType)
+                .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
+                .fetch();
 
         // 종목 아이콘 목록
-        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypeInfos, stockType.stockTypeIconURL);
+        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypes, stockType.stockTypeIconURL);
 
         // 종목 이름목록
-        List<String> stockTypeNames = getStockTypeIconURLs(stockTypeInfos, stockType.stockTypeName);
+        List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
 
         return queryFactory
                 .select(new QStrategyDetailResponse(

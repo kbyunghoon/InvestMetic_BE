@@ -19,6 +19,7 @@ import com.investmetic.global.util.s3.S3FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +30,12 @@ public class StrategyRegisterService {
     private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public PresignedUrlResponseDto registerStrategy(
             StrategyRegisterRequestDto requestDto) {
         // TODO: 추후 삭제 ----------
         // TODO: 유저 가져오기, tradeType 가져오기, stockType 추가 예정
-        User user = userRepository.findById(327L)
+        User user = userRepository.findById(1L)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
         TradeType tradeType = tradeTypeRepository.findByTradeTypeId(requestDto.getTradeTypeId())
