@@ -20,6 +20,8 @@ public enum ErrorCode {
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, 1007, "비정상적 접근"),
     INVALID_DATE(HttpStatus.BAD_REQUEST, 1008, "날짜 형식을 확인해주세요."),
     EMPTY_PATH_VARIABLE(HttpStatus.BAD_REQUEST, 1008, "필수 경로 변수가 누락되었습니다. 요청 경로에 올바른 값을 입력해 주세요."),
+    NOT_SUPPORTED_TYPE(HttpStatus.BAD_REQUEST, 1009, "잘못된 형식 파일입니다."),
+
     //사용자 관련 오류
     USER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, 2001, "해당 회원의 정보를 찾을 수 없습니다."),
     USERS_NOT_FOUND(HttpStatus.NOT_FOUND, 2002, "조회된 회원이 없습니다."),
@@ -57,8 +59,8 @@ public enum ErrorCode {
     ACCOUNT_IMAGE_QUERY_FAILED(HttpStatus.BAD_REQUEST, 3015, "실계좌 이미지 조회에 실패했습니다."),
     ACCOUNT_IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, 3016, "실계좌 이미지 등록/수정에 실패했습니다."),
     ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
-    STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST,3018,"전략 통계가 존재하지 않습니다."),
-    ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST,3019,"유효하지 않은 옵션입니다."),
+    STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST, 3018, "전략 통계가 존재하지 않습니다."),
+    ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST, 3019, "유효하지 않은 옵션입니다."),
     DAILY_ANALYSIS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 3020, "해당 날짜의 전략 통계가 이미 존재합니다."),
 
     // 전략리뷰 관련오류(3300번대 );

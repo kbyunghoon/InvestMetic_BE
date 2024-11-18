@@ -1,8 +1,11 @@
 package com.investmetic.global.util.s3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +49,11 @@ class S3FileServiceTest {
         String fileName = "testImage.webp"; // 확장자 불충족.
         int size = 1000; //약 1KB
 
-        String s3Path;
-
         // 확장자 다르면 RuntimeException던짐.
-        RuntimeException exception = assertThrows(RuntimeException.class
-                , () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
 
-        assertTrue(exception.getMessage().equals("Not Supported File"));
+        assertEquals(ErrorCode.NOT_SUPPORTED_TYPE, exception.getErrorCode());
     }
 
     @Test
@@ -61,13 +62,11 @@ class S3FileServiceTest {
         String fileName = "testImage.jpg"; // 확장자 충족.
         int size = 1024 * 1024 * 2; //2MB -> 2MB미만만 가능.
 
-        String s3Path;
-
         // 2MB 이상이면  RuntimeException던짐.
-        RuntimeException exception = assertThrows(RuntimeException.class
-                , () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, fileName, size));
 
-        assertTrue(exception.getMessage().equals("Not Supported File"));
+        assertEquals(ErrorCode.NOT_SUPPORTED_TYPE, exception.getErrorCode());
     }
 
     @Test
@@ -138,10 +137,10 @@ class S3FileServiceTest {
 
         int size = 1024 * 1024; //1MB
 
-        RuntimeException exception = assertThrows(RuntimeException.class
-                , () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
 
-        assertTrue(exception.getMessage().equals("Not Supported File"));
+        assertEquals(ErrorCode.NOT_SUPPORTED_TYPE, exception.getErrorCode());
 
     }
 
@@ -153,10 +152,10 @@ class S3FileServiceTest {
         int size = 1024 * 1024; //1MB
 
         // 확장자 틀릴 때 RuntimeException던짐.
-        RuntimeException exception = assertThrows(RuntimeException.class
-                , () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> s3FileService.getS3Path(FilePath.NOTICE, fileName, size));
 
-        assertTrue(exception.getMessage().equals("Not Supported File"));
+        assertEquals(ErrorCode.NOT_SUPPORTED_TYPE, exception.getErrorCode());
     }
 
 
