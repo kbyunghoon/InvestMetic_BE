@@ -9,12 +9,18 @@ import org.springframework.data.domain.Pageable;
 public interface UserRepositoryCustom {
 
     Optional<UserProfileDto> findByEmailUserInfo(String email);
+
     Optional<UserProfileDto> findByNicknameUserInfo(String nickname);
+
     Optional<UserProfileDto> findByPhoneUserInfo(String phone);
+
     Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageRequest);
 
 
     boolean existsByEmail(String email);
+
     boolean existsByNickname(String nickname);
+
     boolean existsByPhone(String phone);
+
 }

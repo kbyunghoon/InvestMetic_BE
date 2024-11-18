@@ -28,36 +28,35 @@ public class UserAdminService {
     private final UserHistoryRepository userHistoryRepository;
 
 
-
-
     /**
      * 회원 목록 페이지 네이션.
      * <pre>
      *  설명은 userRepository.getAdminUsersPage에 적혀있습니다.
      *  조건 검색하는 필터 메서드는 다양한 서비스에서 재사용 가능하도록 Repositoy에 넣어 놓았습니다.
      * </pre>
-     * */
-    public PageResponseDto<UserProfileDto> getUserList(UserAdminPageRequestDto pageRequestDto, Pageable pageable){
+     */
+    public PageResponseDto<UserProfileDto> getUserList(UserAdminPageRequestDto pageRequestDto, Pageable pageable) {
 
         // role 조건 확인. 가독성 위해 Set말고 swich로
         switch (pageRequestDto.getRole()) {
-            case ALL, INVESTOR, TRADER, ADMIN ->{}
+            case ALL, INVESTOR, TRADER, ADMIN -> {
+            }
             default -> throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
         }
 
         // 검색 조건 확인.
-        if(pageRequestDto.getCondition() !=null){
+        if (pageRequestDto.getCondition() != null) {
             switch (pageRequestDto.getCondition()) {
-                case NICKNAME, NAME, EMAIL, PHONE ->{}
-                default-> throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
+                case NICKNAME, NAME, EMAIL, PHONE -> {
+                }
+                default -> throw new BusinessException(ErrorCode.HANDLE_ACCESS_DENIED);
             }
         }
-
 
         // pageRequestDto에 따른 회원 조회.
         Page<UserProfileDto> userPageList = userRepository.getAdminUsersPage(pageRequestDto, pageable);
 
-        if(userPageList.getContent().isEmpty()){
+        if (userPageList.getContent().isEmpty()) {
             throw new BusinessException(ErrorCode.USERS_NOT_FOUND);
         }
 
@@ -68,24 +67,25 @@ public class UserAdminService {
 
     /**
      * 강제 유저 탈퇴
+     *
      * @param userId 탈퇴시키고자하는 user id
-     * @param email 현재 관리자의 email, security에서 가져오기. 또는 role
-     * */
+     * @param email  현재 관리자의 email, security에서 가져오기. 또는 role
+     */
     @Transactional
-    public void deleteUser(Long userId, String email){
+    public void deleteUser(Long userId, String email) {
 
         // DB에 해당 email의 값이 없을경우.
-        Role adminRole = userRepository.findRoleByEmail(email).orElseThrow(()->
-                new BusinessException(ErrorCode.PERMISSION_DENIED));
+        Role adminRole = userRepository.findRoleByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERMISSION_DENIED));
 
         // 관리자가 아닐경우
-        if(!Role.isAdmin(adminRole)){
+        if (!Role.isAdmin(adminRole)) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
         // deleteById를 사용하여 조회 시 값이 없을 경우 EmptyResultDataAccessException 이 발생
-        User deleteUser = userRepository.findById(userId).orElseThrow( () ->
-                new BusinessException(ErrorCode.USERS_NOT_FOUND));
+        User deleteUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
         // 유저 정보 삭제.
         userRepository.delete(deleteUser);
@@ -97,19 +97,18 @@ public class UserAdminService {
      * <pre>
      *     SUPER_ADMIN의 경우 관리자 회원 목록에서 보이지 않도록 조치함.
      * </pre>
-     * */
+     */
     @Transactional
-    public void modifyRole(Long userId, RoleCondition role){
+    public void modifyRole(Long userId, RoleCondition role) {
 
         //변경시키려고 하는 회원이 없는경우.
-        User user = userRepository.findById(userId).orElseThrow(()->
-                new BusinessException(ErrorCode.USERS_NOT_FOUND));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
         // 회원 등급 변경.
-        switch (role){
+        switch (role) {
             // 1. INVESTOR로 받는경우 해당 회원이 INVESTOR_ADMIN이 아니면 Exception 발생.
             case INVESTOR -> {
-                if(!Role.INVESTOR_ADMIN.equals(user.getRole())){
+                if (!Role.INVESTOR_ADMIN.equals(user.getRole())) {
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }
                 user.changeRole(Role.INVESTOR);
@@ -120,7 +119,7 @@ public class UserAdminService {
 
             // 2. TRADER로 받는경우 해당 회원이 TRADER_ADMIN이 아니면 Exception 발생.
             case TRADER -> {
-                if(!Role.TRADER_ADMIN.equals(user.getRole())){
+                if (!Role.TRADER_ADMIN.equals(user.getRole())) {
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }
                 user.changeRole(Role.TRADER);
@@ -128,14 +127,14 @@ public class UserAdminService {
             }
 
             // 3. ADMIN으로 받는경우 TRADER면 TRADER_ADMIN, INVESTOR면 INVESTOR_ADMIN으로
-            case ADMIN ->{
-                if(user.getRole().equals(Role.INVESTOR)){
+            case ADMIN -> {
+                if (user.getRole().equals(Role.INVESTOR)) {
                     user.changeRole(Role.INVESTOR_ADMIN);
 
-                }else if(user.getRole().equals(Role.TRADER)){
+                } else if (user.getRole().equals(Role.TRADER)) {
                     user.changeRole(Role.TRADER_ADMIN);
 
-                }else {
+                } else {
                     //이미 INVESTOR_ADMIN이거나 TRADER_ADMIN인데 ADMIN권한으로 변경해달라고 하는 경우.
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }

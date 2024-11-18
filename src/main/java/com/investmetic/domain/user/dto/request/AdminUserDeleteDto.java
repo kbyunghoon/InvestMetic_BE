@@ -11,7 +11,7 @@ public class AdminUserDeleteDto {
     private String email;
 
     @Builder
-    AdminUserDeleteDto(String email){
+    AdminUserDeleteDto(String email) {
         this.email = email;
     }
 }

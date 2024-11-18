@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
@@ -21,20 +22,10 @@ class UserMyPageRepositoryTest {
     private UserRepository userReposiroty;
 
     private User createOneUser() {
-        User user = User.builder()
-                .userName("정룡우")
-                .nickname("jeongRyongWoo")
-                .email("jlwoo092513@gmail.com")
-                .password("123456")
-                .imageUrl("jrw_projectS3/profile/정룡우.img")
-                .phone("01012345678")
-                .birthDate("000925")
-                .ipAddress("127.0.0.1")
-                .infoAgreement(Boolean.FALSE)
-                .joinDate(LocalDate.now())
-                .userState(UserState.ACTIVE)
-                .role(Role.INVESTOR_ADMIN)
-                .build();
+        User user = User.builder().userName("정룡우").nickname("jeongRyongWoo").email("jlwoo092513@gmail.com")
+                .password("123456").imageUrl("jrw_projectS3/profile/정룡우.img").phone("01012345678").birthDate("000925")
+                .ipAddress("127.0.0.1").infoAgreement(Boolean.FALSE).joinDate(LocalDate.now())
+                .userState(UserState.ACTIVE).role(Role.INVESTOR_ADMIN).build();
         userReposiroty.save(user);
         return user;
     }
@@ -51,8 +42,8 @@ class UserMyPageRepositoryTest {
         Optional<UserProfileDto> userProfileDto = userReposiroty.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
-        assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
-        assertTrue(userProfileDto.get().getEmail().equals(user.getEmail())); //Email 검증
+        assertEquals(userProfileDto.get().getUserId(), user.getUserId()); //UserId 검증
+        assertEquals(userProfileDto.get().getEmail(), user.getEmail()); //Email 검증
 
         System.out.println(userProfileDto.get()); //확인 용.
     }
@@ -66,8 +57,7 @@ class UserMyPageRepositoryTest {
         assertTrue(userProfileDto.isPresent());
 
         // DB에 없는 Email
-        Optional<UserProfileDto> userNotFound = userReposiroty.findByEmailUserInfo(
-                user.getEmail() + "@gmail.com");
+        Optional<UserProfileDto> userNotFound = userReposiroty.findByEmailUserInfo(user.getEmail() + "@gmail.com");
         assertTrue(userNotFound.isEmpty());
     }
 

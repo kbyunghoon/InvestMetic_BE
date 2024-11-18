@@ -64,8 +64,8 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade=CascadeType.ALL ,orphanRemoval = true)
-     List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
 
     @Builder
     public User(String userName, String nickname, String email, String password, String imageUrl,
@@ -93,7 +93,7 @@ public class User extends BaseEntity {
         this.role = role;
     }
 
-    public void addUserHistory(UserHistory userHistory){
+    public void addUserHistory(UserHistory userHistory) {
         if (this.userHistory == null) {
             this.userHistory = new ArrayList<>();
         }

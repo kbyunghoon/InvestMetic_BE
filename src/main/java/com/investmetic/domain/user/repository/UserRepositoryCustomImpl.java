@@ -5,6 +5,7 @@ import static com.investmetic.domain.user.model.entity.QUser.user;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
+import com.investmetic.domain.user.dto.response.QUserProfileDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.QUser;
@@ -13,7 +14,6 @@ import com.investmetic.global.exception.ErrorCode;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -27,7 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
-public class UserRepositoryCustomImpl implements UserRepositoryCustom{
+public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
@@ -41,11 +41,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(Projections.fields(UserProfileDto.class,
-                        user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
-                        user.infoAgreement, user.role))
-                .where(user.email.eq(email))
-                .fetchOne());
+                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
+                        user.phone, user.infoAgreement, user.role)).where(user.email.eq(email)).fetchOne());
     }
 
     /**
@@ -58,9 +55,9 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
      *  따라서 condition이나 keyword 둘 중 하나라도 없으면 모든 회원 조회됩니다.
      *  condition이나 role에 잘못된 값이 들어가는 경우 exception 처리 됩니다.
      * </pre>
-     * */
+     */
     @Override
-    public Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageable){
+    public Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageable) {
 
         QUser user = QUser.user;
 
@@ -71,41 +68,27 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
         condition.add(keywordCondition(requestDto.getCondition(), requestDto.getKeyword()));
         condition.add(roleCondition(requestDto.getRole()));
 
-        Optional<List<UserProfileDto>> content = Optional.ofNullable(queryFactory
-                .select(Projections.fields(UserProfileDto.class,
-                        user.userId,
-                        user.userName,
-                        user.email,
-                        user.imageUrl,
-                        user.nickname,
-                        user.phone,
-                        user.infoAgreement,
-                        user.role))
-                .from(user)
-                .where(condition.toArray(new Predicate[0]))
-                .orderBy(orderByLatest())
-                .offset(pageable.getPageNumber())
-                .limit(pageable.getPageSize())
-                .fetch());
+        Optional<List<UserProfileDto>> content = Optional.ofNullable(queryFactory.select(
+                        new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
+                                user.infoAgreement, user.role)).from(user).where(condition.toArray(new Predicate[0]))
+                .orderBy(orderByLatest()).offset(pageable.getPageNumber()).limit(pageable.getPageSize()).fetch());
 
-        //null시 바로 던짐.
+        // null시 바로 던짐.
         content.orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
         // PageableExecutionUtils 이용. count쿼리 최소화.
-        JPAQuery<Long> countQuery = queryFactory
-                .select(user.count())
-                .where(condition.toArray(new Predicate[0]))
+        JPAQuery<Long> countQuery = queryFactory.select(user.count()).where(condition.toArray(new Predicate[0]))
                 .from(user);
 
         return PageableExecutionUtils.getPage(content.get(), pageable, countQuery::fetchOne);
     }
 
 
-    private BooleanExpression keywordCondition(ColumnCondition condition , String keyword) {
+    private BooleanExpression keywordCondition(ColumnCondition condition, String keyword) {
 
         // condition 이 null, keyword가 null, "", 빈 문자열이면  null 반환
         // 기본 페이지에서는 condition이 null로 설정 되도록.
-        if ( condition == null || StringUtils.isBlank(keyword)) {
+        if (condition == null || StringUtils.isBlank(keyword)) {
             return null;
         }
 
@@ -122,7 +105,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
     }
 
     //회원 등급 조건 조회.
-    private BooleanExpression roleCondition(RoleCondition role){
+    private BooleanExpression roleCondition(RoleCondition role) {
 
         return switch (role) {
 
@@ -139,7 +122,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
 
 
     //최신 생성순.
-    private OrderSpecifier<?> orderByLatest(){
+    private OrderSpecifier<?> orderByLatest() {
 
         //userId 는 시간순으로 정해짐. 인덱스
         return new OrderSpecifier<>(Order.DESC, QUser.user.userId);
@@ -150,10 +133,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
     public boolean existsByPhone(String phone) {
         QUser user = QUser.user;
 
-        return queryFactory
-                .selectFrom(user)
-                .where(user.phone.eq(phone))
-                .fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.phone.eq(phone)).fetchFirst() == null;
     }
 
     //닉네임 중복검사
@@ -161,10 +141,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
     public boolean existsByNickname(String nickname) {
         QUser user = QUser.user;
 
-        return queryFactory
-                .selectFrom(user)
-                .where(user.nickname.eq(nickname))
-                .fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.nickname.eq(nickname)).fetchFirst() == null;
     }
 
     //이메일 중복검사
@@ -172,10 +149,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
     public boolean existsByEmail(String email) {
         QUser user = QUser.user;
 
-        return queryFactory
-                .selectFrom(user)
-                .where(user.email.eq(email))
-                .fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.email.eq(email)).fetchFirst() == null;
     }
 
     @Override
@@ -183,11 +157,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(Projections.fields(UserProfileDto.class,
-                        user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
-                        user.infoAgreement))
-                .where(user.phone.eq(phone))
-                .fetchOne());
+                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
+                        user.infoAgreement, user.role)).where(user.phone.eq(phone)).fetchOne());
     }
 
     @Override
@@ -195,10 +166,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom{
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(Projections.fields(UserProfileDto.class,
-                        user.userId, user.userName, user.nickname, user.email, user.imageUrl, user.phone,
-                        user.infoAgreement))
-                .where(user.nickname.eq(nickname))
-                .fetchOne());
+                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
+                        user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
     }
 }

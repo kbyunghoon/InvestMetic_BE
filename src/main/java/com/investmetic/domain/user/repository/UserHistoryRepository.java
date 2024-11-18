@@ -10,3 +10,4 @@ public interface UserHistoryRepository extends JpaRepository<UserHistory, Long> 
     //메서드명 주의. user의 userid로 찾기.
     List<UserHistory> findByUserUserId(Long id);
 }
+

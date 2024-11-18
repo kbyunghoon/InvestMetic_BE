@@ -34,7 +34,7 @@ public class UserAdminPageControllerTest {
 
     @Nested
     @DisplayName("회원 목록 조회")
-    class AdminUserList{
+    class AdminUserList {
 
         @Test
         @DisplayName("role @NotNull 확인.")
@@ -46,18 +46,14 @@ public class UserAdminPageControllerTest {
             multiValueMap.add("size", String.valueOf(9));
 
             // when
-            ResultActions resultActions1 = mockMvc.perform(get("/api/admin/users")
-                    .params(multiValueMap)
-            );
+            ResultActions resultActions1 = mockMvc.perform(get("/api/admin/users").params(multiValueMap));
 
             // then
             resultActions1.andExpect(status().isBadRequest())
-                    .andExpect(status().reason(containsString("Validation failure")))
-                    .andDo(print());
+                    .andExpect(status().reason(containsString("Validation failure"))).andDo(print());
 
         }
     }
-
 
 
 }

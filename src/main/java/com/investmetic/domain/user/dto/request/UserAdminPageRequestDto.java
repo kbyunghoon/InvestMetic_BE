@@ -24,7 +24,7 @@ public class UserAdminPageRequestDto {
         this.role = role;
     }
 
-    public static UserAdminPageRequestDto createDto(String keyword, ColumnCondition condition, RoleCondition role){
+    public static UserAdminPageRequestDto createDto(String keyword, ColumnCondition condition, RoleCondition role) {
         return new UserAdminPageRequestDto(keyword, condition, role);
     }
 }
