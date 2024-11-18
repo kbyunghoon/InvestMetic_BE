@@ -10,5 +10,4 @@ import org.springframework.data.repository.query.Param;
 public interface MonthlyAnalysisRepository extends JpaRepository<MonthlyAnalysis, Long> {
     @Query("select m from MonthlyAnalysis m where m.strategy.strategyId = :strategyId")
     Page<MonthlyAnalysis> findByStrategyId(@Param("strategyId") Long strategyId, Pageable pageable);
-
 }

@@ -32,7 +32,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 회원 ID, 기본 키로 자동 증가됨
 
-    @Column(name="user_name")
+    @Column(name = "user_name")
     private String userName; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
 
     private String nickname; // 사용자 닉네임 (표시 이름)
