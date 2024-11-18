@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StockTypeRepository extends JpaRepository<StockType, Long> {
     Page<StockType> findByActivateState(Boolean activateState, Pageable pageable);
+
     Optional<StockType> findByStockTypeId(Long stockTypeId);
 }

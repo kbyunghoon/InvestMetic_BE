@@ -57,7 +57,7 @@ class TradeTypeServiceTest {
         System.out.println("savedTradeType: " + savedTradeType);
     }
     @Test
-    @DisplayName("종목 상태 변경 테스트")
+    @DisplayName("매매유형 상태 변경 테스트")
     void changeStockTypes() {
         // 페이지 조회(true) : 활성 상태 페이지 불러오기
         Pageable pageable = PageRequest.of(0, 10);
@@ -66,7 +66,7 @@ class TradeTypeServiceTest {
         // 페이지 첫번째 dto 가져오기
         TradeTypeResponseDTO dto=dtolist.get(0);
         tradeTypeService.changeActivateState(dto.getTradeTypeId());
-        Optional<TradeType> tradeType=tradeTypeRepository.findByTradeTypeId(dto.getTradeTypeId());
-        assertThat(tradeType.get().getTradeTypeId()).isEqualTo(false);
+        TradeType tradeType=tradeTypeRepository.findByTradeTypeId(dto.getTradeTypeId()).orElse(null);
+        assertThat(tradeType.getActivateState()).isEqualTo(false);
     }
 }

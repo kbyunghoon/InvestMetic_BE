@@ -44,7 +44,7 @@ public class TradeTypeController {
     @PatchMapping("/trade-type/{tradeTypeId}")
     public ResponseEntity<BaseResponse<Void>> updateTradeType(@PathVariable Long tradeTypeId){
         tradeTypeService.changeActivateState(tradeTypeId);
-        return BaseResponse.success(SuccessCode.CREATED);
+        return BaseResponse.success(SuccessCode.UPDATED);
     }
 
 }

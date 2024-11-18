@@ -73,7 +73,7 @@ class StockTypeServiceTest {
         // 페이지 첫번째 dto 가져오기
         StockTypeResponseDTO changeDto=dto.getContent().get(0);
         stockTypeService.changeActivateState(changeDto.getStockTypeId());
-        Optional<StockType> stockType=stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId());
-        assertThat(stockType.get().getActivateState()).isEqualTo(false);
+        StockType stockType=stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId()).orElse(null);
+        assertThat(stockType.getActivateState()).isEqualTo(false);
     }
 }

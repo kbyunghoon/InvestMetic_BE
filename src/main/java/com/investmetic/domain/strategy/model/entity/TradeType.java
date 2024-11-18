@@ -29,11 +29,6 @@ public class TradeType extends BaseEntity {
     }
 
     public void changeActivateState() {
-        if(this.activateState == Boolean.TRUE){
-            this.activateState = false;
-        }
-        if(this.activateState == Boolean.FALSE) {
-            this.activateState = true;
-        }
+        this.activateState = !this.activateState;
     }
 }

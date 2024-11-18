@@ -43,5 +43,6 @@ public class TradeTypeService {
                 .findById(tradeTypeId)
                 .orElseThrow(()->new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
         tradeType.changeActivateState();
+        tradeTypeRepository.save(tradeType);
     }
 }

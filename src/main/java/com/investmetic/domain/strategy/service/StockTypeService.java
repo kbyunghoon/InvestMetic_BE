@@ -9,6 +9,7 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +39,10 @@ public class StockTypeService {
 
     public void changeActivateState(Long StockTypeId) {
         StockType stockType = stockTypeRepository
-                .findById(StockTypeId)
+                .findByStockTypeId(StockTypeId)
                 .orElseThrow(()-> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
         stockType.changeActivateState();
+        stockTypeRepository.save(stockType);
     }
 
 }
