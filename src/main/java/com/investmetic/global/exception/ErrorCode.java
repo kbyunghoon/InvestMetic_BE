@@ -20,6 +20,7 @@ public enum ErrorCode {
     FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, 1007, "비정상적 접근"),
     INVALID_DATE(HttpStatus.BAD_REQUEST, 1008, "날짜 형식을 확인해주세요."),
     EMPTY_PATH_VARIABLE(HttpStatus.BAD_REQUEST, 1008, "필수 경로 변수가 누락되었습니다. 요청 경로에 올바른 값을 입력해 주세요."),
+    NOT_SUPPORTED_TYPE(HttpStatus.BAD_REQUEST, 1009, "잘못된 형식 파일입니다."),
 
     //사용자 관련 오류
     USER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, 2001, "해당 회원의 정보를 찾을 수 없습니다."),
@@ -34,6 +35,7 @@ public enum ErrorCode {
     PASSWORD_RESET_FAILED(HttpStatus.BAD_REQUEST, 2202, "비밀번호 재설정에 실패하였습니다."),
     INVALID_NICKNAME(HttpStatus.BAD_REQUEST, 2203, "사용할 수 없는 닉네임입니다."),
     INVALID_EMAIL(HttpStatus.BAD_REQUEST, 2204, "사용할 수 없는 이메일입니다."),
+    INVALID_PHONE(HttpStatus.BAD_REQUEST, 2207, "사용할 수 없는 전화번호입니다."),
     EMAIL_NOT_FOUND_FOR_PHONE_NUMBER(HttpStatus.BAD_REQUEST, 2205, "입력한 핸드폰 번호에 해당하는 이메일을 찾을 수 없습니다. 다시 입력해 주세요."),
     USER_STATISTICS_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, 2301, "사용자 통계 데이터를 조회할 수 없습니다."),
     TRADER_LIST_RETRIEVAL_FAILED(HttpStatus.NOT_FOUND, 2302, "트레이더 목록 조회에 실패하였습니다."),
@@ -57,7 +59,9 @@ public enum ErrorCode {
     ACCOUNT_IMAGE_QUERY_FAILED(HttpStatus.BAD_REQUEST, 3015, "실계좌 이미지 조회에 실패했습니다."),
     ACCOUNT_IMAGE_SAVE_FAILED(HttpStatus.BAD_REQUEST, 3016, "실계좌 이미지 등록/수정에 실패했습니다."),
     ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
-    STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST,3018,"전략 통계가 존재하지 않습니다."),
+    STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST, 3018, "전략 통계가 존재하지 않습니다."),
+    ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST, 3019, "유효하지 않은 옵션입니다."),
+    DAILY_ANALYSIS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 3020, "해당 날짜의 전략 통계가 이미 존재합니다."),
 
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다."),

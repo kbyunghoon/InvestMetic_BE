@@ -26,6 +26,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 회원 ID, 기본 키로 자동 증가됨
 
+    @Column(name = "user_name")
     private String userName; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
 
     private String nickname; // 사용자 닉네임 (표시 이름)
@@ -58,8 +59,7 @@ public class User extends BaseEntity {
     private Role role; // 회원 등급 또는 역할
 
     @Builder
-    public User(String userName, String nickname, String email, String password, String imageUrl,
-                String phone,
+    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
                 String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
                 UserState userState, Boolean withdrawalStatus, Role role) {
 

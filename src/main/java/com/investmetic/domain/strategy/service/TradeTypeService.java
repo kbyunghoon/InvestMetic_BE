@@ -1,11 +1,15 @@
 package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
+import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +26,12 @@ public class TradeTypeService {
         tradeType.changeTradeIconURL(tradeIconURL);
         tradeTypeRepository.save(tradeType);
         return s3FileService.getPreSignedUrl(tradeIconURL);
+    }
+    public PageResponseDto<TradeTypeResponseDTO> getTradeTypes(Pageable pageable, Boolean activateState) {
+        Page<TradeTypeResponseDTO> tradeTypes = tradeTypeRepository.findByActivateState(activateState, pageable)
+                .map(TradeTypeResponseDTO::from);
+
+        return new PageResponseDto<>(tradeTypes);
     }
 
 }
