@@ -21,7 +21,7 @@ public class StrategyStatistics extends BaseEntity {
 
     private Long balance; // 잔고
 
-    private String operationPeriod; // 운용 기간
+    private Integer operationPeriod; // 운용 기간(일수로 변경)
 
     private Long cumulativeTransactionAmount; // 누적 입출금액
 
