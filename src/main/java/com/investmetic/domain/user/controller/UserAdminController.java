@@ -38,12 +38,11 @@ public class UserAdminController {
      * @return param을 기반으로 나온 회원 목록 페이지 네이션 정보.
      * */
     @GetMapping("/users")
-    // jakarta.validation.constraints.NotNull - HandlerMethodValidationException 500으로 빠짐.
     public ResponseEntity<?> getUserList(@RequestParam(required = false) @NotNull RoleCondition role,
                                          @RequestParam(required = false) ColumnCondition condition,
                                          @RequestParam(required = false) String keyword,
                                          @PageableDefault(size = 9) Pageable pageable) {
-        // setter없이 객체 2개 바인딩 안됨.
+        // setter만들기 좀 그래서 위와 같이 파라미터로 받았습니다.
         UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(keyword, condition ,role);
 
         return BaseResponse.success(userAdminService.getUserList(requestDto, pageable));
@@ -52,9 +51,7 @@ public class UserAdminController {
 
     /**
      * 강제 회원 탈퇴 기능
-     * 회원 이력관리에서 회원을 탈퇴시키면 회원 이력관리에서 해당 회원에 관한 데이터도 싹 다 지울 것인지.
-     * 지운다면 UserEntity 사용가능
-     * 데이터 남긴다면 String UserId로 해야함.
+     * 회원 탈퇴시 회원 이력 테이블에 해당 회원 데이터 모두 삭제.
      *
      * @param userId 탈퇴시키고자 하는 회원 id
      * */

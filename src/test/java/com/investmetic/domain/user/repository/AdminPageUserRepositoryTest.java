@@ -17,6 +17,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,6 +57,8 @@ public class AdminPageUserRepositoryTest {
                 , Role.TRADER
                 , Role.TRADER_ADMIN
                 , Role.SUPER_ADMIN));
+
+
 
         @BeforeEach
         public void createUsers50() {
@@ -248,6 +251,8 @@ public class AdminPageUserRepositoryTest {
             return user;
         }
 
+
+
         @ParameterizedTest
         @DisplayName("등급 변경 repository test")
         @EnumSource(value = Role.class, names = {"INVESTOR_ADMIN"})
@@ -267,6 +272,95 @@ public class AdminPageUserRepositoryTest {
             assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).get(0).getActionType()).isEqualTo(ActionType.PROMOTION);
             assertThat(userRepository.findByEmailUserInfo(user.getEmail()).isPresent()).isEqualTo(true);
             assertThat(userRepository.findByEmailUserInfo(user.getEmail()).get().getRole()).isEqualTo(role);
+        }
+
+
+        @Test
+        @DisplayName("등급 변경시 이력 저장")
+        void adminUserRoleTest2(){
+
+            // given
+            User user = createOneUser();
+
+            em.flush();
+            em.clear();
+                // 영속화 상태
+            User dbUser =  userRepository.findById(user.getUserId()).orElse(null);
+            user.changeRole(Role.SUPER_ADMIN);
+
+            assertThat(dbUser).isNotNull();
+
+                // 영속성 전파.
+            dbUser.addUserHistory(UserHistory.createEntity(user, ActionType.PROMOTION));
+            userRepository.save(dbUser);
+
+            em.flush();
+            em.clear();
+
+            //when, then
+            assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).size()).isGreaterThan(0);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("회원 강제 탈퇴")
+    class UserDelete {
+
+        private User createOneUser() {
+            User user = User.builder()
+                    .userName("testUser")
+                    .nickname("testNickname")
+                    .phone("01012345678")
+                    .birthDate("19900101")
+                    .password("password")
+                    .email("test@example.com")
+                    .role(Role.INVESTOR)
+                    .infoAgreement(true)
+                    .build();
+
+            userRepository.save(user);
+            return user;
+        }
+
+
+
+        @Test
+        @DisplayName("회원 탈퇴시 회원 이력도 삭제")
+        void adminUserDeleteTest1() {
+            // given
+            User user = createOneUser();
+            userHistoryRepository.save(UserHistory.createEntity(user, ActionType.PROMOTION));
+
+            em.flush();
+            em.clear();
+
+            // history 화인
+            assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).size()).isEqualTo(1);
+            User dbUser= userRepository.findById(user.getUserId()).orElseThrow();
+
+            // 유저 삭제
+            userRepository.delete(dbUser);
+
+            em.flush();
+            em.clear();
+
+            // when, then - 다 삭제 되었는지 확인.
+            assertThat(userRepository.findByEmailUserInfo(user.getEmail()).isPresent()).isEqualTo(false);
+            assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).size()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("회원 등급 가져오기.")
+        void getRoleTest(){
+            User user = createOneUser();
+
+            em.flush();
+            em.clear();
+
+            Optional<Role> role = userRepository.findRoleByEmail(user.getEmail());
+
+            assertThat(role.get().equals(Role.INVESTOR)).isEqualTo(true);
         }
     }
 }

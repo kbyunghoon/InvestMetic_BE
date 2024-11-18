@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
@@ -216,9 +217,65 @@ public class AdminPageUserServiceTest {
                     arguments("INVESTOR_ADMIN -> TRADER", RoleCondition.TRADER, Role.INVESTOR_ADMIN)
             );
         }
+    }
 
 
 
+    @Nested
+    @DisplayName("회원 강제 탈퇴")
+    class UserDelete{
+
+
+
+        @ParameterizedTest
+        @DisplayName("해당 회원의 등급이 admin인 경우.")
+        @EnumSource(value = Role.class, names = {"TRADER_ADMIN", "INVESTOR_ADMIN", "SUPER_ADMIN"})
+        void adminDeleteUserTest1(Role role){
+
+            // given - 하나 만들기.
+            User user = User.builder().build();
+
+            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.ofNullable(role));
+            when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+
+            // when, then
+            assertThatCode(()->userAdminService.deleteUser(1L,"email")).doesNotThrowAnyException();
+
+        }
+
+
+        @ParameterizedTest
+        @DisplayName("해당 회원의 등급이 일반 회원인 경우.")
+        @EnumSource(value = Role.class, names = {"TRADER", "INVESTOR"})
+        void adminDeleteUserTest2(Role role){
+
+            // given - 하나 만들기.
+            User user = User.builder().build();
+
+            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.ofNullable(role));
+
+            // when, then
+            assertThatThrownBy(()->userAdminService.deleteUser(1L,"email"))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.PERMISSION_DENIED.getMessage());
+
+        }
+
+
+        @Test
+        @DisplayName("해당 회원이 이미 삭제된 경우")
+        void adminDeleteUserTest3(){
+
+            // given
+            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.of(Role.TRADER_ADMIN));
+            when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            // when, then
+            assertThatThrownBy(()->userAdminService.deleteUser(1L,"email"))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessage(ErrorCode.USERS_NOT_FOUND.getMessage());
+
+        }
     }
 
 

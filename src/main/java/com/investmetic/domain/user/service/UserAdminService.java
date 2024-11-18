@@ -75,22 +75,19 @@ public class UserAdminService {
     public void deleteUser(Long userId, String email){
 
         // DB에 해당 email의 값이 없을경우.
-        UserProfileDto adminProfile= userRepository.findByEmailUserInfo(email).orElseThrow(()->
+        Role adminRole = userRepository.findRoleByEmail(email).orElseThrow(()->
                 new BusinessException(ErrorCode.PERMISSION_DENIED));
 
-        //관리자가 아닐경우
-        if(!Role.isAdmin(adminProfile.getRole())){
+        // 관리자가 아닐경우
+        if(!Role.isAdmin(adminRole)){
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
-        //deleteById를 사용하여 조회 시 값이 없을 경우 EmptyResultDataAccessException 이 발생
+        // deleteById를 사용하여 조회 시 값이 없을 경우 EmptyResultDataAccessException 이 발생
         User deleteUser = userRepository.findById(userId).orElseThrow( () ->
                 new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-        // 회원 이력 저장. orphanRemoval = false
-        userHistoryRepository.save(UserHistory.createEntity(deleteUser, ActionType.FORCED_WITHDRAWAL));
-
-        //유저 정보 삭제.
+        // 유저 정보 삭제.
         userRepository.delete(deleteUser);
     }
 
@@ -103,7 +100,6 @@ public class UserAdminService {
      * */
     @Transactional
     public void modifyRole(Long userId, RoleCondition role){
-        UserHistory userHistory;
 
         //변경시키려고 하는 회원이 없는경우.
         User user = userRepository.findById(userId).orElseThrow(()->
@@ -119,7 +115,7 @@ public class UserAdminService {
                 user.changeRole(Role.INVESTOR);
 
                 // 회원 변경 이력 저장.
-                userHistory = UserHistory.createEntity(user, ActionType.DEMOTION);
+                user.addUserHistory(UserHistory.createEntity(user, ActionType.DEMOTION));
             }
 
             // 2. TRADER로 받는경우 해당 회원이 TRADER_ADMIN이 아니면 Exception 발생.
@@ -128,7 +124,7 @@ public class UserAdminService {
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }
                 user.changeRole(Role.TRADER);
-                userHistory = UserHistory.createEntity(user, ActionType.DEMOTION);
+                user.addUserHistory(UserHistory.createEntity(user, ActionType.DEMOTION));
             }
 
             // 3. ADMIN으로 받는경우 TRADER면 TRADER_ADMIN, INVESTOR면 INVESTOR_ADMIN으로
@@ -143,13 +139,12 @@ public class UserAdminService {
                     //이미 INVESTOR_ADMIN이거나 TRADER_ADMIN인데 ADMIN권한으로 변경해달라고 하는 경우.
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }
-                userHistory = UserHistory.createEntity(user, ActionType.PROMOTION);
+                user.addUserHistory(UserHistory.createEntity(user, ActionType.PROMOTION));
             }
 
             // 그 외의 값은 모두 예외처리.
             default -> throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
         }
-        userHistoryRepository.save(userHistory);
 
         userRepository.saveAndFlush(user);
     }
