@@ -1,10 +1,8 @@
 package com.investmetic.domain.user.model.entity;
 
-import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.global.common.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,10 +10,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -63,8 +59,7 @@ public class User extends BaseEntity {
     private Role role; // 회원 등급 또는 역할
 
     @Builder
-    public User(String userName, String nickname, String email, String password, String imageUrl,
-                String phone,
+    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
                 String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
                 UserState userState, Boolean withdrawalStatus, Role role) {
 

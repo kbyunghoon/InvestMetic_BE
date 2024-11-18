@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
@@ -43,7 +44,7 @@ class UserMyPageRepositoryTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    public void testProfile() throws InterruptedException {
+    void testProfile() {
 
         //유저 생성.
         User user = createOneUser();
@@ -52,15 +53,15 @@ class UserMyPageRepositoryTest {
         Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
-        assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
-        assertTrue(userProfileDto.get().getEmail().equals(user.getEmail())); //Email 검증
+        assertEquals(userProfileDto.get().getUserId(), user.getUserId()); // UserId 검증
+        assertEquals(userProfileDto.get().getEmail(), user.getEmail()); // Email 검증
 
         System.out.println(userProfileDto.get()); //확인 용.
     }
 
     @Test
     @DisplayName("회원 정보 조회 - 사용자 Email 조회 결과 없을 떄")
-    public void testProfile2() {
+    void testProfile2() {
         // 유저 생성
         User user = createOneUser();
         Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
