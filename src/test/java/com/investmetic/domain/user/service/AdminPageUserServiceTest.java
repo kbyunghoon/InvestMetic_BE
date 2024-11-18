@@ -54,7 +54,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("role이 정상값일 경우")
         @EnumSource(value = RoleCondition.class, names = {"ALL", "TRADER", "INVESTOR", "ADMIN"})
-          void adminUserLists1(RoleCondition roleCondition) {
+        void adminUserLists1(RoleCondition roleCondition) {
 
             // given
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, null, roleCondition);
@@ -72,7 +72,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("role이 오류값일 경우")
         @EnumSource(value = RoleCondition.class, names = {"TRADER_ADMIN", "INVESTOR_ADMIN"})
-          void adminUserLists2(RoleCondition roleCondition) {
+        void adminUserLists2(RoleCondition roleCondition) {
 
             // given
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, null, roleCondition);
@@ -87,7 +87,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("condition이 정상값일 경우")
         @EnumSource(value = ColumnCondition.class, names = {"NICKNAME", "NAME", "EMAIL", "PHONE"})
-          void adminUserLists3(ColumnCondition roleCondition) {
+        void adminUserLists3(ColumnCondition roleCondition) {
 
             // given
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, roleCondition,
@@ -108,7 +108,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("condition이 오류값일 경우")
         @EnumSource(value = ColumnCondition.class, names = {"ID"})
-          void adminUserLists4(ColumnCondition columnCondition) {
+        void adminUserLists4(ColumnCondition columnCondition) {
 
             // given
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, columnCondition,
@@ -122,7 +122,7 @@ public class AdminPageUserServiceTest {
 
         @Test
         @DisplayName("content가 null인 경우.")
-          void adminUserLists5() {
+        void adminUserLists5() {
             // given
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, null, RoleCondition.ALL);
             Pageable pageable = PageRequest.of(10000, 9);
@@ -174,7 +174,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @MethodSource("normalRoleProvider")
         @DisplayName("{0}")
-          void roleChangeTest1(String testName, RoleCondition roleCondition, Role previousRole) {
+        void roleChangeTest1(String testName, RoleCondition roleCondition, Role previousRole) {
 
             //given
             User user = createOneUser(previousRole);
@@ -189,7 +189,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @MethodSource("abnormalRoleProvider")
         @DisplayName("{0}")
-          void roleChangeTest2(String testName, RoleCondition roleCondition, Role previousRole) {
+        void roleChangeTest2(String testName, RoleCondition roleCondition, Role previousRole) {
 
             //given
             User user = createOneUser(previousRole);
@@ -211,7 +211,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("해당 회원의 등급이 admin인 경우.")
         @EnumSource(value = Role.class, names = {"TRADER_ADMIN", "INVESTOR_ADMIN", "SUPER_ADMIN"})
-          void adminDeleteUserTest1(Role role) {
+        void adminDeleteUserTest1(Role role) {
 
             // given - 하나 만들기.
             User user = User.builder().build();
@@ -228,7 +228,7 @@ public class AdminPageUserServiceTest {
         @ParameterizedTest
         @DisplayName("해당 회원의 등급이 일반 회원인 경우.")
         @EnumSource(value = Role.class, names = {"TRADER", "INVESTOR"})
-          void adminDeleteUserTest2(Role role) {
+        void adminDeleteUserTest2(Role role) {
 
             // given
             when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.ofNullable(role));
@@ -242,7 +242,7 @@ public class AdminPageUserServiceTest {
 
         @Test
         @DisplayName("해당 회원이 이미 삭제된 경우")
-          void adminDeleteUserTest3() {
+        void adminDeleteUserTest3() {
 
             // given
             when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.of(Role.TRADER_ADMIN));
