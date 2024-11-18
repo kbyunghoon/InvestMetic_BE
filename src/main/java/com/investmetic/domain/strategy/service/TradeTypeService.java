@@ -4,6 +4,8 @@ import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.List;
@@ -36,4 +38,10 @@ public class TradeTypeService {
         return tradeTypes;
     }
 
+    public void changeActivateState(Long tradeTypeId){
+        TradeType tradeType = tradeTypeRepository
+                .findById(tradeTypeId)
+                .orElseThrow(()->new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+        tradeType.changeActivateState();
+    }
 }

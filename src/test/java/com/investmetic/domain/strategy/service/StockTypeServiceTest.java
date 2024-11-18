@@ -12,6 +12,7 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,7 @@ class StockTypeServiceTest {
         // 페이지 첫번째 dto 가져오기
         StockTypeResponseDTO changeDto=dto.getContent().get(0);
         stockTypeService.changeActivateState(changeDto.getStockTypeId());
-        StockType stockType=stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId());
-        assertThat(stockType.getActivateState()).isEqualTo(false);
+        Optional<StockType> stockType=stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId());
+        assertThat(stockType.get().getActivateState()).isEqualTo(false);
     }
 }
