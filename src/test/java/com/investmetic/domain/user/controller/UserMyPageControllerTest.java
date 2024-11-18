@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
+import com.investmetic.domain.user.repository.UserRepository;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,25 +31,15 @@ class UserMyPageControllerTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userRepository;
 
 
     private User createOneUser() {
-        User user = User.builder()
-                .userName("정룡우")
-                .nickname("jeongRyongWoo")
-                .email("jlwoo092513@gmail.com")
-                .password("123456")
-                .imageUrl("jrw_projectS3/profile/정룡우.img")
-                .phone("01012345678")
-                .birthDate("000925")
-                .ipAddress("127.0.0.1")
-                .infoAgreement(Boolean.FALSE)
-                .joinDate(LocalDate.now())
-                .userState(UserState.ACTIVE)
-                .role(Role.INVESTOR_ADMIN)
-                .build();
-        userMyPageRepository.save(user);
+        User user = User.builder().userName("정룡우").nickname("jeongRyongWoo").email("jlwoo092513@gmail.com")
+                .password("123456").imageUrl("jrw_projectS3/profile/정룡우.img").phone("01012345678").birthDate("000925")
+                .ipAddress("127.0.0.1").infoAgreement(Boolean.FALSE).joinDate(LocalDate.now())
+                .userState(UserState.ACTIVE).role(Role.INVESTOR_ADMIN).build();
+        userRepository.save(user);
         return user;
     }
 
@@ -67,9 +57,7 @@ class UserMyPageControllerTest {
         multiValueMap.add("email", user.getEmail());
 
         // MockMvc 이용 회원 정보 요청.
-        ResultActions resultActions = mockMvc.perform(get("/api/users/mypage/profile")
-                .params(multiValueMap)
-        );
+        ResultActions resultActions = mockMvc.perform(get("/api/users/mypage/profile").params(multiValueMap));
 
         resultActions.andExpect(status().isOk()) // 정상 상태 확인
                 .andExpect(jsonPath("$.result.userName").value(user.getUserName())) // body에서 이름이 DB에 저장된 이름과 같은지 확인
@@ -88,21 +76,17 @@ class UserMyPageControllerTest {
         multiValueMap.add("email", user.getEmail());
 
         // MockMvc 이용 회원 정보 요청.
-        ResultActions resultActions1 = mockMvc.perform(get("/api/users/mypage/profile")
-                .params(multiValueMap)
-        );
+        ResultActions resultActions1 = mockMvc.perform(get("/api/users/mypage/profile").params(multiValueMap));
 
         resultActions1.andExpect(status().isOk()) // 정상 상태 확인
                 .andExpect(jsonPath("$.result.userName").value(user.getUserName())) // body에서 이름이 DB에 저장된 이름과 같은지 확인
                 .andDo(print());
 
         // MockMvc 이용 회원 정보 요청. - DB에 없는 이메일
-        ResultActions resultActions2 = mockMvc.perform(get("/api/users/mypage/profile")
-                .param("email", "NotFound@Email.com")
-        );
+        ResultActions resultActions2 = mockMvc.perform(
+                get("/api/users/mypage/profile").param("email", "NotFound@Email.com"));
 
-        resultActions2.andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(2001))// 실패 상태 확인
+        resultActions2.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value(2001))// 실패 상태 확인
                 .andDo(print());
     }
 }

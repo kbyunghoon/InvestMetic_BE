@@ -7,7 +7,6 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.domain.user.repository.mypage.UserMyPageRepository;
 import java.time.LocalDate;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -20,41 +19,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class UserMyPageRepositoryTest {
     @Autowired
-    private UserMyPageRepository userMyPageRepository;
+    private UserRepository userRepository;
 
     private User createOneUser() {
-        User user = User.builder()
-                .userName("정룡우")
-                .nickname("jeongRyongWoo")
-                .email("jlwoo092513@gmail.com")
-                .password("123456")
-                .imageUrl("jrw_projectS3/profile/정룡우.img")
-                .phone("01012345678")
-                .birthDate("000925")
-                .ipAddress("127.0.0.1")
-                .infoAgreement(Boolean.FALSE)
-                .joinDate(LocalDate.now())
-                .userState(UserState.ACTIVE)
-                .role(Role.INVESTOR_ADMIN)
-                .build();
-        userMyPageRepository.save(user);
+        User user = User.builder().userName("정룡우").nickname("jeongRyongWoo").email("jlwoo092513@gmail.com")
+                .password("123456").imageUrl("jrw_projectS3/profile/정룡우.img").phone("01012345678").birthDate("000925")
+                .ipAddress("127.0.0.1").infoAgreement(Boolean.FALSE).joinDate(LocalDate.now())
+                .userState(UserState.ACTIVE).role(Role.INVESTOR_ADMIN).build();
+        userRepository.save(user);
         return user;
     }
 
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    void testProfile() {
+    void testProfile() throws InterruptedException {
 
         //유저 생성.
         User user = createOneUser();
 
         //Email은 jwt나 SecurityContext에서 가져오기
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
-        assertEquals(userProfileDto.get().getUserId(), user.getUserId()); // UserId 검증
-        assertEquals(userProfileDto.get().getEmail(), user.getEmail()); // Email 검증
+        assertEquals(userProfileDto.get().getUserId(), user.getUserId()); //UserId 검증
+        assertEquals(userProfileDto.get().getEmail(), user.getEmail()); //Email 검증
 
         System.out.println(userProfileDto.get()); //확인 용.
     }
@@ -64,11 +53,11 @@ class UserMyPageRepositoryTest {
     void testProfile2() {
         // 유저 생성
         User user = createOneUser();
-        Optional<UserProfileDto> userProfileDto = userMyPageRepository.findByEmailUserInfo(user.getEmail());
+        Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
         assertTrue(userProfileDto.isPresent());
 
         // DB에 없는 Email
-        Optional<UserProfileDto> userNotFound = userMyPageRepository.findByEmailUserInfo(
+        Optional<UserProfileDto> userNotFound = userRepository.findByEmailUserInfo(
                 user.getEmail() + "@gmail.com");
         assertTrue(userNotFound.isEmpty());
     }
