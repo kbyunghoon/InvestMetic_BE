@@ -37,5 +37,10 @@ public class StockTypeController {
                 .presignedUrl(preSignedURL)
                 .build());
     }
+    @PatchMapping("stock-type")
+    public ResponseEntity<BaseResponse<Void>> updateStockType(@PathVariable Long stockTypeId) {
+        stockTypeService.changeActivateState(stockTypeId);
+        return BaseResponse.success(SuccessCode.UPDATED);
+    }
 
 }

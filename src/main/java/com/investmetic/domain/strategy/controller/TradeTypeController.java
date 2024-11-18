@@ -23,10 +23,11 @@ public class TradeTypeController {
 
 
     @GetMapping("/trade-type")
-    public ResponseEntity<BaseResponse<PageResponseDto<TradeTypeResponseDTO>>> getAllTradeTypes(
+    public ResponseEntity<BaseResponse<List<TradeTypeResponseDTO>>> getAllTradeTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
             @RequestParam boolean activateState) {
-        PageResponseDto<TradeTypeResponseDTO> tradeTypeResponseDTO = tradeTypeService.getTradeTypes(pageable, activateState);
+        List<TradeTypeResponseDTO> tradeTypeResponseDTO = tradeTypeService.getTradeTypes(
+                activateState);
         return BaseResponse.success(tradeTypeResponseDTO);
     }
 

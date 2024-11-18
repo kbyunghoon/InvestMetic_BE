@@ -59,6 +59,9 @@ public enum ErrorCode {
     ACCOUNT_IMAGE_DELETE_FAILED(HttpStatus.BAD_REQUEST, 3017, "실계좌 이미지 삭제에 실패했습니다."),
     STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST,3018,"전략 통계가 존재하지 않습니다."),
 
+    STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST,3019,"해당 종목이 존재하지 않습니다."),
+    TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3020, "해당 매매 유형이 존재하지 않습니다."),
+
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다.");
 

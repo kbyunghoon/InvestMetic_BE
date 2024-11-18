@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@Transactional
 class TradeTypeServiceTest {
     @Autowired
     private TradeTypeService tradeTypeService;
