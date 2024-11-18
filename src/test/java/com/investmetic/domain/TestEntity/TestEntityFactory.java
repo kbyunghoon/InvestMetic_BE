@@ -42,6 +42,7 @@ public class TestEntityFactory {
 
     public static Strategy createTestStrategy(User user, TradeType tradeType) {
         return Strategy.builder()
+                .strategyId(1L)
                 .user(user)
                 .tradeType(tradeType)
                 .strategyName("매매 전략")

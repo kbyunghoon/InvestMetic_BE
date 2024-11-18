@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -112,4 +113,11 @@ public class DailyAnalysis extends BaseEntity {
 
     private Double sharpRatio; // Sharp 비율
 
+    @Builder
+    public DailyAnalysis(Strategy strategy, LocalDate dailyDate, Long transaction, Long dailyProfitLoss) {
+        this.strategy = strategy;
+        this.dailyDate = dailyDate;
+        this.transaction = transaction;
+        this.dailyProfitLoss = dailyProfitLoss;
+    }
 }

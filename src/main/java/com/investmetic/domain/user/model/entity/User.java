@@ -1,8 +1,10 @@
 package com.investmetic.domain.user.model.entity;
 
+import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.global.common.BaseEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,8 +12,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +30,7 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId; // 회원 ID, 기본 키로 자동 증가됨
 
-    @Column(name="user_name")
+    @Column(name = "user_name")
     private String userName; // 사용자 이름 (로그인 아이디로 사용될 수 있음)
 
     private String nickname; // 사용자 닉네임 (표시 이름)

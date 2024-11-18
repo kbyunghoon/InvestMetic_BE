@@ -2,8 +2,10 @@ package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
+import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatisticsResponse;
+import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.StrategyStatistics;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
@@ -13,6 +15,8 @@ import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -66,8 +70,36 @@ public class StrategyDetailService {
         // 구독여부 체크
         boolean isSubscribed = subscriptionRepository.existsByStrategyIdAndUserId(strategyId, userId);
         strategyDetail.updateIsSubscribed(isSubscribed);
-
         return strategyDetail;
+    }
+
+
+    // 전략 분석 조회
+    public StrategyAnalysisResponse getStrategyAnalysis(Long strategyId, AnalysisOption option1,
+                                                        AnalysisOption option2) {
+        validateOption(option1, option2);
+
+        if (option1.equals(option2)) {
+            return getSingleStrategyAnalysis(option1, strategyId);
+        }
+        return dailyAnalysisRepository.findStrategyAnalysis(strategyId, option1, option2);
+    }
+
+    private void validateOption(AnalysisOption option1, AnalysisOption option2) {
+        if (option1 == null || option2 == null) {
+            throw new BusinessException(ErrorCode.ANALYSIS_OPTION_NOT_FOUND);
+        }
+    }
+
+    // 분석 옵션이 같을때 처리
+    private StrategyAnalysisResponse getSingleStrategyAnalysis(AnalysisOption option, Long strategyId) {
+        List<String> xAxis = dailyAnalysisRepository.findXAxis(strategyId);
+        List<Double> yAxis = dailyAnalysisRepository.findYAxis(strategyId, option);
+
+        return StrategyAnalysisResponse.builder()
+                .xAxis(xAxis)
+                .yAxis(Map.of(option.name(), yAxis))
+                .build();
     }
 
 }
