@@ -68,8 +68,7 @@ public class User extends BaseEntity {
     List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
 
     @Builder
-    public User(String userName, String nickname, String email, String password, String imageUrl,
-                String phone,
+    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
                 String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
                 UserState userState, Boolean withdrawalStatus, Role role) {
 

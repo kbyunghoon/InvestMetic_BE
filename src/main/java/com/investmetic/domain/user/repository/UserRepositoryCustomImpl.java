@@ -9,8 +9,6 @@ import com.investmetic.domain.user.dto.response.QUserProfileDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.QUser;
-import com.investmetic.global.exception.BusinessException;
-import com.investmetic.global.exception.ErrorCode;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
@@ -68,19 +66,19 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         condition.add(keywordCondition(requestDto.getCondition(), requestDto.getKeyword()));
         condition.add(roleCondition(requestDto.getRole()));
 
-        Optional<List<UserProfileDto>> content = Optional.ofNullable(queryFactory.select(
+        List<UserProfileDto> content = queryFactory.select(
                         new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
                                 user.infoAgreement, user.role)).from(user).where(condition.toArray(new Predicate[0]))
-                .orderBy(orderByLatest()).offset(pageable.getPageNumber()).limit(pageable.getPageSize()).fetch());
+                .orderBy(orderByLatest()).offset(pageable.getPageNumber()).limit(pageable.getPageSize()).fetch();
 
-        // null시 바로 던짐.
-        content.orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
         // PageableExecutionUtils 이용. count쿼리 최소화.
         JPAQuery<Long> countQuery = queryFactory.select(user.count()).where(condition.toArray(new Predicate[0]))
                 .from(user);
 
-        return PageableExecutionUtils.getPage(content.get(), pageable, countQuery::fetchOne);
+
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
 
@@ -157,8 +155,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
-                        user.infoAgreement, user.role)).where(user.phone.eq(phone)).fetchOne());
+                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
+                        user.phone, user.infoAgreement, user.role)).where(user.phone.eq(phone)).fetchOne());
     }
 
     @Override
@@ -166,7 +164,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
-                        user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
+                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
+                        user.phone, user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
     }
 }

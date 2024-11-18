@@ -42,7 +42,7 @@ public class AccountVerificationService {
         for (AccountImageRequestDto accountImageRequestDto : requestDtoList) {
             String filePath = s3FileService.getS3Path(
                     FilePath.STRATEGY_IMAGE,
-                    accountImageRequestDto.getFileName() + "_" + accountImageRequestDto.getTitle(),
+                    accountImageRequestDto.getFileName(),
                     accountImageRequestDto.getFileSize()
             );
 

@@ -22,20 +22,20 @@ public class EmailAuthController {
     private final EmailService emailService;
 
     // 이메일 인증 코드 전송
-    @GetMapping("/email/{email_addr}/authcode")
+    @GetMapping("/email/{emailAddr}/authcode")
     public ResponseEntity<BaseResponse<String>> sendEmailPath(
-            @PathVariable String email_addr) throws MessagingException {
+            @PathVariable String emailAddr) throws MessagingException {
 
-        emailService.sendEmail(email_addr);
+        emailService.sendEmail(emailAddr);
         return BaseResponse.success(SuccessCode.OK);
     }
 
     // 인증 코드 검증
-    @PostMapping("/email/{email_addr}/authcode")
+    @PostMapping("/email/{emailAddr}/authcode")
     public ResponseEntity<BaseResponse<Boolean>> sendEmailAndCode(
-            @PathVariable String email_addr,
+            @PathVariable String emailAddr,
             @RequestBody EmailRequestDto emailRequestDto) {
-        boolean response = emailService.verifyEmailCode(email_addr, emailRequestDto.getCode());
+        boolean response = emailService.verifyEmailCode(emailAddr, emailRequestDto.getCode());
         return BaseResponse.success(response);
 
     }

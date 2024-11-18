@@ -6,6 +6,8 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -42,16 +44,20 @@ public class S3FileService {
     @Value("${cloud.aws.s3.defaultImgPath}")
     private String bucketPath;
 
-    private static HashSet<String> imgExtensionSet;
-    private static HashSet<String> excelExtensionSet;
-    private static HashSet<String> docsExtensionSet;
+    private static final HashSet<String> imgExtensionSet;
+    private static final HashSet<String> excelExtensionSet;
+    private static final HashSet<String> docsExtensionSet;
 
-    public S3FileService(AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
+    static {
         imgExtensionSet = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
         excelExtensionSet = new HashSet<>(Arrays.asList("xls", "xlsx"));
         docsExtensionSet = new HashSet<>(Arrays.asList("doc", "docx", "pptx", "ppt"));
     }
+
+    public S3FileService(AmazonS3 amazonS3) {
+        this.amazonS3 = amazonS3;
+    }
+
 
     /**
      * S3상에서 UserProfile이미지가 저장될 경로를 반환.
@@ -67,27 +73,27 @@ public class S3FileService {
         //전략 엑셀.
         if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
             //확장자가 틀리거나 500MB이상 인지 확인
-            if (!filterExcelExtension(fileName) || !(size < 1024 * 1024 * 500)) {
-                throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
+            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
+                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
             }
 
             //전략 이미지, 유저 프로필 사진
         } else if (filePath.equals(FilePath.STRATEGY_IMAGE) || filePath.equals(FilePath.USER_PROFILE)) {
             //확장자가 틀리거나 2MB이상인지 확인
-            if (!filterImageExtension(fileName) || !(size < 1024 * 1024 * 2)) {
-                throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
+            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
+                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
             }
-
             //공지사항.
         } else if (filePath.equals(FilePath.NOTICE)) {
             //확장자가 틀리거나 5MB이상인지 확인
-            if (!filterNoticeExtension(fileName) || !(size < 1024 * 1024 * 5)) {
-                throw new RuntimeException("Not Supported File"); // 검사 불통시 예외던짐
+            if (!filterNoticeExtension(fileName) || size >= 1024 * 1024 * 5) {
+                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
             }
+
         } else {
 
             // 아무것도 아닌경우. - 이럴 일은 없겠지만...
-            throw new RuntimeException("Not Supported Type");
+            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
         }
 
         //객체 URL 경로 반환.(도메인 경로 포함)

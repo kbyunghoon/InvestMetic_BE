@@ -1,7 +1,8 @@
 package com.investmetic.domain.user.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
@@ -48,29 +49,29 @@ class UserMyPageServiceTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    public void provideUserInfoTest1() {
+    void provideUserInfoTest1() {
         User oneUser = createOneUser();
 
         UserProfileDto userProfileDto = userMyPageService.provideUserInfo(oneUser.getEmail());
 
-        assertTrue(oneUser.getEmail().equals(userProfileDto.getEmail()));
-        assertTrue(oneUser.getImageUrl().equals(userProfileDto.getImageUrl()));
-        assertTrue(oneUser.getPhone().equals(userProfileDto.getPhone()));
+        assertEquals(oneUser.getEmail(), userProfileDto.getEmail());
+        assertEquals(oneUser.getImageUrl(), userProfileDto.getImageUrl());
+        assertEquals(oneUser.getPhone(), userProfileDto.getPhone());
     }
 
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 없을 경우")
-    public void provideUserInfoTest2() {
+    void provideUserInfoTest2() {
 
         User oneUser = createOneUser(); // 1명 DB에 생성
 
         UserProfileDto presentUserProfile = userMyPageService.provideUserInfo(oneUser.getEmail());
-        assertTrue(presentUserProfile != null); // DB에 방금 만든 1명이 있는지.
+        assertNotNull(presentUserProfile); // DB에 방금 만든 1명이 있는지.
 
         BusinessException e = assertThrows(BusinessException.class,
                 () -> userMyPageService.provideUserInfo("asdf@hanmail.com"));
-        assertTrue(e.getErrorCode().getMessage().equals(ErrorCode.USER_INFO_NOT_FOUND.getMessage()));
+        assertEquals(e.getErrorCode().getMessage(), ErrorCode.USER_INFO_NOT_FOUND.getMessage());
 
 
     }
