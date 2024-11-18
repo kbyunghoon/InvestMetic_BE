@@ -65,7 +65,9 @@ public enum ErrorCode {
 
 
     //문의 관련 오류(5000번대 );
-    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "해당 문의를 찾을 수 없습니다.");
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "해당 문의를 찾을 수 없습니다."),
+    INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, 5002, "정렬 조건이 잘못되었습니다."),
+    EMPTY_QUESTION_LIST(HttpStatus.NOT_FOUND, 5003, "조회 가능한 문의가 없습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드
