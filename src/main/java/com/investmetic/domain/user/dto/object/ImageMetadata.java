@@ -3,11 +3,12 @@ package com.investmetic.domain.user.dto.object;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ImageMetadata {
 
     public ImageMetadata(String imageName, String extension, int size) {

@@ -2,28 +2,22 @@ package com.investmetic.domain.strategy.model.entity;
 
 import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StrategyStatistics extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long strategyStatisticsId;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "strategy_id", nullable = false)
-    private Strategy strategy;
 
     private Long balance; // 잔고
 

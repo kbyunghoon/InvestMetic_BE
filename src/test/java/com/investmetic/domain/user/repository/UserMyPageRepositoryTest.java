@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.repository;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,20 +35,10 @@ class UserMyPageRepositoryTest {
     private UserRepository userRepository;
 
     private User createOneUser() {
-        User user = User.builder()
-                .userName("정룡우")
-                .nickname("jeongRyongWoo")
-                .email("jlwoo092513@gmail.com")
-                .password("123456")
-                .imageUrl("jrw_projectS3/profile/정룡우.img")
-                .phone("01012345678")
-                .birthDate("000925")
-                .ipAddress("127.0.0.1")
-                .infoAgreement(Boolean.FALSE)
-                .joinDate(LocalDate.now())
-                .userState(UserState.ACTIVE)
-                .role(Role.INVESTOR_ADMIN)
-                .build();
+        User user = User.builder().userName("정룡우").nickname("jeongRyongWoo").email("jlwoo092513@gmail.com")
+                .password("123456").imageUrl("jrw_projectS3/profile/정룡우.img").phone("01012345678").birthDate("000925")
+                .ipAddress("127.0.0.1").infoAgreement(Boolean.FALSE).joinDate(LocalDate.now())
+                .userState(UserState.ACTIVE).role(Role.INVESTOR_ADMIN).build();
         userRepository.save(user);
         return user;
     }
@@ -55,7 +46,7 @@ class UserMyPageRepositoryTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    public void testProfile(){
+    void testProfile() throws InterruptedException {
 
         //유저 생성.
         User user = createOneUser();
@@ -64,13 +55,15 @@ class UserMyPageRepositoryTest {
         Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
 
         assertTrue(userProfileDto.isPresent());
-        assertTrue(userProfileDto.get().getUserId().equals(user.getUserId())); //UserId 검증
-        assertTrue(userProfileDto.get().getEmail().equals(user.getEmail())); //Email 검증
+        assertEquals(userProfileDto.get().getUserId(), user.getUserId()); //UserId 검증
+        assertEquals(userProfileDto.get().getEmail(), user.getEmail()); //Email 검증
+
+        System.out.println(userProfileDto.get()); //확인 용.
     }
 
     @Test
     @DisplayName("회원 정보 조회 - 사용자 Email 조회 결과 없을 떄")
-    public void testProfile2() {
+    void testProfile2() {
         // 유저 생성
         User user = createOneUser();
         Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());

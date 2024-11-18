@@ -1,14 +1,18 @@
 package com.investmetic.domain.strategy.dto.request;
 
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import jakarta.persistence.Column;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TradeTypeRequestDTO {
     private String tradeTypeName;
+
+    @Column(length = 1000)
     private String tradeTypeIconURL;
     private int size;
 
@@ -27,4 +31,5 @@ public class TradeTypeRequestDTO {
                 .tradeTypeIconURL(tradeTypeIconURL)
                 .build();
     }
+
 }
