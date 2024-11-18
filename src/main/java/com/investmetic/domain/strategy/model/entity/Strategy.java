@@ -71,8 +71,19 @@ public class Strategy extends BaseEntity {
     @ColumnDefault("0.0")
     private Double averageRating = 0.0; // 평균별점
 
+    @ColumnDefault("0")
+    private Integer reviewCount = 0; // 리뷰수
+
     public void updateAverageRating(Double newAverageRating) {
         this.averageRating = newAverageRating;
+    }
+
+    public void incrementReviewCount() {
+        reviewCount++;
+    }
+
+    public void decrementReviewCount() {
+        reviewCount--;
     }
 
     @PrePersist
