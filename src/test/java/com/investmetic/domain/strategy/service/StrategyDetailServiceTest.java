@@ -42,12 +42,12 @@ class StrategyDetailServiceTest {
                 1L, AnalysisOption.BALANCE, AnalysisOption.PRINCIPAL);
 
         // x축 y축 사이즈 같아야함
-        assertThat(response.getXAxis().size())
-                .isEqualTo(response.getYAxis().get(AnalysisOption.BALANCE.name()).size());
+        assertThat(response.getXAxis())
+                .hasSize(response.getYAxis().get(AnalysisOption.BALANCE.name()).size());
 
         // PRINCIPAL의 이름이 포함되어야함
-        assertThat(response.getXAxis().size())
-                .isEqualTo(response.getYAxis().get(AnalysisOption.PRINCIPAL.name()).size());
+        assertThat(response.getXAxis())
+                .hasSize(response.getYAxis().get(AnalysisOption.PRINCIPAL.name()).size());
     }
 
     @Test
@@ -56,7 +56,7 @@ class StrategyDetailServiceTest {
         StrategyAnalysisResponse response = strategyDetailService.getStrategyAnalysis(
                 1L, AnalysisOption.BALANCE, AnalysisOption.BALANCE);
 
-        assertThat(response.getYAxis().size()).isEqualTo(1);
+        assertThat(response.getYAxis()).hasSize(1);
 
         assertThat(response.getYAxis()).containsKey(AnalysisOption.BALANCE.name());
     }
@@ -67,7 +67,7 @@ class StrategyDetailServiceTest {
         StrategyAnalysisResponse response = strategyDetailService.getStrategyAnalysis(
                 1L, AnalysisOption.BALANCE, AnalysisOption.PRINCIPAL);
 
-        assertThat(response.getYAxis().size()).isEqualTo(2);
+        assertThat(response.getYAxis()).hasSize(2);
 
         assertThat(response.getYAxis()).containsKeys(AnalysisOption.BALANCE.name(), AnalysisOption.PRINCIPAL.name());
     }

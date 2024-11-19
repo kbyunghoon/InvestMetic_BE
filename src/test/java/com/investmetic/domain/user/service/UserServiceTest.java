@@ -32,7 +32,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("회원가입")
-    public void 회원가입() throws Exception {
+    void 회원가입() throws Exception {
 
         // given
         UserSignUpDto userSignUpDto = UserSignUpDto.builder()

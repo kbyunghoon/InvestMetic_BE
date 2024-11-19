@@ -19,6 +19,7 @@ import com.investmetic.global.util.s3.S3FileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class StrategyRegisterService {
     private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public PresignedUrlResponseDto registerStrategy(
             StrategyRegisterRequestDto requestDto) {
         // TODO: 추후 삭제 ----------

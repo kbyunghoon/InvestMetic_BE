@@ -1,6 +1,7 @@
 package com.investmetic.domain.user.dto.request;
 
 import com.investmetic.domain.user.dto.object.ImageMetadata;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,12 +11,13 @@ import lombok.NoArgsConstructor;
  */
 
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserModifyDto {
 
     private String nickname;
 
     private String password;
+
 
     // imageDto의 정보로 Service에서 유효성 검사 진행 후 presigned url 요청, 기존의 s3에 저장된 사진 제거.
     private ImageMetadata imageDto;

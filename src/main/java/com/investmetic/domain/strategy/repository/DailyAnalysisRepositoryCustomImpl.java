@@ -25,11 +25,11 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
 
         // y축 데이터 조회
         List<Double> firstYAxis = findYAxis(strategyId, option1);
-        List<Double> SecondYAxis = findYAxis(strategyId, option2);
+        List<Double> secondYAxis = findYAxis(strategyId, option2);
 
         Map<String, List<Double>> yaxis = Map.of(
                 option1.name(), firstYAxis,
-                option2.name(), SecondYAxis
+                option2.name(), secondYAxis
         );
 
         return StrategyAnalysisResponse.builder()

@@ -1,6 +1,5 @@
 package com.investmetic.domain.user.model.entity;
 
-import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.global.common.BaseEntity;
@@ -9,13 +8,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,7 +25,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {
 
     @Id
@@ -62,9 +64,11 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
+
     @Builder
-    public User(String userName, String nickname, String email, String password, String imageUrl,
-                String phone,
+    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
                 String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
                 UserState userState, Boolean withdrawalStatus, Role role) {
 
@@ -82,6 +86,17 @@ public class User extends BaseEntity {
         this.userState = userState;
         this.withdrawalStatus = withdrawalStatus;
         this.role = role;
+    }
+
+    public void changeRole(Role role) {
+        this.role = role;
+    }
+
+    public void addUserHistory(UserHistory userHistory) {
+        if (this.userHistory == null) {
+            this.userHistory = new ArrayList<>();
+        }
+        this.userHistory.add(userHistory);
     }
 
 }
