@@ -6,6 +6,7 @@ import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.dto.request.TraderQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.response.AdminQuestionListResponseDto;
 import com.investmetic.domain.qna.dto.response.InvestorQuestionListResponseDto;
+import com.investmetic.domain.qna.dto.response.QuestionDetailResponseDto;
 import com.investmetic.domain.qna.dto.response.TraderQuestionListResponseDto;
 import com.investmetic.domain.qna.service.QuestionService;
 import com.investmetic.global.common.PageResponseDto;
@@ -82,5 +83,28 @@ public class QuestionController {
             @PageableDefault(size = 8, sort = "createdAt") Pageable pageable) {
 
         return questionService.getAdminQuestionList(requestDto, pageable);
+    }
+
+    //투자자 문의 상세 조회
+    @GetMapping("/investor/questions/{questionId}")
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getInvestorQuestionDetail(
+            @PathVariable Long questionId,
+            @RequestParam Long userId) {
+        return questionService.getInvestorQuestionDetail(questionId, userId);
+    }
+
+    //트레이더 문의 상세 조회
+    @GetMapping("/trader/questions/{questionId}")
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getTraderQuestionDetail(
+            @PathVariable Long questionId,
+            @RequestParam Long traderId) {
+        return questionService.getTraderQuestionDetail(questionId, traderId);
+    }
+
+    //관리자 문의 상세 조회
+    @GetMapping("/admin/questions/{questionId}")
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getAdminQuestionDetail(
+            @PathVariable Long questionId) {
+        return questionService.getAdminQuestionDetail(questionId);
     }
 }

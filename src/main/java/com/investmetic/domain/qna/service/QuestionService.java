@@ -2,10 +2,11 @@ package com.investmetic.domain.qna.service;
 
 import com.investmetic.domain.qna.dto.request.AdminQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.request.InvestorQuestionListRequestDto;
-import com.investmetic.domain.qna.dto.request.TraderQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.request.TraderQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.response.AdminQuestionListResponseDto;
 import com.investmetic.domain.qna.dto.response.InvestorQuestionListResponseDto;
+import com.investmetic.domain.qna.dto.response.QuestionDetailResponseDto;
 import com.investmetic.domain.qna.dto.response.TraderQuestionListResponseDto;
 import com.investmetic.domain.qna.model.entity.Question;
 import com.investmetic.domain.qna.repository.QuestionRepository;
@@ -129,5 +130,55 @@ public class QuestionService {
         Page<AdminQuestionListResponseDto> response = questions.map(AdminQuestionListResponseDto::from);
 
         return BaseResponse.success(new PageResponseDto<>(response));
+    }
+    // 투자자 문의 상세 조회
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getInvestorQuestionDetail(Long questionId, Long userId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        // 본인 문의인지 검증
+        if (!question.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        return createResponse(question);
+    }
+
+    // 트레이더 문의 상세 조회
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getTraderQuestionDetail(Long questionId, Long traderId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        // 본인 전략의 질문인지 검증
+        if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        return createResponse(question);
+    }
+
+    // 관리자 문의 상세 조회
+    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getAdminQuestionDetail(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        return createResponse(question);
+    }
+
+    // 공통 응답 생성 메서드
+    private ResponseEntity<BaseResponse<QuestionDetailResponseDto>> createResponse(Question question) {
+        QuestionDetailResponseDto response = QuestionDetailResponseDto.builder()
+                .questionId(question.getQuestionId())
+                .title(question.getTitle())
+                .content(question.getContent())
+                .investorName(question.getUser().getNickname())
+                .traderName(question.getStrategy().getUser().getNickname())
+                .strategyName(question.getStrategy().getStrategyName())
+                .qnaState(question.getQnaState())
+                .createdAt(question.getCreatedAt())
+                .answerId(null) // 답변 연결 시 추가
+                .build();
+
+        return BaseResponse.success(response);
     }
 }
