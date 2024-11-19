@@ -16,7 +16,16 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId")
     Page<DailyAnalysis> findByStrategyId(@Param("strategyId") Long strategyId, Pageable pageable);
 
-    boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = false")
+    Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsFalse(
+            @Param("strategy") Strategy strategy,
+            @Param("dailyDate") LocalDate dailyDate);
+
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = true")
+    Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsTrue(
+            @Param("strategy") Strategy strategy,
+            @Param("dailyDate") LocalDate dailyDate);
+
 
     // 특정 전략의 해당 날짜의 이전 데이터들 가져오기
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate <= :startDate ORDER BY d.dailyDate ASC")
@@ -43,6 +52,9 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
      */
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategy(@Param("strategyId") Long strategyId);
+
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.proceed = false")
+    List<DailyAnalysis> findAllByProceedIsFalse();
 
     @Query("""
             SELECT d FROM DailyAnalysis d

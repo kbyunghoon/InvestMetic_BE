@@ -24,7 +24,6 @@ public class Scheduler {
         );
 
         if (previousAnalysisOpt.isEmpty()) {
-            System.out.println("currentAnalysis : " + currentAnalysis.getDailyDate());
             // 원금 (현재 거래 금액을 가져옴)
             Long principal = currentAnalysis.getTransaction();
 
@@ -198,12 +197,9 @@ public class Scheduler {
                 .orElse(0.0);
 
         // 원금
-        System.out.println(currentAnalysis.getDailyDate());
         Long principal = (previousPrincipal != 0 && previousBalance != 0 && transaction != 0)
                 ? previousPrincipal + (long) (transaction / ((double) previousBalance / previousPrincipal))
                 : previousPrincipal;
-
-        System.out.println("principal : " + principal);
 
         // 잔고
         Long balance = previousBalance + transaction + dailyProfitLoss;
@@ -239,8 +235,6 @@ public class Scheduler {
                 .sum();
 
         // 일간 손익률
-        System.out.println("referencePrice : " + referencePrice);
-        System.out.println("previousDailyProfitLossRate : " + previousDailyProfitLossRate);
         double dailyProfitLossRate = (previousDailyProfitLossRate != 0)
                 ? (referencePrice - previousReferencePrice) / previousReferencePrice
                 : 0.0;
