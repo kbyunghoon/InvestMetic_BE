@@ -40,7 +40,7 @@ public class StockTypeService {
     public void changeActivateState(Long StockTypeId) {
         StockType stockType = stockTypeRepository
                 .findByStockTypeId(StockTypeId)
-                .orElseThrow(()-> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
         stockType.changeActivateState();
         stockTypeRepository.save(stockType);
     }

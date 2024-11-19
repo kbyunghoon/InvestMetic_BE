@@ -29,6 +29,7 @@ public class TradeTypeService {
         tradeTypeRepository.save(tradeType);
         return s3FileService.getPreSignedUrl(tradeIconURL);
     }
+
     public List<TradeTypeResponseDTO> getTradeTypes(Boolean activateState) {
         List<TradeTypeResponseDTO> tradeTypes = tradeTypeRepository.findByActivateState(activateState)
                 .stream()
@@ -38,10 +39,10 @@ public class TradeTypeService {
         return tradeTypes;
     }
 
-    public void changeActivateState(Long tradeTypeId){
+    public void changeActivateState(Long tradeTypeId) {
         TradeType tradeType = tradeTypeRepository
                 .findById(tradeTypeId)
-                .orElseThrow(()->new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
         tradeType.changeActivateState();
         tradeTypeRepository.save(tradeType);
     }

@@ -58,23 +58,24 @@ class StockTypeServiceTest {
     @DisplayName("종목 조회 테스트")
     void getStockType() {
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<StockTypeResponseDTO> stocks=stockTypeService.getStockTypes(pageable, true);
+        PageResponseDto<StockTypeResponseDTO> stocks = stockTypeService.getStockTypes(pageable, true);
 
         // 생성할 때 넣은 종목 이름과 비교
         assertThat(stocks.getContent().get(0).getStockTypeName()).isEqualTo(
                 stockTypeRequestList.get(0).getStockTypeName());
     }
+
     @Test
     @DisplayName("종목 상태 변경 테스트")
     void changeStockTypes() {
         // 페이지 조회(true) : 활성 상태 페이지 불러오기
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponseDto<StockTypeResponseDTO> dto=stockTypeService.getStockTypes(pageable, true);
+        PageResponseDto<StockTypeResponseDTO> dto = stockTypeService.getStockTypes(pageable, true);
 
         // 페이지 첫번째 dto 가져오기
-        StockTypeResponseDTO changeDto=dto.getContent().get(0);
+        StockTypeResponseDTO changeDto = dto.getContent().get(0);
         stockTypeService.changeActivateState(changeDto.getStockTypeId());
-        StockType stockType=stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId()).orElse(null);
+        StockType stockType = stockTypeRepository.findByStockTypeId(changeDto.getStockTypeId()).orElse(null);
         assertThat(stockType.getActivateState()).isEqualTo(false);
     }
 }

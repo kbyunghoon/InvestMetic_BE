@@ -32,7 +32,6 @@ class TradeTypeServiceTest {
     private ArrayList<TradeTypeRequestDTO> tradeTypeRequestDtoList;
 
 
-
     @BeforeEach
     void setUp() {
         tradeTypeRequestDtoList = new ArrayList<>();
@@ -56,17 +55,18 @@ class TradeTypeServiceTest {
         String savedTradeType = tradeTypeService.saveTradeType(tradeType);
         assertThat(savedTradeType).isNotNull();
     }
+
     @Test
     @DisplayName("매매유형 상태 변경 테스트")
     void changeStockTypes() {
         // 페이지 조회(true) : 활성 상태 페이지 불러오기
         Pageable pageable = PageRequest.of(0, 10);
-        List<TradeTypeResponseDTO> dtolist=tradeTypeService.getTradeTypes( true);
+        List<TradeTypeResponseDTO> dtolist = tradeTypeService.getTradeTypes(true);
 
         // 페이지 첫번째 dto 가져오기
-        TradeTypeResponseDTO dto=dtolist.get(0);
+        TradeTypeResponseDTO dto = dtolist.get(0);
         tradeTypeService.changeActivateState(dto.getTradeTypeId());
-        TradeType tradeType=tradeTypeRepository.findByTradeTypeId(dto.getTradeTypeId()).orElse(null);
+        TradeType tradeType = tradeTypeRepository.findByTradeTypeId(dto.getTradeTypeId()).orElse(null);
         assertThat(tradeType.getActivateState()).isEqualTo(false);
     }
 }

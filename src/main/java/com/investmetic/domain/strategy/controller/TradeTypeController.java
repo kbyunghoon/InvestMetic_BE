@@ -40,8 +40,9 @@ public class TradeTypeController {
                         .presignedUrl(preSignedURL)
                         .build());
     }
+
     @PatchMapping("/trade-type/{tradeTypeId}")
-    public ResponseEntity<BaseResponse<Void>> updateTradeType(@PathVariable Long tradeTypeId){
+    public ResponseEntity<BaseResponse<Void>> updateTradeType(@PathVariable Long tradeTypeId) {
         tradeTypeService.changeActivateState(tradeTypeId);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
