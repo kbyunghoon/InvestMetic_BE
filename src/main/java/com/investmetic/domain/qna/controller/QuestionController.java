@@ -1,6 +1,9 @@
 package com.investmetic.domain.qna.controller;
 
+import com.investmetic.domain.qna.dto.request.AdminQuestionListRequestDto;
+import com.investmetic.domain.qna.dto.request.InvestorQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.request.TraderQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.response.AdminQuestionListResponseDto;
 import com.investmetic.domain.qna.dto.response.InvestorQuestionListResponseDto;
 import com.investmetic.domain.qna.dto.response.TraderQuestionListResponseDto;
@@ -11,11 +14,11 @@ import com.investmetic.global.exception.SuccessCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +34,7 @@ public class QuestionController {
     private final QuestionService questionService;
 
     //문의 등록
-    @PostMapping("\"/strategies/{strategyId}/questions\"")
+    @PostMapping("/strategies/{strategyId}/questions")
     public ResponseEntity<BaseResponse<Void>> addQuestion(
             @PathVariable Long strategyId,
             @RequestParam Long userId,
@@ -51,49 +54,33 @@ public class QuestionController {
         return BaseResponse.success(SuccessCode.DELETED);
     }
 
-//    //특정 유저에 대한 모든 문의 삭제 (회원탈퇴 or 추방)
-//    @DeleteMapping
-//    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByUser(
-//            @PathVariable Long userId) {
-//        questionService.deleteAllQuestionByUser(userId);
-//        return BaseResponse.success();
-//
-//
-//    }
-//
-//    //특정 전략에 대한 모든 문의 삭제 (전략 삭제)
-//    @DeleteMapping("/{strategyId}/questions")
-//    public ResponseEntity<BaseResponse<Void>> deleteAllQuestionByStrategy(
-//            @PathVariable Long strategyId) {
-//        questionService.deleteAllQuestionByUser(strategyId);
-//        return BaseResponse.success();
 
-
-//    }
-
-    //투자자 문의 목록 조회
-    @GetMapping("/users/{userId}/questions")
+    // 투자자 문의 목록 조회
+    @GetMapping("/investor/{userId}/questions")
     public ResponseEntity<BaseResponse<PageResponseDto<InvestorQuestionListResponseDto>>> getInvestorQuestions(
             @PathVariable Long userId,
-            @PageableDefault(size = 4, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ModelAttribute InvestorQuestionListRequestDto requestDto,
+            @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
-        return questionService.getInvestorQuestionList(userId, pageable);
+        return questionService.getInvestorQuestionList(userId, requestDto, pageable);
     }
 
-    //트레이더 문의 목록 조회
-    @GetMapping("/strategies/{strategyId}/questions")
+    // 트레이더 문의 목록 조회
+    @GetMapping("/trader/{strategyId}/questions")
     public ResponseEntity<BaseResponse<PageResponseDto<TraderQuestionListResponseDto>>> getTraderQuestions(
             @PathVariable Long strategyId,
-            @PageableDefault(size = 4, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ModelAttribute TraderQuestionListRequestDto requestDto,
+            @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
-        return questionService.getTraderQuestionsList(strategyId, pageable);
+        return questionService.getTraderQuestionsList(strategyId, requestDto, pageable);
     }
 
-    //관리자 문의 목록 조회
-    @GetMapping("/admins/questions")
+    // 관리자 문의 목록 조회
+    @GetMapping("/admin/questions")
     public ResponseEntity<BaseResponse<PageResponseDto<AdminQuestionListResponseDto>>> getAdminQuestions(
-            @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+            @ModelAttribute AdminQuestionListRequestDto requestDto,
+            @PageableDefault(size = 8, sort = "createdAt") Pageable pageable) {
 
-        return questionService.getAdminQuestionList(pageable);
+        return questionService.getAdminQuestionList(requestDto, pageable);
     }
 }
