@@ -15,6 +15,7 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -74,5 +75,21 @@ public class AccountVerificationService {
     public PageResponseDto<AccountImagesResponseDto> getAccountImagesByStrategyId(Long strategyId, Pageable pageable) {
         return new PageResponseDto<>(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)
                 .map(AccountImagesResponseDto::from));
+    }
+
+    @Transactional
+    public void deleteStrategyAccountImages(Long strategyId, List<Long> requestDtoList) {
+        for (Long requestDtoId : requestDtoList) {
+            Optional<AccountVerification> targetImage = accountVerificationRepository.findById(requestDtoId);
+            if (targetImage.isEmpty()) {
+                throw new BusinessException(ErrorCode.ACCOUNT_IMAGE_NOT_FOUND);
+            }
+            AccountVerification imageEntity = targetImage.get();
+            // FIXME: User 구현 후 수정 예정
+//            if (imageEntity.getCreatedBy() != user) {
+//                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+//            }
+            accountVerificationRepository.delete(imageEntity);
+        }
     }
 }
