@@ -1,4 +1,4 @@
-package com.investmetic.global.util.stibee.dto.request;
+package com.investmetic.global.util.stibee.dto;
 
 import lombok.Data;
 

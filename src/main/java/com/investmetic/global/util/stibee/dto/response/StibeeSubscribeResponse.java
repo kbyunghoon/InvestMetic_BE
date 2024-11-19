@@ -14,15 +14,15 @@ public class StibeeSubscribeResponse<T> {
     @JsonProperty("Error")
     private StibeeError error;
 
+    @JsonProperty("Value")
+    private T value;
+
     @Data
     public static class StibeeError {
         private String code;
         private int httpStatusCode;
         private String message;
     }
-
-    @JsonProperty("Value")
-    private T value;
 
 
 }

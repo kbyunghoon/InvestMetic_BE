@@ -1,16 +1,18 @@
-package com.investmetic.global.util.stibee.dto;
+package com.investmetic.global.util.stibee.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.global.util.stibee.dto.object.EmailAndName;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * 스티비 회원 등록시에 사용될 클래스
  */
 @Getter
-public class EmailSubscribeDto {
+@ToString
+public class EmailSubscribe {
 
     /*
      * eventOccurredBy가 SUBSCRIBER일 때: 구독자의 구독 상태에 따라 다르게 처리됩니다.
@@ -33,26 +35,22 @@ public class EmailSubscribeDto {
 
     private final List<EmailAndName> subscribers;
 
-    @JsonProperty("$ad_agreed")
-    private final String ad_agreed;
 
 
-
-    private EmailSubscribeDto(String ad_agreed, List<String> groupIds, List<EmailAndName> subscribers) {
-        this.ad_agreed = ad_agreed;
+    private EmailSubscribe( List<String> groupIds, List<EmailAndName> subscribers) {
         this.groupIds = groupIds;
         this.subscribers = subscribers;
     }
 
-    public static EmailSubscribeDto fromUserSignupDto(UserSignUpDto userSignUpDto) {
+    public static EmailSubscribe fromUserSignupDto(UserSignUpDto userSignUpDto) {
 
-        //이메일 수신 동의
-        String ad_agreed = userSignUpDto.getInfoAgreement() ? "Y" : "N";
+        //이메일 수신 동의 -> 광고성 정보 수신 동의
+        String ad_agreed = Boolean.TRUE.equals(userSignUpDto.getInfoAgreement()) ? "Y" : "N";
 
         List<EmailAndName> subscribers = new ArrayList<>(
-                List.of(EmailAndName.create(userSignUpDto.getEmail(), userSignUpDto.getUsername())));
+                List.of(EmailAndName.create(userSignUpDto.getEmail(), userSignUpDto.getUsername(), ad_agreed)));
 
-        return new EmailSubscribeDto(ad_agreed, null, subscribers);
+        return new EmailSubscribe(null, subscribers);
     }
 
 
