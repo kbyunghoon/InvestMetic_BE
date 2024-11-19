@@ -45,6 +45,7 @@ class StockTypeServiceTest {
                     .build();
             stockTypeRequestList.add(stockTypeRequestDTO);
         }
+        stockTypeService.saveStockType(stockTypeRequestList.get(0));
     }
 
     @Test
@@ -59,7 +60,6 @@ class StockTypeServiceTest {
     void getStockType() {
         Pageable pageable = PageRequest.of(0, 10);
         PageResponseDto<StockTypeResponseDTO> stocks=stockTypeService.getStockTypes(pageable, true);
-
         // 생성할 때 넣은 종목 이름과 비교
         assertThat(stocks.getContent().get(0).getStockTypeName()).isEqualTo(stockTypeRequestList.get(0).getStockTypeName());
     }

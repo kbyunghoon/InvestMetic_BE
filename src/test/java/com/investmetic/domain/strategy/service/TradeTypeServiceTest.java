@@ -46,6 +46,7 @@ class TradeTypeServiceTest {
 
             tradeTypeRequestDtoList.add(tradetype);
         }
+        tradeTypeService.saveTradeType(tradeTypeRequestDtoList.get(0));
     }
 
     @Test
@@ -54,7 +55,6 @@ class TradeTypeServiceTest {
         TradeTypeRequestDTO tradeType = tradeTypeRequestDtoList.get(0);
         String savedTradeType = tradeTypeService.saveTradeType(tradeType);
         assertThat(savedTradeType).isNotNull();
-        System.out.println("savedTradeType: " + savedTradeType);
     }
     @Test
     @DisplayName("매매유형 상태 변경 테스트")
