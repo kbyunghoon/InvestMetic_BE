@@ -19,14 +19,14 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
 
     // 특정 전략의 해당 날짜의 이전 데이터들 가져오기
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate < :startDate ORDER BY d.dailyDate ASC")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate <= :startDate ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategyAndDateBefore(@Param("strategyId") Long strategyId,
-                                                       @Param("startDate") LocalDateTime startDate);
+                                                       @Param("startDate") LocalDate startDate);
 
     // 특정 전략의 가장 오래된 updated_at 이후 데이터를 가져오기
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate >= :startDate ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategyAndDateAfter(@Param("strategyId") Long strategyId,
-                                                      @Param("startDate") LocalDateTime startDate);
+                                                      @Param("startDate") LocalDate startDate);
 
     // 특정 전략의 가장 오래된 updated_at 날짜 조회
     @Query("SELECT MIN(d.updatedAt) FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.updatedAt > :lastRunDate")
@@ -43,4 +43,17 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
      */
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategy(@Param("strategyId") Long strategyId);
+
+    @Query("""
+            SELECT d FROM DailyAnalysis d
+                WHERE d.proceed = false
+                  AND d.dailyDate = (
+                      SELECT MIN(d2.dailyDate) FROM DailyAnalysis d2
+                      WHERE d2.strategy.strategyId = d.strategy.strategyId
+                        AND d2.proceed = false
+                  )
+                ORDER BY d.dailyDate ASC
+            """)
+    List<DailyAnalysis> findEligibleDailyAnalysis();
+
 }

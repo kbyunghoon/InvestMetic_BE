@@ -76,7 +76,6 @@ public class BatchConfig {
     public ItemWriter<DailyAnalysis> loggingWriter() {
         return items -> {
             for (DailyAnalysis item : items) {
-                System.out.println("Saving DailyAnalysis: " + item.getDailyDate());
             }
             dailyAnalysisWriter().write(items);
         };

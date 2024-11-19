@@ -23,6 +23,16 @@ public class RoundUtil {
         return round(value, 2);
     }
 
+    // 소수점 셋째 자리에서 반올림
+    public static double roundToFourth(double value) {
+        return round(value, 3);
+    }
+
+    // 소수점 셋째 자리에서 반올림
+    public static double roundToFifth(double value) {
+        return round(value, 4);
+    }
+
     private static double round(double value, int idx) {
         BigDecimal bigDecimal = BigDecimal.valueOf(value);
         return bigDecimal.setScale(idx, RoundingMode.HALF_UP).doubleValue();

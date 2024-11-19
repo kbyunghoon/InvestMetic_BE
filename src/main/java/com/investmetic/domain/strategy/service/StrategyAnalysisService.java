@@ -36,6 +36,7 @@ public class StrategyAnalysisService {
                     .dailyDate(analysisRequest.getDate())
                     .transaction(analysisRequest.getTransaction())
                     .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                    .proceed(false)
                     .build();
 
             dailyAnalysisRepository.save(dailyAnalysis);
