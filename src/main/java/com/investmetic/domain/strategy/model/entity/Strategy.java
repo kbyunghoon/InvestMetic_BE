@@ -73,6 +73,7 @@ public class Strategy extends BaseEntity {
     private Integer subscriptionCount; // 구독수
 
     @ColumnDefault("0.0")
+    @Builder.Default
     private Double averageRating = 0.0; // 평균별점
 
     public void updateAverageRating(Double newAverageRating) {
@@ -85,5 +86,9 @@ public class Strategy extends BaseEntity {
         if (this.averageRating == null) {
             this.averageRating = 0.0;
         }
+    }
+
+    public void setIsPublic(IsPublic isPublic) {
+        this.isPublic = isPublic;
     }
 }

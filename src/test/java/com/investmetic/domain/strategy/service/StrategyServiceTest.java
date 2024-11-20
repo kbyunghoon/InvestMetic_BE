@@ -44,11 +44,7 @@ class StrategyServiceTest {
 
         strategyService.updateVisibility(strategyId);
 
-        ArgumentCaptor<Strategy> captor = ArgumentCaptor.forClass(Strategy.class);
-        verify(strategyRepository, times(1)).save(captor.capture());
-
-        Strategy savedStrategy = captor.getValue();
-        assertEquals(IsPublic.PRIVATE, savedStrategy.getIsPublic());
+        assertEquals(IsPublic.PRIVATE, strategy.getIsPublic());
     }
 
     @Test
@@ -64,11 +60,7 @@ class StrategyServiceTest {
 
         strategyService.updateVisibility(strategyId);
 
-        ArgumentCaptor<Strategy> captor = ArgumentCaptor.forClass(Strategy.class);
-        verify(strategyRepository, times(1)).save(captor.capture());
-
-        Strategy savedStrategy = captor.getValue();
-        assertEquals(IsPublic.PUBLIC, savedStrategy.getIsPublic());
+        assertEquals(IsPublic.PUBLIC, strategy.getIsPublic());
     }
 
     @Test

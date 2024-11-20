@@ -24,12 +24,8 @@ public class StrategyService {
 //            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
 //        }
 
-        Strategy updatedStrategy = strategy.toBuilder()
-                .isPublic(strategy.getIsPublic() == IsPublic.PUBLIC
-                        ? IsPublic.PRIVATE
-                        : IsPublic.PUBLIC)
-                .build();
-
-        strategyRepository.save(updatedStrategy);
+        strategy.setIsPublic(strategy.getIsPublic() == IsPublic.PUBLIC
+                ? IsPublic.PRIVATE
+                : IsPublic.PUBLIC);
     }
 }
