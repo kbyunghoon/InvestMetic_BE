@@ -44,6 +44,10 @@ public class Question extends BaseEntity {
 
     private String strategyName; //전략명    ..?
 
+    @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
+    @Getter
+    private Answer answer;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private QnaState qnaState; // 답변 상태
@@ -58,16 +62,12 @@ public class Question extends BaseEntity {
         question.content = content;
         return question;
     }
-    @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
-    private Answer answer;
 
-    public Answer getAnswer() {
-        return answer;
+
+    public void updateQnaState(QnaState newState) {
+        if (this.qnaState != newState) {
+            this.qnaState = newState;
+        }
+
     }
-
-    public void setQnaState(QnaState qnaState) {
-        this.qnaState = qnaState;
-    }
-
-
 }

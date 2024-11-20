@@ -32,7 +32,7 @@ public class AnswerService {
         Answer answer = Answer.createAnswer(question, answerRequestDto.getContent());
         answerRepository.save(answer);
 
-        question.setQnaState(QnaState.COMPLETED);
+        question.updateQnaState(QnaState.COMPLETED);
     }
 
     //문의 답변 삭제
@@ -55,7 +55,7 @@ public class AnswerService {
         answerRepository.delete(answer);
 
         //문의 답변 삭제시 qna상태 WAITING으로 변경
-        question.setQnaState(QnaState.WAITING);
+        question.updateQnaState(QnaState.WAITING);
         questionRepository.save(question);
     }
 }
