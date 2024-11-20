@@ -122,7 +122,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     @Override
     public Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest request, Long userId,
                                                         Pageable pageable) {
-        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
 
         List<StrategySimpleResponse> content = queryFactory
                 .select(new QStrategySimpleResponse(
