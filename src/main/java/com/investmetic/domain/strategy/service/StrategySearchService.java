@@ -24,48 +24,54 @@ public class StrategySearchService {
 
     public PageResponseDto<StrategySimpleResponse> searchByFilters(FilterSearchRequest request, Long userId,
                                                                    Pageable pageable) {
-
         // 데이터 조회
         Page<StrategySimpleResponse> content = strategyRepository.searchByFilters(request, userId, pageable);
 
-        // 전략 ID 추출
-        List<Long> strategyIds = content.getContent()
-                .stream()
-                .map(StrategySimpleResponse::getStrategyId)
-                .toList();
+        return updateStrategyResponses(userId, content);
 
-        Map<Long, List<String>> stockTypeIconsMap = strategyRepository.findStockTypeIconsMap(strategyIds); // 배치 쿼리
-        Map<Long, Boolean> subscriptionMap = strategyRepository.findBySubscriptionMap(userId, strategyIds); // 배치 쿼리
-        Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds); // 배치 쿼리
-
-        // 2. 데이터 업데이트
-        updateContent(content, stockTypeIconsMap, subscriptionMap, profitRateDataMap);
-
-        return new PageResponseDto<>(content);
     }
 
     public PageResponseDto<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest request, Long userId,
                                                                      Pageable pageable) {
-
         // 데이터 조회
         Page<StrategySimpleResponse> content = strategyRepository.searchByAlgorithm(request, userId, pageable);
 
+        return updateStrategyResponses(userId, content);
+
+    }
+
+    private PageResponseDto<StrategySimpleResponse> updateStrategyResponses(Long userId,
+                                                                            Page<StrategySimpleResponse> content) {
         // 전략 ID 추출
-        List<Long> strategyIds = content.getContent()
-                .stream()
-                .map(StrategySimpleResponse::getStrategyId)
-                .toList();
+        List<Long> strategyIds = getStrategyIds(content);
 
-        Map<Long, List<String>> stockTypeIconsMap = strategyRepository.findStockTypeIconsMap(strategyIds); // 배치 쿼리
-        Map<Long, Boolean> subscriptionMap = strategyRepository.findBySubscriptionMap(userId, strategyIds); // 배치 쿼리
-        Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds); // 배치 쿼리
+        // 배치 쿼리를 통해 필요한 데이터 조회
+        Map<Long, List<String>> stockTypeIconsMap = strategyRepository.findStockTypeIconsMap(strategyIds);
+        Map<Long, Boolean> subscriptionMap = strategyRepository.findBySubscriptionMap(userId, strategyIds);
+        Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds);
 
-        // 2. 데이터 업데이트
+        // 응답 데이터 업데이트
         updateContent(content, stockTypeIconsMap, subscriptionMap, profitRateDataMap);
 
         return new PageResponseDto<>(content);
     }
 
+    private List<Long> getStrategyIds(Page<StrategySimpleResponse> content) {
+        return content.getContent()
+                .stream()
+                .map(StrategySimpleResponse::getStrategyId)
+                .toList();
+    }
+
+    /***
+     * 응답 데이터 업데이트
+     * 각 전략 응답에 대해 종목 아이콘, 구독 여부, 수익률 그래프 데이터를 설정
+     *
+     * @param content 전략 응답 데이터
+     * @param stockTypeIconsMap 종목 아이콘 데이터 맵
+     * @param subscriptionMap 구독 여부 데이터 맵
+     * @param profitRateDataMap 수익률 그래프 데이터 맵
+     */
     private void updateContent(Page<StrategySimpleResponse> content, Map<Long, List<String>> stockTypeIconsMap,
                                Map<Long, Boolean> subscriptionMap, Map<Long, List<Tuple>> profitRateDataMap) {
 
