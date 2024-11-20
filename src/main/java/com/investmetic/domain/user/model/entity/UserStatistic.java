@@ -20,6 +20,4 @@ public class UserStatistic extends BaseEntity {
     private Integer newWithdrawalCount; // 신규 탈퇴자 수
     private Integer totalUserCount; // 누적 가입자 수
     private Integer totalWithdrawalCount; // 누적 탈퇴자 수
-
-
 }
