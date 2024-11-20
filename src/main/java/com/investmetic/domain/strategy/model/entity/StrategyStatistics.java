@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -88,4 +89,13 @@ public class StrategyStatistics extends BaseEntity {
     private LocalDate finalProfitLossDate; // 최종 손익 일자
 
     private Integer totalTradeDays; // 총 매매일수
+
+    private Double dailyProfitLossStdDev; // 수익률 표준편차 (방어형 전략 알고리즘 필요)
+
+    private Integer mddRank; // MDD 순위 (방어형 전략 알고리즘 필요)
+
+    private Integer stdDevRank; // 표준편차 순위 (방어형 전략 알고리즘 필요)
+
+    private Integer winRateRank; // 승률 순위 (방어형 전략 알고리즘 필요)
+
 }

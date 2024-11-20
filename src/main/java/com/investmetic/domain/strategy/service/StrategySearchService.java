@@ -3,12 +3,10 @@ package com.investmetic.domain.strategy.service;
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
 import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
+import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
-import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
-import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
-import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.querydsl.core.Tuple;
 import java.util.List;
@@ -41,6 +39,36 @@ public class StrategySearchService {
         Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds); // 배치 쿼리
 
         // 2. 데이터 업데이트
+        updateContent(content, stockTypeIconsMap, subscriptionMap, profitRateDataMap);
+
+        return new PageResponseDto<>(content);
+    }
+
+    public PageResponseDto<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest request, Long userId,
+                                                                     Pageable pageable) {
+
+        // 데이터 조회
+        Page<StrategySimpleResponse> content = strategyRepository.searchByAlgorithm(request, userId, pageable);
+
+        // 전략 ID 추출
+        List<Long> strategyIds = content.getContent()
+                .stream()
+                .map(StrategySimpleResponse::getStrategyId)
+                .toList();
+
+        Map<Long, List<String>> stockTypeIconsMap = strategyRepository.findStockTypeIconsMap(strategyIds); // 배치 쿼리
+        Map<Long, Boolean> subscriptionMap = strategyRepository.findBySubscriptionMap(userId, strategyIds); // 배치 쿼리
+        Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds); // 배치 쿼리
+
+        // 2. 데이터 업데이트
+        updateContent(content, stockTypeIconsMap, subscriptionMap, profitRateDataMap);
+
+        return new PageResponseDto<>(content);
+    }
+
+    private void updateContent(Page<StrategySimpleResponse> content, Map<Long, List<String>> stockTypeIconsMap,
+                               Map<Long, Boolean> subscriptionMap, Map<Long, List<Tuple>> profitRateDataMap) {
+
         content.forEach(response -> {
             Long strategyId = response.getStrategyId();
 
@@ -62,7 +90,5 @@ public class StrategySearchService {
 
             response.updateProfitRateChartData(profitRateChartData);
         });
-
-        return new PageResponseDto<>(content);
     }
 }

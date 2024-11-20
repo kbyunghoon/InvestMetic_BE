@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.repository;
 
+import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
@@ -16,9 +17,11 @@ public interface StrategyRepositoryCustom {
 
     Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIdS);
 
-    Map<Long, Boolean> findBySubscriptionMap(Long userId,List<Long> strategyIdS);
+    Map<Long, Boolean> findBySubscriptionMap(Long userId, List<Long> strategyIdS);
 
     Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest filterSearchRequest, Long userId,
                                                  Pageable pageable);
 
+    Page<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest algorithmSearchRequest, Long userId,
+                                                   Pageable pageable);
 }

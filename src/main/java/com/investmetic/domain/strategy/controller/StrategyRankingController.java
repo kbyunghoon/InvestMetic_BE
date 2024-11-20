@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.controller;
 
+import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.service.StrategySearchService;
@@ -32,5 +33,17 @@ public class StrategyRankingController {
 
         return BaseResponse.success(result);
     }
+
+    @PostMapping("/api/strategies/search/algorithm")
+    public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> searchByAlgorithm(
+            @RequestBody AlgorithmSearchRequest algorithmSearchRequest,
+            @RequestParam Long userId,
+            @PageableDefault(size = 8, sort = "cumulativeProfitRate", direction = Direction.DESC) Pageable pageable) {
+        PageResponseDto<StrategySimpleResponse> result = strategySearchService.searchByAlgorithm(
+                algorithmSearchRequest, userId, pageable);
+
+        return BaseResponse.success(result);
+    }
+
 
 }
