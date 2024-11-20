@@ -10,7 +10,6 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
