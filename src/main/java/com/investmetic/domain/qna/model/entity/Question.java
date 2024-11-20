@@ -58,4 +58,8 @@ public class Question extends BaseEntity {
         return question;
     }
 
+    public void setQnaState(QnaState qnaState) {
+        this.qnaState = qnaState;
+    }
+
 }
