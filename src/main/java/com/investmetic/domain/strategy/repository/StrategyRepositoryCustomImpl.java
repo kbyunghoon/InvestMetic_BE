@@ -32,7 +32,6 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,6 +141,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
+                .join(stockTypeGroup).on(stockTypeGroup.strategy.eq(strategy))
+                .join(stockTypeGroup.stockType, stockType)
                 .where(isApprovedAndPublic(), applyAllFilters(request))
                 .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
                 .offset(pageable.getOffset())
@@ -179,7 +180,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
-                        strategyStatistics.recentYearProfitRate, 
+                        strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
                         strategy.averageRating,
                         strategy.reviewCount
@@ -267,7 +268,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
         // 조건 추가
         builder.and(applySearchWordFilter(filterSearchRequest.getSearchWord()));
-        builder.and(applyTradeTypeFilter(filterSearchRequest.getTradeTypes()));
+        builder.and(applyTradeTypeFilter(filterSearchRequest.getTradeTypeNames()));
         builder.and(applyOperationCycleFilter(filterSearchRequest.getOperationCycles()));
         builder.and(applyStockTypeFilter(filterSearchRequest.getStockTypeNames()));
         builder.and(applyOperationPeriodFilter(filterSearchRequest.getDurations()));
@@ -287,7 +288,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 전략명 검색어 필터
     private BooleanExpression applySearchWordFilter(String searchWord) {
-        return searchWord == null ? null : strategy.strategyName.like("%" + searchWord + "%");
+        return searchWord == null || searchWord.isEmpty() ? null : strategy.strategyName.like("%" + searchWord + "%");
     }
 
     // 운용방식(매매유형) 필터
