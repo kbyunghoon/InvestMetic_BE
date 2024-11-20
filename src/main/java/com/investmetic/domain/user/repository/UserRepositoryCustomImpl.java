@@ -1,11 +1,17 @@
 package com.investmetic.domain.user.repository;
 
+import static com.investmetic.domain.strategy.model.IsApproved.APPROVED;
+import static com.investmetic.domain.strategy.model.IsPublic.PUBLIC;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
+import com.investmetic.domain.strategy.model.entity.QStrategy;
+import com.investmetic.domain.subscription.model.entity.QSubscription;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
+import com.investmetic.domain.user.dto.response.QTraderProfileDto;
 import com.investmetic.domain.user.dto.response.QUserProfileDto;
+import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.QUser;
@@ -13,6 +19,9 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
@@ -76,6 +85,67 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory.select(user.count()).where(condition.toArray(new Predicate[0]))
                 .from(user);
 
+
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageable) {
+
+        QUser qUser = QUser.user;
+        QStrategy qStrategy = QStrategy.strategy;
+        QSubscription qSubscription = QSubscription.subscription;
+
+        NumberExpression<Long> strategyCount = Expressions.numberTemplate(
+                Long.class,
+                "({0})",
+                JPAExpressions
+                        .select(qStrategy.count())
+                        .from(qStrategy)
+                        .where(
+                                qStrategy.user.eq(qUser),
+                                qStrategy.isApproved.eq(APPROVED),
+                                qStrategy.isPublic.eq(PUBLIC)
+                        )
+        );
+
+        NumberExpression<Long> totalSubCount = Expressions.numberTemplate(
+                Long.class,
+                "({0})",
+                JPAExpressions
+                        .select(qSubscription.count())
+                        .from(qSubscription)
+                        .innerJoin(qStrategy).on(qSubscription.strategy.eq(qStrategy))
+                        .where(
+                                qStrategy.user.eq(qUser),
+                                qStrategy.isApproved.eq(APPROVED),
+                                qStrategy.isPublic.eq(PUBLIC)
+                        )
+        );
+
+        List<TraderProfileDto> content = queryFactory
+                .select(new QTraderProfileDto(
+                                qUser.userId,
+                                qUser.userName,
+                                qUser.nickname,
+                                qUser.imageUrl,
+                                strategyCount,
+                                totalSubCount
+                        )
+                )
+                .from(qUser)
+                .where(qUser.role.in(Role.TRADER, Role.TRADER_ADMIN),
+                        keywordCondition(ColumnCondition.NICKNAME, traderNickname))
+                .orderBy(totalSubCount.desc()) // 구독순 확인.
+                .offset(pageable.getPageNumber())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(qUser.count())
+                .from(qUser)
+                .where(qUser.role.in(Role.TRADER, Role.TRADER_ADMIN));
 
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
@@ -167,4 +237,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
                         user.phone, user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
     }
+
+
+
+    
 }
