@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -57,9 +58,16 @@ public class Question extends BaseEntity {
         question.content = content;
         return question;
     }
+    @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
+    private Answer answer;
+
+    public Answer getAnswer() {
+        return answer;
+    }
 
     public void setQnaState(QnaState qnaState) {
         this.qnaState = qnaState;
     }
+
 
 }
