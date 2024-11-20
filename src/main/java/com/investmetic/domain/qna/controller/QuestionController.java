@@ -45,13 +45,22 @@ public class QuestionController {
         return BaseResponse.success(SuccessCode.CREATED);
     }
 
-    //문의 삭제
+    //문의 삭제 (투자자)
     @DeleteMapping("/strategies/{strategyId}/questions/{questionId}")
-    public ResponseEntity<BaseResponse<Void>> deleteQuestion(
+    public ResponseEntity<BaseResponse<Void>> deleteInvestorQuestion(
             @PathVariable Long strategyId,
             @PathVariable Long questionId) {
 
-        questionService.deleteQuestion(strategyId, questionId);
+        questionService.deleteQuestion(strategyId, questionId,"investor");
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
+    //문의 삭제 (관리자)
+    @DeleteMapping("/admin/strategies/{strategyId}/questions/{questionId}")
+    public ResponseEntity<BaseResponse<Void>> deleteAdminQuestion(
+            @PathVariable Long strategyId,
+            @PathVariable Long questionId) {
+
+        questionService.deleteQuestion(strategyId, questionId,"admin");
         return BaseResponse.success(SuccessCode.DELETED);
     }
 

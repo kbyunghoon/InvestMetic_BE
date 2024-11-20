@@ -1,5 +1,6 @@
 package com.investmetic.domain.qna.service;
 
+
 import com.investmetic.domain.qna.dto.request.AdminQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.request.InvestorQuestionListRequestDto;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
@@ -50,135 +51,150 @@ public class QuestionService {
 
     //문의 삭제
     @Transactional
-    public void deleteQuestion(Long strategyId, Long questionId) {
+    public void deleteQuestion(Long strategyId, Long questionId, String role) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
         Question question = questionRepository.findByStrategyAndQuestionId(strategy, questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        if ("investor".equalsIgnoreCase(role)) {
+            if (!question.getUser().getUserId().equals(strategy.getUser().getUserId())) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+
+        // 관리자는 권한 검증 없이 삭제 가능
+            if (!"investor".equalsIgnoreCase(role) && !"admin".equalsIgnoreCase(role)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        }
+
         questionRepository.delete(question);
     }
+        //투자자 문의 목록 조회
+        public ResponseEntity<BaseResponse<PageResponseDto<InvestorQuestionListResponseDto>>> getInvestorQuestionList (
+                Long userId, InvestorQuestionListRequestDto requestDto, Pageable pageable){
 
-    //투자자 문의 목록 조회
-    public ResponseEntity<BaseResponse<PageResponseDto<InvestorQuestionListResponseDto>>> getInvestorQuestionList(
-            Long userId, InvestorQuestionListRequestDto requestDto, Pageable pageable) {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+            Sort sort = Sort.by(requestDto.getSortBy()).descending();
+            if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
+                sort = Sort.by(requestDto.getSortBy()).ascending();
+            }
 
-        Sort sort = Sort.by(requestDto.getSortBy()).descending();
-        if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
-            sort = Sort.by(requestDto.getSortBy()).ascending();
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+
+            Page<Question> questions = questionRepository.findQuestionsForInvestor(
+                    requestDto.getKeyword(),
+                    requestDto.getQnaState(),
+                    user,
+                    sortedPageable
+            );
+
+            Page<InvestorQuestionListResponseDto> response = questions.map(InvestorQuestionListResponseDto::from);
+
+            return BaseResponse.success(new PageResponseDto<>(response));
         }
 
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        //트레이더 문의 목록 조회
+        public ResponseEntity<BaseResponse<PageResponseDto<TraderQuestionListResponseDto>>> getTraderQuestionsList (
+                Long strategyId, TraderQuestionListRequestDto requestDto, Pageable pageable){
 
-        Page<Question> questions = questionRepository.findQuestionsForInvestor(
-                requestDto.getKeyword(),
-                requestDto.getQnaState(),
-                user,
-                sortedPageable
-        );
+            Strategy strategy = strategyRepository.findById(strategyId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        Page<InvestorQuestionListResponseDto> response = questions.map(InvestorQuestionListResponseDto::from);
+            String sortBy = (requestDto.getSortBy() != null) ? requestDto.getSortBy() : "createdAt";
+            Sort sort = Sort.by(sortBy).descending();
+            if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
+                sort = Sort.by(sortBy).ascending();
+            }
 
-        return BaseResponse.success(new PageResponseDto<>(response));
-    }
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-    //트레이더 문의 목록 조회
-    public ResponseEntity<BaseResponse<PageResponseDto<TraderQuestionListResponseDto>>> getTraderQuestionsList(
-            Long strategyId, TraderQuestionListRequestDto requestDto, Pageable pageable) {
+            Page<Question> questions = questionRepository.findQuestionsForTrader(
+                    requestDto.getKeyword(),
+                    requestDto.getQnaState(),
+                    strategy,
+                    sortedPageable
+            );
 
-        Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+            Page<TraderQuestionListResponseDto> response = questions.map(TraderQuestionListResponseDto::from);
 
-        Sort sort = Sort.by(requestDto.getSortBy()).descending();
-        if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
-            sort = Sort.by(requestDto.getSortBy()).ascending();
+            return BaseResponse.success(new PageResponseDto<>(response));
         }
 
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        // 관리자 문의 목록 조회
+        public ResponseEntity<BaseResponse<PageResponseDto<AdminQuestionListResponseDto>>> getAdminQuestionList (
+                AdminQuestionListRequestDto requestDto, Pageable pageable){
 
-        Page<Question> questions = questionRepository.findQuestionsForTrader(
-                requestDto.getKeyword(),
-                requestDto.getQnaState(),
-                strategy,
-                sortedPageable
-        );
+            Sort sort = Sort.by(requestDto.getSortBy()).descending();
+            if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
+                sort = Sort.by(requestDto.getSortBy()).ascending();
+            }
 
-        Page<TraderQuestionListResponseDto> response = questions.map(TraderQuestionListResponseDto::from);
+            Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 
-        return BaseResponse.success(new PageResponseDto<>(response));
-    }
+            Page<Question> questions = questionRepository.findQuestionsForAdmin(
+                    requestDto.getKeyword(),
+                    requestDto.getQnaState(),
+                    sortedPageable
+            );
 
-    // 관리자 문의 목록 조회
-    public ResponseEntity<BaseResponse<PageResponseDto<AdminQuestionListResponseDto>>> getAdminQuestionList(
-            AdminQuestionListRequestDto requestDto, Pageable pageable) {
+            Page<AdminQuestionListResponseDto> response = questions.map(AdminQuestionListResponseDto::from);
 
-        Sort sort = Sort.by(requestDto.getSortBy()).descending();
-        if ("ASC".equalsIgnoreCase(requestDto.getSort())) {
-            sort = Sort.by(requestDto.getSortBy()).ascending();
+            return BaseResponse.success(new PageResponseDto<>(response));
+        }
+        // 투자자 문의 상세 조회
+        public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getInvestorQuestionDetail (Long questionId, Long
+        userId){
+            Question question = questionRepository.findById(questionId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+            // 본인 문의인지 검증
+            if (!question.getUser().getUserId().equals(userId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+
+            return createResponse(question);
         }
 
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+        // 트레이더 문의 상세 조회
+        public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getTraderQuestionDetail (Long questionId, Long
+        traderId){
+            Question question = questionRepository.findById(questionId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-        Page<Question> questions = questionRepository.findQuestionsForAdmin(
-                requestDto.getKeyword(),
-                requestDto.getQnaState(),
-                sortedPageable
-        );
+            // 본인 전략의 질문인지 검증
+            if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
 
-        Page<AdminQuestionListResponseDto> response = questions.map(AdminQuestionListResponseDto::from);
-
-        return BaseResponse.success(new PageResponseDto<>(response));
-    }
-    // 투자자 문의 상세 조회
-    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getInvestorQuestionDetail(Long questionId, Long userId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-
-        // 본인 문의인지 검증
-        if (!question.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            return createResponse(question);
         }
 
-        return createResponse(question);
-    }
+        // 관리자 문의 상세 조회
+        public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getAdminQuestionDetail (Long questionId){
+            Question question = questionRepository.findById(questionId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-    // 트레이더 문의 상세 조회
-    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getTraderQuestionDetail(Long questionId, Long traderId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-
-        // 본인 전략의 질문인지 검증
-        if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            return createResponse(question);
         }
 
-        return createResponse(question);
+        // 공통 응답 생성 메서드
+        private ResponseEntity<BaseResponse<QuestionDetailResponseDto>> createResponse (Question question){
+            Long answerId = (question.getAnswer() != null) ? question.getAnswer().getAnswerId() : null;
+            QuestionDetailResponseDto response = QuestionDetailResponseDto.builder()
+                    .questionId(question.getQuestionId())
+                    .title(question.getTitle())
+                    .content(question.getContent())
+                    .investorName(question.getUser().getNickname())
+                    .traderName(question.getStrategy().getUser().getNickname())
+                    .strategyName(question.getStrategy().getStrategyName())
+                    .qnaState(question.getQnaState())
+                    .createdAt(question.getCreatedAt())
+                    .answerId(answerId)
+                    .build();
+
+            return BaseResponse.success(response);
+        }
     }
-
-    // 관리자 문의 상세 조회
-    public ResponseEntity<BaseResponse<QuestionDetailResponseDto>> getAdminQuestionDetail(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-
-        return createResponse(question);
-    }
-
-    // 공통 응답 생성 메서드
-    private ResponseEntity<BaseResponse<QuestionDetailResponseDto>> createResponse(Question question) {
-        QuestionDetailResponseDto response = QuestionDetailResponseDto.builder()
-                .questionId(question.getQuestionId())
-                .title(question.getTitle())
-                .content(question.getContent())
-                .investorName(question.getUser().getNickname())
-                .traderName(question.getStrategy().getUser().getNickname())
-                .strategyName(question.getStrategy().getStrategyName())
-                .qnaState(question.getQnaState())
-                .createdAt(question.getCreatedAt())
-                .answerId(null) // 답변 연결 시 추가
-                .build();
-
-        return BaseResponse.success(response);
-    }
-}
