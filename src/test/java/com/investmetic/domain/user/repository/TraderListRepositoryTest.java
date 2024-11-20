@@ -18,6 +18,7 @@ import com.investmetic.domain.user.model.entity.User;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,6 +94,14 @@ class TraderListRepositoryTest {
             }
 
         }
+    }
+    @AfterAll
+    void deleteAll(){
+        //constraint -> 연관 관계 순서대로
+        subscriptionRepository.deleteAll();
+        strategyRepository.deleteAll();
+        tradeTypeRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
 
@@ -213,3 +222,4 @@ class TraderListRepositoryTest {
 
 
 }
+
