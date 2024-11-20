@@ -49,6 +49,7 @@ public class AccountVerificationController {
     }
 
     @PostMapping("/{strategyId}/delete-account-images")
+    @Operation(summary = "트레이더 전략 실계좌 인증 이미지 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/3f07500f850b40e29eb70ccf5fe83ba1?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> deleteAccountImages(
             @PathVariable Long strategyId,
             @RequestBody List<Long> imageIds
