@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
-  class AdminPageUserRepositoryTest {
+class AdminPageUserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -58,7 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
         @BeforeEach
-          void createUsers50() {
+        void createUsers50() {
             for (int i = 0; i < 50; i++) {
 
                 DecimalFormat dc = new DecimalFormat("##");
@@ -74,7 +74,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("정상 회원 조회")
-          void adminUserListTest1() {
+        void adminUserListTest1() {
 
             //given - 회원 목록 페이지 들어갔을때.
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, null, RoleCondition.ALL);
@@ -103,7 +103,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("회원 조회 ADMIN만")
-          void adminUserListTest2() {
+        void adminUserListTest2() {
 
             // given - INVESTOR_ADMIN 과 TRADER_ADMIN 탐색.
             UserAdminPageRequestDto requestDto = UserAdminPageRequestDto.createDto(null, null, RoleCondition.ADMIN);
@@ -120,7 +120,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("회원 조회 TRADER만, 닉네임 조회.")
-          void adminUserListTest3() {
+        void adminUserListTest3() {
 
             String setKeyword = "3";
 
@@ -145,7 +145,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("회원 조회 INVESTOR만, 이름 조회.")
-          void adminUserListTest4() {
+        void adminUserListTest4() {
 
             String setKeyword = "1";
             // given  TRADER와 TRADER_ADMIN 탐색, 닉네임에 3이 들어가는 것만.
@@ -169,7 +169,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("condition에 잘못된 값 입력 시")
-          void adminUserListTest5() {
+        void adminUserListTest5() {
 
             // condition은 있는데 keyword가 null이면 기본 회원 조회.
             String setKeyword = "asdf";
@@ -194,7 +194,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("role에 잘못된 값 입력 시")
-          void adminUserListTest6() {
+        void adminUserListTest6() {
 
             String setKeyword = "3";
             // given - role값이 잘못된 값 일경우 모든 회원 조회와 같음.
@@ -237,7 +237,7 @@ import org.springframework.transaction.annotation.Transactional;
         @ParameterizedTest
         @DisplayName("등급 변경 repository test")
         @EnumSource(value = Role.class, names = {"INVESTOR_ADMIN"})
-          void adminUserRoleTest1(Role role) {
+        void adminUserRoleTest1(Role role) {
             //given
             User user = createOneUser();
 
@@ -252,14 +252,16 @@ import org.springframework.transaction.annotation.Transactional;
             // when, then
             assertThat(userHistoryRepository.findByUserUserId(user.getUserId()).get(0).getActionType()).isEqualTo(
                     ActionType.PROMOTION);
-            assertThat(userRepository.findByEmailUserInfo(user.getEmail())).isPresent();
-            assertThat(userRepository.findByEmailUserInfo(user.getEmail()).get().getRole()).isEqualTo(role);
+            Optional<UserProfileDto> userProfileDto = userRepository.findByEmailUserInfo(user.getEmail());
+
+            assertThat(userProfileDto).isPresent();
+            assertThat((userProfileDto.get().getRole())).isEqualTo(role);
         }
 
 
         @Test
         @DisplayName("등급 변경시 이력 저장")
-          void adminUserRoleTest2() {
+        void adminUserRoleTest2() {
 
             // given
             User user = createOneUser();
@@ -301,7 +303,7 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("회원 탈퇴시 회원 이력도 삭제")
-          void adminUserDeleteTest1() {
+        void adminUserDeleteTest1() {
             // given
             User user = createOneUser();
             userHistoryRepository.save(UserHistory.createEntity(user, ActionType.PROMOTION));
@@ -326,14 +328,14 @@ import org.springframework.transaction.annotation.Transactional;
 
         @Test
         @DisplayName("회원 등급 가져오기.")
-          void getRoleTest() {
+        void getRoleTest() {
             User user = createOneUser();
 
             em.flush();
             em.clear();
 
             Optional<Role> role = userRepository.findRoleByEmail(user.getEmail());
-            
+
             assert role.isPresent();
 
             assertThat(role).contains(Role.INVESTOR);

@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.model.entity;
 
+import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.global.common.BaseEntity;
@@ -21,12 +22,17 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@DynamicUpdate
 public class User extends BaseEntity {
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,8 +70,6 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
 
     @Builder
     public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
@@ -86,6 +90,38 @@ public class User extends BaseEntity {
         this.userState = userState;
         this.withdrawalStatus = withdrawalStatus;
         this.role = role;
+    }
+
+
+    /**
+     * update를 위한 메서드 Setter와 Builder 사용하지 않기위해 작성. 이메일은 변경하지 않는다.
+     * <p>
+     * DynamicUpdate를 사용해도 null이 들어가면 데이터를 null로 넣어줌.
+     */
+    public void updateUser(UserModifyDto userModifyDto, String imageUrl) {
+
+        // 핸드폰 번호 수정.
+        if (userModifyDto.getPhone() != null) {
+            this.phone = userModifyDto.getPhone();
+        }
+
+        if (userModifyDto.getNickname() != null) {
+            this.nickname = userModifyDto.getNickname();
+        }
+
+        if (userModifyDto.getInfoAgreement() != null) {
+            this.infoAgreement = userModifyDto.getInfoAgreement();
+        }
+
+        // 기본 이미지를 이용하거나 새로운 사진을 업로드하는 경우. null 또는 presignedUrl
+        if (Boolean.TRUE.equals(userModifyDto.getImageChange())) {
+            this.imageUrl = imageUrl;
+        }
+    }
+
+    // 해당 유저의 패스워드를 재설정한다.(회원 정보 페이지 비밀번호 수정, 로그인 페이지 비밀번호 재설정)
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 
     public void changeRole(Role role) {
