@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/strategies")
+@RequestMapping("/api/my-strategies")
 @RequiredArgsConstructor
 @Tag(name = "마이페이지 트레이더 API", description = "마이페이지 트레이더 전략 관련 API")
 public class AccountVerificationController {
