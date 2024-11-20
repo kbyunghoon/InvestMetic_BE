@@ -32,6 +32,7 @@ import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,6 +122,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     @Override
     public Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest request, Long userId,
                                                         Pageable pageable) {
+        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
 
         List<StrategySimpleResponse> content = queryFactory
                 .select(new QStrategySimpleResponse(
@@ -132,7 +134,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
-                        strategyStatistics.averageProfitLossRate,
+                        strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
                         strategy.averageRating,
                         strategy.reviewCount
@@ -178,7 +180,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
-                        strategyStatistics.averageProfitLossRate,
+                        strategyStatistics.recentYearProfitRate, 
                         strategy.subscriptionCount,
                         strategy.averageRating,
                         strategy.reviewCount
@@ -266,11 +268,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
         // 조건 추가
         builder.and(applySearchWordFilter(filterSearchRequest.getSearchWord()));
-        builder.and(applyTradeTypeFilter(filterSearchRequest.getTradeType()));
-        builder.and(applyOperationCycleFilter(filterSearchRequest.getOperationCycle()));
-        builder.and(applyStockTypeFilter(filterSearchRequest.getStockTypes()));
-        builder.and(applyOperationPeriodFilter(filterSearchRequest.getDuration()));
-        builder.and(applyProfitRangeFilter(filterSearchRequest.getProfitRange()));
+        builder.and(applyTradeTypeFilter(filterSearchRequest.getTradeTypes()));
+        builder.and(applyOperationCycleFilter(filterSearchRequest.getOperationCycles()));
+        builder.and(applyStockTypeFilter(filterSearchRequest.getStockTypeNames()));
+        builder.and(applyOperationPeriodFilter(filterSearchRequest.getDurations()));
+        builder.and(applyProfitRangeFilter(filterSearchRequest.getProfitRanges()));
         builder.and(applyPrincipalRangeFilter(filterSearchRequest.getPrincipalRange()));
         builder.and(applyMddRangeFilter(filterSearchRequest.getMddRange()));
         builder.and(applySmScoreRangeFilter(filterSearchRequest.getSmScoreRange()));
