@@ -10,11 +10,11 @@ import lombok.Getter;
 @Getter
 public class FilterSearchRequest {
     private String searchWord; // 검색어
-    private List<String> tradeType; // 운용방식
-    private List<OperationCycle> operationCycle; // 운용주기
-    private List<String> stockTypes; // 운용 종목 리스트
-    private List<DurationRange> duration; // 기간 (1년 이하, 1~2년 등)
-    private List<ProfitRange> profitRange; // 수익률 범위
+    private List<String> tradeTypes; // 운용방식
+    private List<OperationCycle> operationCycles; // 운용주기
+    private List<String> stockTypeNames; // 운용 종목 이름
+    private List<DurationRange> durations; // 기간 (1년 이하, 1~2년 등)
+    private List<ProfitRange> profitRanges; // 수익률 범위
     private RangeDto principalRange; // 원금 범위
     private RangeDto mddRange; // MDD 범위
     private RangeDto smScoreRange; // SM SCORE 범위
