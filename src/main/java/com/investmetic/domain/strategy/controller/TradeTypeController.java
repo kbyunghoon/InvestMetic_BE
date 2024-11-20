@@ -3,10 +3,10 @@ package com.investmetic.domain.strategy.controller;
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
 import com.investmetic.domain.strategy.service.TradeTypeService;
-import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,10 +22,11 @@ public class TradeTypeController {
 
 
     @GetMapping("/trade-type")
-    public ResponseEntity<BaseResponse<PageResponseDto<TradeTypeResponseDTO>>> getAllTradeTypes(
+    public ResponseEntity<BaseResponse<List<TradeTypeResponseDTO>>> getAllTradeTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
             @RequestParam boolean activateState) {
-        PageResponseDto<TradeTypeResponseDTO> tradeTypeResponseDTO = tradeTypeService.getTradeTypes(pageable, activateState);
+        List<TradeTypeResponseDTO> tradeTypeResponseDTO = tradeTypeService.getTradeTypes(
+                activateState);
         return BaseResponse.success(tradeTypeResponseDTO);
     }
 
@@ -38,6 +39,12 @@ public class TradeTypeController {
                 PresignedUrlResponseDto.builder()
                         .presignedUrl(preSignedURL)
                         .build());
+    }
+
+    @PatchMapping("/trade-type/{tradeTypeId}")
+    public ResponseEntity<BaseResponse<Void>> updateTradeType(@PathVariable Long tradeTypeId) {
+        tradeTypeService.changeActivateState(tradeTypeId);
+        return BaseResponse.success(SuccessCode.UPDATED);
     }
 
 }

@@ -4,12 +4,14 @@ import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
-import com.investmetic.global.common.PageResponseDto;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,11 +29,21 @@ public class TradeTypeService {
         tradeTypeRepository.save(tradeType);
         return s3FileService.getPreSignedUrl(tradeIconURL);
     }
-    public PageResponseDto<TradeTypeResponseDTO> getTradeTypes(Pageable pageable, Boolean activateState) {
-        Page<TradeTypeResponseDTO> tradeTypes = tradeTypeRepository.findByActivateState(activateState, pageable)
-                .map(TradeTypeResponseDTO::from);
 
-        return new PageResponseDto<>(tradeTypes);
+    public List<TradeTypeResponseDTO> getTradeTypes(Boolean activateState) {
+        List<TradeTypeResponseDTO> tradeTypes = tradeTypeRepository.findByActivateState(activateState)
+                .stream()
+                .map(TradeTypeResponseDTO::from)
+                .toList();
+
+        return tradeTypes;
     }
 
+    public void changeActivateState(Long tradeTypeId) {
+        TradeType tradeType = tradeTypeRepository
+                .findById(tradeTypeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+        tradeType.changeActivateState();
+        tradeTypeRepository.save(tradeType);
+    }
 }

@@ -63,6 +63,10 @@ public enum ErrorCode {
     ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST, 3019, "유효하지 않은 옵션입니다."),
     DAILY_ANALYSIS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 3020, "해당 날짜의 전략 통계가 이미 존재합니다."),
 
+    STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 종목이 존재하지 않습니다."),
+    TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3022, "해당 매매 유형이 존재하지 않습니다."),
+    ACCOUNT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 3030, "해당 실계좌 인증 이미지가 존재하지 않습니다."),
+
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다."),
 
