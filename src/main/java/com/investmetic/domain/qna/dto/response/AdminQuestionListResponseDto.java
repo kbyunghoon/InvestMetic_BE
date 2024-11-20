@@ -10,6 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
+
 public class AdminQuestionListResponseDto {
     private Long questionId;
     private String title;
