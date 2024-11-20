@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/strategies")
+@RequestMapping("/api/my-strategies")
 @RequiredArgsConstructor
 @Tag(name = "전략 API", description = "전략 관련 API")
 public class StrategyController {
