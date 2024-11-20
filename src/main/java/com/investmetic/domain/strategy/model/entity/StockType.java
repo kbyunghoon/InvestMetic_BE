@@ -34,7 +34,7 @@ public class StockType extends BaseEntity {
         this.stockTypeIconURL = stockTypeIconURL;
     }
 
-    public void changeActivateState(boolean activateState) {
-        this.activateState = activateState;
+    public void changeActivateState() {
+        this.activateState = !this.activateState;
     }
 }

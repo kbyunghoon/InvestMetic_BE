@@ -11,13 +11,21 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserProfileDto {
+
     private Long userId;
+
     private String userName;
+
     private String email;
+
     private String imageUrl;
+
     private String nickname;
+
     private String phone;
+
     private Boolean infoAgreement;
+
     private Role role;
 
     @QueryProjection
