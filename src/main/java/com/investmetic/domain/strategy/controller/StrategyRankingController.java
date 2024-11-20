@@ -8,6 +8,8 @@ import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategySearchService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,10 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/strategies/search")
+@Tag(name = "전략 랭킹페이지 API", description = "전략 랭킹페이지 관련 API")
 public class StrategyRankingController {
     private final StrategySearchService strategySearchService;
     private final StrategyRegisterService strategyRegisterService;
 
+    @Operation(summary = "전략 항목별 검색(전략 랭킹페이지) ",
+            description = "<a href='https://www.notion.so/d547c3ca558d42239f45ddf4e40e113d' target='_blank'>API 명세서</a>")
     @PostMapping("/filters")
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> searchByFilters(
             @RequestBody FilterSearchRequest filterSearchRequest,
@@ -40,6 +45,8 @@ public class StrategyRankingController {
         return BaseResponse.success(result);
     }
 
+    @Operation(summary = "전략 알고리즘별 검색(전략 랭킹페이지) ",
+            description = "<a href='https://www.notion.so/10dad66378804aedb83e9672ea419329' target='_blank'>API 명세서</a>")
     @PostMapping("/algorithm")
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> searchByAlgorithm(
             @RequestBody AlgorithmSearchRequest algorithmSearchRequest,
@@ -51,7 +58,10 @@ public class StrategyRankingController {
         return BaseResponse.success(result);
     }
 
+
     // 랭킹 페이지 진입시 요청
+    @Operation(summary = "전략 랭킹페이지 진입시 요청(매매유형, 종목 조회) ",
+            description = "<a href='https://www.notion.so/6737234016814bd2bbee79e49cc652c8' target='_blank'>API 명세서</a>")
     @GetMapping
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
         return BaseResponse.success(strategyRegisterService.loadStrategyRegistrationInfo());
