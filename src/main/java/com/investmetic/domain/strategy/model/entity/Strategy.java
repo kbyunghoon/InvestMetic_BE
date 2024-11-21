@@ -20,6 +20,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,8 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
+@Builder(toBuilder = true)
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Strategy extends BaseEntity {
 
@@ -61,7 +64,8 @@ public class Strategy extends BaseEntity {
     private String proposalFilePath; // 제안서 파일경로
 
     @Enumerated(EnumType.STRING)
-    private IsPublic isPublic; // 공개여부
+    @Builder.Default
+    private IsPublic isPublic = IsPublic.PRIVATE; // 공개여부 (default : 비공개)
 
     @Enumerated(EnumType.STRING)
     private IsApproved isApproved; // 승인여부
@@ -75,10 +79,23 @@ public class Strategy extends BaseEntity {
     private Double zScore;
 
     @ColumnDefault("0.0")
+    @Builder.Default
     private Double averageRating = 0.0; // 평균별점
+
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer reviewCount = 0; // 리뷰수
 
     public void updateAverageRating(Double newAverageRating) {
         this.averageRating = newAverageRating;
+    }
+
+    public void incrementReviewCount() {
+        reviewCount++;
+    }
+
+    public void decrementReviewCount() {
+        reviewCount--;
     }
 
     @PrePersist
@@ -101,23 +118,7 @@ public class Strategy extends BaseEntity {
         this.smScore = smScore;
     }
 
-    // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
-    @Builder
-    public Strategy(Long strategyId, User user, TradeType tradeType, StrategyStatistics strategyStatistics,
-                    String strategyName, OperationCycle operationCycle,
-                    MinimumInvestmentAmount minimumInvestmentAmount, String strategyDescription,
-                    String proposalFilePath,
-                    IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating,
-                    Double smScore) {
-        this.strategyId = strategyId;
-        this.user = user;
-        this.tradeType = tradeType;
-        this.strategyStatistics = strategyStatistics;
-        this.strategyName = strategyName;
-        this.operationCycle = operationCycle;
-        this.minimumInvestmentAmount = minimumInvestmentAmount;
-        this.strategyDescription = strategyDescription;
-        this.proposalFilePath = proposalFilePath;
+    public void setIsPublic(IsPublic isPublic) {
         this.isPublic = isPublic;
         this.isApproved = isApproved;
         this.subscriptionCount = subscriptionCount;

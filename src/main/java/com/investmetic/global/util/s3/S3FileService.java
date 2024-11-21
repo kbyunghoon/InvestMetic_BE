@@ -6,8 +6,11 @@ import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -210,7 +213,7 @@ public class S3FileService {
     private Date getPreSignedUrlExpiration() {
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime(); // 현재 시간
-        expTimeMillis += apiExpiration; // 지정한 유효시간을 밀리초로 더해줌.
+        expTimeMillis += apiExpiration; // 1000 - 1초
         expiration.setTime(expTimeMillis); //현재 시간 + 1분 까지 유효
         return expiration;
     }
@@ -232,6 +235,16 @@ public class S3FileService {
             //실패시
             throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
         }
+    }
+
+    /**
+     * URL에서 S3 파일 키 추출
+     */
+    public S3Object extractFileKeyFromUrl(String fileUrl) throws URISyntaxException {
+        URI uri = new URI(fileUrl);
+        String path = uri.getPath(); // 경로 추출
+        // S3에서 파일 가져오기
+        return amazonS3.getObject(bucketName, path.substring(1));
     }
 
 

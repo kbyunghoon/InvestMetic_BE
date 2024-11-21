@@ -2,6 +2,8 @@ package com.investmetic.domain.accountverification.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -187,5 +190,58 @@ class AccountVerificationServiceTest {
         assertThat(response.getTotalPages()).isZero();
         assertThat(response.isFirst()).isTrue();
         assertThat(response.isLast()).isTrue();
+    }
+
+    /**
+     * 전략이 데이터베이스에 존재할 경우, 계좌 인증 이미지 등록 성공 테스트
+     */
+    @Test
+    void 실계좌_인증_이미지_삭제_성공_테스트() {
+        Long strategyId = 1L;
+        List<Long> requestDtoList = List.of(1L, 2L);
+
+        when(accountVerificationRepository.findById(1L)).thenReturn(Optional.of(accountVerification1));
+        when(accountVerificationRepository.findById(2L)).thenReturn(Optional.of(accountVerification2));
+
+        // When
+        accountVerificationService.deleteStrategyAccountImages(strategyId, requestDtoList);
+
+        // Then
+        verify(accountVerificationRepository, times(1)).delete(accountVerification1);
+        verify(accountVerificationRepository, times(1)).delete(accountVerification2);
+    }
+
+    @Test
+    void 이미지가_존재하지_않을_경우_삭제_실패() {
+        Long strategyId = 1L;
+        List<Long> requestDtoList = List.of(1L);
+
+        // Mock repository behavior
+        when(accountVerificationRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                accountVerificationService.deleteStrategyAccountImages(strategyId, requestDtoList)
+        );
+
+        assertEquals(ErrorCode.ACCOUNT_IMAGE_NOT_FOUND, exception.getErrorCode());
+        verify(accountVerificationRepository, never()).delete(any());
+    }
+
+    @Test
+    void 전략_아이디가_다를_경우_삭제_실패() {
+        Long strategyId = 2L;
+        List<Long> requestDtoList = List.of(1L);
+
+        // Mock repository behavior
+        when(accountVerificationRepository.findById(1L)).thenReturn(Optional.of(accountVerification1));
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                accountVerificationService.deleteStrategyAccountImages(strategyId, requestDtoList)
+        );
+
+        assertEquals(ErrorCode.ENTITY_NOT_FOUND, exception.getErrorCode());
+        verify(accountVerificationRepository, never()).delete(any());
     }
 }

@@ -30,6 +30,7 @@ public class DailyAnalysis extends BaseEntity {
     @JoinColumn(name = "strategy_id", nullable = false)
     private Strategy strategy;
 
+    @Builder.Default
     private LocalDate dailyDate = LocalDate.now(); // 날짜
 
     @Builder.Default

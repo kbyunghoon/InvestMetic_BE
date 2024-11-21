@@ -8,6 +8,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
@@ -59,7 +60,7 @@ public class GlobalExceptionHandler {
      * @Valid 또는 @Validated로 유효성 검사 실패 시 발생하는 예외 처리
      * @RequestBody 또는 @RequestPart 사용 시 발생
      */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class, HandlerMethodValidationException.class})
     protected ResponseEntity<BaseResponse<String>> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
         log.error("MethodArgumentNotValidException 예외 처리 : {}", e.getMessage(), e);
@@ -90,4 +91,6 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(BaseResponse.fail(ErrorCode.METHOD_NOT_ALLOWED));
     }
+
+
 }

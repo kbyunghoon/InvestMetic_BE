@@ -28,7 +28,7 @@ public class TradeType extends BaseEntity {
         this.tradeTypeIconURL = tradeTypeIconURL;
     }
 
-    public void changeActivateState(boolean activateState) {
-        this.activateState = activateState;
+    public void changeActivateState() {
+        this.activateState = !this.activateState;
     }
 }
