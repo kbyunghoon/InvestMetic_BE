@@ -1,6 +1,6 @@
 package com.investmetic.global.util.stibee.dto.request;
 
-import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.util.stibee.dto.object.EmailAndName;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class EmailSubscribe {
      * 1. 구독 중 상태일 때: 구독자 정보를 업데이트하지 않습니다. 기존 정보가 그대로 유지됩니다.
      * 2. 수신거부 또는 자동 삭제 상태일 때: 구독자의 구독 상태를 '구독 중으로 변경하고 이름, 전화번호 등의 구독자 정보를 업데이트합니다.
      * */
-    private final String eventOccurredBy = "SUBSCRIBER";
+    private final String eventOccurredBy;
 
     // "Y"로 하면 이메일로 구독을 하시겠습니까? 라는 메일이 옴. -> 구독자가 ok를 해야 추가됨.
     private final String confirmEmailYN = "N";
@@ -36,22 +36,21 @@ public class EmailSubscribe {
     private final List<EmailAndName> subscribers;
 
 
-
-    private EmailSubscribe( List<String> groupIds, List<EmailAndName> subscribers) {
+    private EmailSubscribe(String eventOccurredBy, List<String> groupIds, List<EmailAndName> subscribers) {
+        this.eventOccurredBy = eventOccurredBy;
         this.groupIds = groupIds;
         this.subscribers = subscribers;
     }
 
-    public static EmailSubscribe fromUserSignupDto(UserSignUpDto userSignUpDto) {
+    public static EmailSubscribe fromUser(User user, String eventOccurredBy) {
 
         //이메일 수신 동의 -> 광고성 정보 수신 동의
-        String ad_agreed = Boolean.TRUE.equals(userSignUpDto.getInfoAgreement()) ? "Y" : "N";
+        String adAgreed = Boolean.TRUE.equals(user.getInfoAgreement()) ? "Y" : "N";
 
         List<EmailAndName> subscribers = new ArrayList<>(
-                List.of(EmailAndName.create(userSignUpDto.getEmail(), userSignUpDto.getUsername(), ad_agreed)));
+                List.of(EmailAndName.create(user.getEmail(), user.getUserName(), adAgreed)));
 
-        return new EmailSubscribe(null, subscribers);
+        return new EmailSubscribe(eventOccurredBy, null, subscribers);
     }
-
 
 }
