@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.controller;
 
+import com.investmetic.domain.user.dto.request.PasswordDto;
 import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.service.UserMyPageService;
@@ -22,6 +23,9 @@ public class UserMyPageController {
 
     private final UserMyPageService userMyPageService;
 
+    /**
+     * 회원 정보 제공 기능
+     * */
     @GetMapping("/profile")
     public ResponseEntity<BaseResponse<UserProfileDto>> provideUserInfo(@RequestParam String email) {
 
@@ -33,6 +37,11 @@ public class UserMyPageController {
     }
 
 
+    /**
+     * 회원 정보 수정 기능
+     *
+     * @param userModifyDto 회원이 수정하려고 하는 정보 데이터.
+     * */
     @PatchMapping("/profile")
     public ResponseEntity<BaseResponse<String>> updateUserInfo(@Valid @RequestBody UserModifyDto userModifyDto) {
 
@@ -42,11 +51,14 @@ public class UserMyPageController {
         return BaseResponse.success(userMyPageService.changeUserInfo(userModifyDto, email));
     }
 
+    /**
+     * 패스워드 인증
+     * */
     @PostMapping("/authenticate/password")
-    public ResponseEntity<BaseResponse<Void>> passwordCheck(@RequestBody String password, String email) {
+    public ResponseEntity<BaseResponse<Void>> passwordCheck(@RequestBody PasswordDto passwordDto) {
 
         //@AuthenticationPrincipal
-        userMyPageService.checkPassword(email, password);
+        userMyPageService.checkPassword(passwordDto.getEmail(), passwordDto.getPassword());
 
         return BaseResponse.success();
     }

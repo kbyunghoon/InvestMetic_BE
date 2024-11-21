@@ -29,6 +29,7 @@ public class ReviewService {
     private final UserRepository userRepository;
 
 
+    //TODO : 리뷰 중복등록 방지 추가 + 성능개선 필요
     //리뷰 등록
     @Transactional
     public ReviewResponse addReview(Long strategyId, Long userId, ReviewRequestDto reviewRequestDto) {
@@ -43,6 +44,7 @@ public class ReviewService {
         // 평균 별점 업데이트
         addUpdateAverageRating(strategy, review.getStarRating());
 
+        strategy.incrementReviewCount();    // 전략의 리뷰수 증가
         reviewRepository.save(review);
         return ReviewResponse.from(review);
 
@@ -80,6 +82,9 @@ public class ReviewService {
 
         // 평균 별점 업데이트
         deleteUpdateAverageRating(strategy, deletedStarRating);
+
+        strategy.decrementReviewCount();    // 전략의 리뷰수 감소
+
         reviewRepository.delete(review);
     }
 
@@ -128,11 +133,13 @@ public class ReviewService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+
         Page<ReviewDetailResponse> reviews = reviewRepository.findByStrategy(strategy, pageable)
                 .map(review -> ReviewDetailResponse.from(review, user));
 
         PageResponseDto<ReviewDetailResponse> responsePageResponseDto = new PageResponseDto<>(reviews);
 
-        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(), responsePageResponseDto);
+        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(), strategy.getReviewCount(),
+                responsePageResponseDto);
     }
 }

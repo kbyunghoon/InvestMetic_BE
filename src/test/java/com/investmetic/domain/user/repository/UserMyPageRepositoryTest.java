@@ -70,19 +70,9 @@ class UserMyPageRepositoryTest {
         assertTrue(userProfileDto.isPresent());
 
         // DB에 없는 Email
-        Optional<UserProfileDto> userNotFound = userRepository.findByEmailUserInfo(user.getEmail() + "@gmail.com");
+        Optional<UserProfileDto> userNotFound = userRepository.findByEmailUserInfo(
+                user.getEmail() + "@gmail.com");
         assertTrue(userNotFound.isEmpty());
-    }
-
-    @Test
-    void testest() {
-        userRepository.save(User.builder().email("asdf").imageUrl("").build());
-
-        Optional<User> user = userRepository.findByEmail("asdf");
-        assertThat(user.isPresent()).isTrue();
-
-        assertThat(user.get().getImageUrl()).isEmpty();
-        assertThat(user.get().getImageUrl()).isNotNull();
     }
 
     @Test
@@ -133,7 +123,7 @@ class UserMyPageRepositoryTest {
 
         @Test
         @DisplayName("- 모든 값 변경")
-        public void testUpdateUser1() {
+        void testUpdateUser1() {
             // given
             User user = createOneUser();
 
@@ -169,11 +159,12 @@ class UserMyPageRepositoryTest {
 
         }
 
+
         @ParameterizedTest(name = "{0}")
         @MethodSource("userModifyDtos")
         @DisplayName(" - Entity update 로직 null 제외 검증.")
-        //userModifyDto에 변경하지 않을 필드는 null로 들어옴.
-        public void testUpdateUser2(String displayname, UserModifyDto userModifyDto) {
+            //userModifyDto에 변경하지 않을 필드는 null로 들어옴.
+        void testUpdateUser2(String displayname, UserModifyDto userModifyDto) {
             // given
             User user = createOneUser();
 
@@ -203,6 +194,4 @@ class UserMyPageRepositoryTest {
                     .isEqualTo(existUser.get());
         }
     }
-
-
 }

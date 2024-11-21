@@ -5,8 +5,11 @@ import com.investmetic.domain.strategy.dto.response.StockTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.global.common.PageResponseDto;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,4 +36,13 @@ public class StockTypeService {
 
         return new PageResponseDto<>(stocks);
     }
+
+    public void changeActivateState(Long StockTypeId) {
+        StockType stockType = stockTypeRepository
+                .findByStockTypeId(StockTypeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
+        stockType.changeActivateState();
+        stockTypeRepository.save(stockType);
+    }
+
 }
