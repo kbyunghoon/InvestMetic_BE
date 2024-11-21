@@ -129,9 +129,6 @@ class TraderListRepositoryTest {
 
         // when
         Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, null, pageable);
-        for (TraderProfileDto traderProfileDto : page.getContent()) {
-            System.out.println(traderProfileDto);
-        }
 
         // then
         //구독순 확인.

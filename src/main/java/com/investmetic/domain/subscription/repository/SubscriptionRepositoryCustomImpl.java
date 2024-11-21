@@ -8,11 +8,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SubscriptionRepositoryCustomImpl implements SubscriptionRepositoryCustom {
 
-    private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory queryFactory;
 
     @Override
     public boolean existsByStrategyIdAndUserId(Long strategyId, Long userId) {
-        return jpaQueryFactory.selectOne()
+        return queryFactory.selectOne()
                 .from(subscription)
                 .where(subscription.strategy.strategyId.eq(strategyId), subscription.user.userId.eq(userId))
                 .fetchFirst() != null;

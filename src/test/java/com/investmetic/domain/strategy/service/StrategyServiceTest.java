@@ -17,7 +17,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -76,5 +75,38 @@ class StrategyServiceTest {
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
         verify(strategyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("전략 삭제 - 성공")
+    void 테스트_4() {
+        Long strategyId = 1L;
+        Strategy strategy = Strategy.builder()
+                .strategyId(strategyId)
+                .isPublic(IsPublic.PUBLIC)
+                .build();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        strategyService.deleteStrategy(strategyId);
+
+        verify(strategyRepository, times(1)).findById(strategyId);
+        verify(strategyRepository, times(1)).deleteById(strategyId);
+    }
+
+    @Test
+    @DisplayName("전략 삭제 - 실패 (전략 ID가 존재하지 않을 때)")
+    void 테스트_5() {
+        Long strategyId = 999L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                strategyService.deleteStrategy(strategyId)
+        );
+
+        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository, times(1)).findById(strategyId);
+        verify(strategyRepository, never()).deleteById(strategyId);
     }
 }
