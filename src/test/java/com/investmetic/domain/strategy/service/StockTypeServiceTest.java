@@ -10,7 +10,6 @@ import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +33,7 @@ class StockTypeServiceTest {
     @BeforeEach
     void setUp() {
         stockTypeRequestList = new ArrayList<StockTypeRequestDTO>();
+        stockTypeRepository.deleteAll();
 
         for (int i = 1; i <= 5; i++) {
             StockTypeRequestDTO stockTypeRequestDTO = StockTypeRequestDTO.builder()
