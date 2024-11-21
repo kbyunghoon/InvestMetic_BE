@@ -2,6 +2,7 @@ package com.investmetic.domain.subscription.controller;
 
 import com.investmetic.domain.subscription.service.SubscriptionService;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

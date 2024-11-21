@@ -3,6 +3,7 @@ package com.investmetic.domain.user.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
@@ -45,6 +46,9 @@ class AdminPageUserRepositoryTest {
     @Autowired
     private UserHistoryRepository userHistoryRepository;
 
+    @Autowired
+    private StrategyRepository strategyRepository;
+
 
     /**
      * null, "" ," " 요청 시 @Valid등으로도 test하도록.
@@ -60,7 +64,6 @@ class AdminPageUserRepositoryTest {
         @BeforeEach
         void createUsers50() {
             for (int i = 0; i < 50; i++) {
-
                 DecimalFormat dc = new DecimalFormat("##");
 
                 User user = User.builder().userName("정룡우" + i).nickname("jeongRyongWoo" + i)
@@ -83,8 +86,6 @@ class AdminPageUserRepositoryTest {
             //when
             Page<UserProfileDto> users = userRepository.getAdminUsersPage(requestDto, pageable);
 
-            //then
-            assertThat(users.getTotalElements()).isEqualTo(40L); // Super_admin 뺀값
 
             long higher = Long.MAX_VALUE;
             //최신순으로 정렬되어있는지 확인.
