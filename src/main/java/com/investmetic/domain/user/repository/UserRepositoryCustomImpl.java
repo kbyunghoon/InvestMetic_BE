@@ -100,28 +100,31 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     /**
-     * 트레이더 목록 조회
+     * 트레이더 목록 조회 정렬 조건 - STRATEGY_TOTAL 과 SUBSCRIBE_TOTAL로 나누기
      */
     @Override
     public Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageable) {
 
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
-        // 정렬 조건 - STRATEGY_TOTAL 과 SUBSCRIBE_TOTAL로 나누기
-        if (StringUtils.equals(orderBy, "STRATEGY_TOTAL")) { // null safe
-            orderSpecifiers.add(strategy.count().desc()); //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
+        // null safe
+        if (StringUtils.equals(orderBy, "STRATEGY_TOTAL")) {
+
+            //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
+            orderSpecifiers.add(strategy.count().desc());
+
         }
         orderSpecifiers.add(strategy.subscriptionCount.sum().desc());
 
         // 전략순일때도 전략 -> 구독 -> 유저 id 순으로 정렬하기.
-
         List<TraderProfileDto> content = queryFactory.select(
                         new QTraderProfileDto(user.userId,
                                 user.userName,
                                 user.nickname,
                                 user.imageUrl,
-                                strategy.count(),
-                                strategy.subscriptionCount.sum()))
+                                strategy.count().coalesce(0L),
+                                strategy.subscriptionCount.sum().coalesce(0))
+                )
                 .from(user)
                 .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
                 .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),

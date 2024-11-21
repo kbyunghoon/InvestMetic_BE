@@ -61,15 +61,16 @@ public class UserController {
 
     /**
      * 트레이더 목록 조회
-     * @param orderBy 정렬할 조건, null 가능
-     * @param keyword 닉네임 검색 키워드, null 가능
+     *
+     * @param orderBy  정렬할 조건, null 가능
+     * @param keyword  닉네임 검색 키워드, null 가능
      * @param pageable 현재 페이지, 사이즈 - 디자인에서는 12개로 확인됨.
-     * */
+     */
     @GetMapping("/traders")
-    public ResponseEntity<BaseResponse<PageResponseDto<TraderProfileDto>>> getTraderList(@RequestParam String orderBy,
-                                                                                         @RequestParam String keyword,
-                                                                                         @RequestParam Pageable pageable) {
-
+    public ResponseEntity<BaseResponse<PageResponseDto<TraderProfileDto>>> getTraderList(
+            @RequestParam String orderBy,
+            @RequestParam String keyword,
+            @RequestParam Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(orderBy, keyword, pageable));
 
     }

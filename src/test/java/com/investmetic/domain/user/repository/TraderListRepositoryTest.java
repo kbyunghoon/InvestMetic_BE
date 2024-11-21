@@ -70,7 +70,6 @@ class TraderListRepositoryTest {
                     .ipAddress("127.0.0.1")
                     .infoAgreement(Boolean.FALSE)
                     .userState(UserState.ACTIVE)
-                    // Trader 20명 생성.
                     .role(roles.get(i % 5)).build();
 
             userRepository.save(user);
@@ -121,8 +120,8 @@ class TraderListRepositoryTest {
     void TraderListRepositoryTest1() {
 
         // given 가장 큰수로 설정
-        int bigger = Integer.MAX_VALUE;
-        int pagesize = 100;
+        Integer bigger = Integer.MAX_VALUE;
+        Integer pagesize = 100;
         String orderBy = null;
 
         Pageable pageable = PageRequest.of(0, pagesize);

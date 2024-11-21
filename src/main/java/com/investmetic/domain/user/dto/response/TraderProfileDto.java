@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TraderProfileDto {
 
-    private long userId;
+    private Long userId;
     private String userName;
     private String nickname;
     private String imageUrl;
-    private long strategyCount;
-    private int totalSubCount;
+    private Long strategyCount;
+    private Integer totalSubCount;
 
 
     @QueryProjection
-    public TraderProfileDto(long userId, String userName, String nickname, String imageUrl, long strategyCount,
-                            int totalSubCount) {
+    public TraderProfileDto(Long userId, String userName, String nickname, String imageUrl, Long strategyCount,
+                            Integer totalSubCount) {
         this.userId = userId;
         this.userName = userName;
         this.nickname = nickname;

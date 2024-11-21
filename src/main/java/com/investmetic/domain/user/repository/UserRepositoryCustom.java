@@ -17,7 +17,7 @@ public interface UserRepositoryCustom {
 
     Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageRequest);
 
-    Page<TraderProfileDto> getTraderListPage(String OrderBy,String traderNickname, Pageable pageRequest);
+    Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageRequest);
 
 
     boolean existsByEmail(String email);

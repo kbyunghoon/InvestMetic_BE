@@ -78,14 +78,14 @@ public class UserService {
      *
      * @param orderBy null일 때 구독순
      * @param keyword null일 때 키워드 검색 x
-     * */
+     */
     @Transactional(readOnly = true)
-    public PageResponseDto<TraderProfileDto> getTraderList(String orderBy, String keyword, Pageable pageable){
+    public PageResponseDto<TraderProfileDto> getTraderList(String orderBy, String keyword, Pageable pageable) {
 
-        Page<TraderProfileDto> page =  userRepository.getTraderListPage(orderBy, keyword, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, keyword, pageable);
 
         // 조회된 트레이더가 없을 때
-        if(page.getContent().isEmpty()){
+        if (page.getContent().isEmpty()) {
             throw new BusinessException(ErrorCode.TRADER_LIST_RETRIEVAL_FAILED);
         }
 

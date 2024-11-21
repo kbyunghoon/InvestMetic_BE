@@ -40,7 +40,7 @@ class TraderListTest {
         String keyword = null;
 
         List<TraderProfileDto> list = new ArrayList<>();
-        TraderProfileDto traderProfileDto = new TraderProfileDto(1, "userName", "nickname", "imageUrl", 4L, 100);
+        TraderProfileDto traderProfileDto = new TraderProfileDto(1L, "userName", "nickname", "imageUrl", 4L, 100);
         list.add(traderProfileDto);
 
         // size가 1인 목록 반환.
