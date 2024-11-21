@@ -68,6 +68,12 @@ public class Strategy extends BaseEntity {
 
     private Integer subscriptionCount; // 구독수
 
+    private Double kpRatio;
+
+    private Double smScore;
+
+    private Double zScore;
+
     @ColumnDefault("0.0")
     private Double averageRating = 0.0; // 평균별점
 
@@ -83,13 +89,26 @@ public class Strategy extends BaseEntity {
         }
     }
 
+    public void setZScore(Double zScore) {
+        this.zScore = zScore;
+    }
+
+    public void setKpRatio(Double kpRatio) {
+        this.kpRatio = kpRatio;
+    }
+
+    public void setSmScore(Double smScore) {
+        this.smScore = smScore;
+    }
+
     // FIXME :  전략 임시용 생성자입니다. 충돌시 아래 생성코드는 삭제해주시고, 작성하신것으로 사용해주세요 -오정훈-
     @Builder
     public Strategy(Long strategyId, User user, TradeType tradeType, StrategyStatistics strategyStatistics,
                     String strategyName, OperationCycle operationCycle,
                     MinimumInvestmentAmount minimumInvestmentAmount, String strategyDescription,
                     String proposalFilePath,
-                    IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating) {
+                    IsPublic isPublic, IsApproved isApproved, Integer subscriptionCount, Double averageRating,
+                    Double smScore) {
         this.strategyId = strategyId;
         this.user = user;
         this.tradeType = tradeType;
@@ -103,5 +122,6 @@ public class Strategy extends BaseEntity {
         this.isApproved = isApproved;
         this.subscriptionCount = subscriptionCount;
         this.averageRating = averageRating;
+        this.smScore = smScore;
     }
 }

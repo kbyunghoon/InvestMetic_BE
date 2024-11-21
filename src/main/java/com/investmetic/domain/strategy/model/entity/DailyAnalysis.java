@@ -138,6 +138,9 @@ public class DailyAnalysis extends BaseEntity {
     private Double currentDrawdownRate = 0.0; // 현재 자본인하율
 
     @Builder.Default
+    private Long drawDownPeriod = 0L; // DD day
+
+    @Builder.Default
     private Long maxDrawdown = 0L; // 최대 자본인하금액
 
     @Builder.Default
@@ -157,6 +160,9 @@ public class DailyAnalysis extends BaseEntity {
 
     @Builder.Default
     private Double sharpRatio = 0.0; // Sharp 비율
+
+    @Builder.Default
+    private Double maxDrawDownInRate = 0.0; //
 
     @Builder.Default
     private Boolean proceed = Boolean.TRUE; // 등록, 수정 시 False

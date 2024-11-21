@@ -68,4 +68,12 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
             """)
     List<DailyAnalysis> findEligibleDailyAnalysis();
 
+    // 특정 개수 데이터 조회
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate < :currentDate ORDER BY d.dailyDate DESC LIMIT :limitCount")
+    List<DailyAnalysis> findSpecificDailyAnalyses(@Param("strategyId") Long strategyId,
+                                                  @Param("currentDate") LocalDate currentDate,
+                                                  @Param("limitCount") Long limitCount);
+
+    @Query("SELECT d.kpRatio FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate DESC LIMIT 1")
+    Optional<Double> findLatestKpRatioByStrategyId(@Param("strategyId") Long strategyId);
 }
