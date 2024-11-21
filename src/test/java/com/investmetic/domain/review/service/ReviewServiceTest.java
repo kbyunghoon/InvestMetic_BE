@@ -83,6 +83,7 @@ class ReviewServiceTest {
         assertThrows(BusinessException.class, () -> updateReviewWithInvalidId(updateDto));
     }
 
+
     @DisplayName("리뷰 등록 시 리뷰 개수와 평균 별점 업데이트")
     @Test
     void 리뷰등록_테스트() {
@@ -103,8 +104,12 @@ class ReviewServiceTest {
         int updatedCount = reviewRepository.countByStrategy(testStrategy);
         assertThat(updatedCount).isEqualTo(initialCount + 1);
 
-        // 평균 별점 검증
         Strategy updatedStrategy = strategyRepository.findById(testStrategy.getStrategyId()).orElseThrow();
+
+        //전략의 리뷰갯수 검증
+        assertThat(updatedCount).isEqualTo(updatedStrategy.getReviewCount());
+
+        // 평균 별점 검증
         assertThat(updatedStrategy.getAverageRating()).isEqualTo(5.0);
     }
 
@@ -127,8 +132,12 @@ class ReviewServiceTest {
         int updatedCount = reviewRepository.countByStrategy(testStrategy);
         assertThat(updatedCount).isEqualTo(5);
 
-        // 평균 별점 검증
         Strategy updatedStrategy = strategyRepository.findById(testStrategy.getStrategyId()).orElseThrow();
+
+        // 전략의 리뷰갯수 검증
+        assertThat(updatedCount).isEqualTo(updatedStrategy.getReviewCount());
+
+        // 평균 별점 검증
         assertThat(updatedStrategy.getAverageRating()).isEqualTo(3.0);
     }
 
@@ -163,8 +172,12 @@ class ReviewServiceTest {
         int updatedCount = reviewRepository.countByStrategy(testStrategy);
         assertThat(updatedCount).isEqualTo(initialCount);
 
-        // 평균 별점 검증 (평점이 4 -> 3으로 업데이트됨)
         Strategy updatedStrategy = strategyRepository.findById(testStrategy.getStrategyId()).orElseThrow();
+
+        // 전략의 리뷰갯수 검증
+        assertThat(updatedCount).isEqualTo(updatedStrategy.getReviewCount());
+
+        // 평균 별점 검증 (평점이 4 -> 3으로 업데이트됨)
         assertThat(updatedStrategy.getAverageRating()).isEqualTo(3.0);
     }
 
@@ -194,8 +207,12 @@ class ReviewServiceTest {
         int updatedCount = reviewRepository.countByStrategy(testStrategy);
         assertThat(updatedCount).isEqualTo(initialCount - 1);
 
-        // 평균 별점 검증 (리뷰 삭제 후 리뷰가 없으면 0.0으로 설정)
         Strategy updatedStrategy = strategyRepository.findById(testStrategy.getStrategyId()).orElseThrow();
+
+        // 전략의 리뷰갯수 검증
+        assertThat(updatedCount).isEqualTo(updatedStrategy.getReviewCount());
+
+        // 평균 별점 검증 (리뷰 삭제 후 리뷰가 없으면 0.0으로 설정)
         assertThat(updatedStrategy.getAverageRating()).isEqualTo(0.0);
     }
 
@@ -231,8 +248,12 @@ class ReviewServiceTest {
         int updatedCount = reviewRepository.countByStrategy(testStrategy);
         assertThat(updatedCount).isEqualTo(initialCount - 1);
 
-        // 평균 별점 검증 (5점 삭제 후 남은 리뷰 평균: (1+2+3+4) / 4 = 2.5)
         Strategy updatedStrategy = strategyRepository.findById(testStrategy.getStrategyId()).orElseThrow();
+
+        // 전략의 리뷰갯수 검증
+        assertThat(updatedCount).isEqualTo(updatedStrategy.getReviewCount());
+
+        // 평균 별점 검증 (5점 삭제 후 남은 리뷰 평균: (1+2+3+4) / 4 = 2.5)
         assertThat(updatedStrategy.getAverageRating()).isEqualTo(2.5);
     }
 }

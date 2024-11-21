@@ -20,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/strategies")
+@RequestMapping("/api/my-strategies")
 @RequiredArgsConstructor
 @Tag(name = "전략 API", description = "전략 관련 API")
 public class StrategyController {
@@ -68,6 +69,14 @@ public class StrategyController {
         strategyService.updateVisibility(strategyId);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
+
+    @DeleteMapping("/{strategyId}")
+    @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId) {
+        strategyService.deleteStrategy(strategyId);
+        return BaseResponse.success();
+    }
+
 
     @GetMapping("/{strategyId}/download-proposal")
     @Operation(summary = "트레이더 전략 제안서 다운로드 기능", description = "<a href='https://field-sting-eff.notion.site/0b7c02614c9e485180a3f2e010773c11?pvs=4' target='_blank'>API 명세서</a>")
