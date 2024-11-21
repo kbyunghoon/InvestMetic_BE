@@ -10,6 +10,7 @@ import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.S3FileService;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -48,11 +49,10 @@ public class StrategyService {
         }
 
         // S3 파일 키 추출 및 파일 가져오기
-        try {
-            S3Object s3Object = s3FileService.extractFileKeyFromUrl(proposalFilePath);
-
-            S3ObjectInputStream inputStream = s3Object.getObjectContent();
-
+        try (
+                S3Object s3Object = s3FileService.extractFileKeyFromUrl(proposalFilePath);
+                S3ObjectInputStream inputStream = s3Object.getObjectContent()
+        ) {
             String fileExtension = extractFileExtension(proposalFilePath);
 
             // 다운로드 시 파일명 변경
@@ -61,9 +61,12 @@ public class StrategyService {
             // InputStreamResource 생성
             InputStreamResource resource = new InputStreamResource(inputStream);
 
-            return FileDownloadResponseDto.builder().downloadFileName(newFileName).resource(resource).build();
+            return FileDownloadResponseDto.builder()
+                    .downloadFileName(newFileName)
+                    .resource(resource)
+                    .build();
 
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }

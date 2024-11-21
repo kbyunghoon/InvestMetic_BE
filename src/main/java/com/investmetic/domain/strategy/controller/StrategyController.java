@@ -12,7 +12,6 @@ import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -72,13 +70,12 @@ public class StrategyController {
     }
 
     @GetMapping("/{strategyId}/download-proposal")
-    public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId)
-            throws UnsupportedEncodingException {
+    @Operation(summary = "트레이더 전략 제안서 다운로드 기능", description = "<a href='https://field-sting-eff.notion.site/0b7c02614c9e485180a3f2e010773c11?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId) {
         FileDownloadResponseDto fileDownloadResponse = strategyService.downloadFileFromUrl(strategyId);
 
-        String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(),
-                        StandardCharsets.UTF_8)
-                .replaceAll("\\+", "%20");
+        String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
