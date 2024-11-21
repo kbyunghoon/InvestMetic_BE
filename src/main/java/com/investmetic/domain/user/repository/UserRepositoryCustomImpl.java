@@ -1,11 +1,8 @@
 package com.investmetic.domain.user.repository;
 
-import static com.investmetic.domain.strategy.model.IsApproved.APPROVED;
-import static com.investmetic.domain.strategy.model.IsPublic.PUBLIC;
+import static com.investmetic.domain.strategy.model.entity.QStrategy.strategy;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
-import com.investmetic.domain.strategy.model.entity.QStrategy;
-import com.investmetic.domain.subscription.model.entity.QSubscription;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
@@ -19,9 +16,6 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
@@ -48,8 +42,16 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
-                        user.phone, user.infoAgreement, user.role)).where(user.email.eq(email)).fetchOne());
+                .select(new QUserProfileDto(user.userId,
+                        user.userName,
+                        user.email,
+                        user.imageUrl,
+                        user.nickname,
+                        user.phone,
+                        user.infoAgreement,
+                        user.role))
+                .where(user.email.eq(email))
+                .fetchOne());
     }
 
     /**
@@ -76,93 +78,64 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         condition.add(roleCondition(requestDto.getRole()));
 
         List<UserProfileDto> content = queryFactory.select(
-                        new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
-                                user.infoAgreement, user.role)).from(user).where(condition.toArray(new Predicate[0]))
-                .orderBy(orderByLatest()).offset(pageable.getPageNumber()).limit(pageable.getPageSize()).fetch();
-
+                        new QUserProfileDto(user.userId,
+                                user.userName,
+                                user.email,
+                                user.imageUrl,
+                                user.nickname,
+                                user.phone,
+                                user.infoAgreement,
+                                user.role)).from(user)
+                .where(condition.toArray(new Predicate[0]))
+                .orderBy(orderByLatest())
+                .offset(pageable.getPageNumber())
+                .limit(pageable.getPageSize())
+                .fetch();
 
         // PageableExecutionUtils 이용. count쿼리 최소화.
         JPAQuery<Long> countQuery = queryFactory.select(user.count()).where(condition.toArray(new Predicate[0]))
                 .from(user);
-
-
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     /**
      * 트레이더 목록 조회
-     * */
+     */
     @Override
     public Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageable) {
 
-        QUser qUser = QUser.user; // 해당 유저(트레이더)엔티티 에 대해서만 진행.
-        QStrategy qStrategy = QStrategy.strategy;
-        QSubscription qSubscription = QSubscription.subscription;
-
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
-        // 해당 트레이더가 가진 전략 총 합.
-        NumberExpression<Long> strategyTotal = Expressions.numberTemplate(
-                Long.class, // 아래의 인수의 타입을 정해준다.
-                "({0})", // JPAExpressions를 통해 나오는 하나의 인수
-                JPAExpressions
-                        .select(qStrategy.count())
-                        .from(qStrategy)
-                        .where(
-                                qStrategy.user.eq(qUser),
-                                qStrategy.isApproved.eq(APPROVED), // 승인된 전략인지.
-                                qStrategy.isPublic.eq(PUBLIC) // 공개된 전략인지. 비공개된 전략은 전략 총 개수에 들어가지 않음.
-                        )
-        );
-
-        // 해당 트레이더가 가진 전략들의 구독수 합.
-        NumberExpression<Long> totalSubCount = Expressions.numberTemplate(
-                Long.class,
-                "({0})",
-                JPAExpressions
-                        .select(qSubscription.count())
-                        .from(qSubscription)
-                        .innerJoin(qStrategy).on(qSubscription.strategy.eq(qStrategy)) // 아래의  where절을 포함.
-                        .where(
-                                qStrategy.user.eq(qUser),
-                                qStrategy.isApproved.eq(APPROVED),
-                                qStrategy.isPublic.eq(PUBLIC)
-                        )
-        );
-
         // 정렬 조건 - STRATEGY_TOTAL 과 SUBSCRIBE_TOTAL로 나누기
-        if(StringUtils.equals(orderBy,"STRATEGY_TOTAL")){ // null safe
-            //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
-            orderSpecifiers.add((strategyTotal.desc()));
+        if (StringUtils.equals(orderBy, "STRATEGY_TOTAL")) { // null safe
+            orderSpecifiers.add(strategy.count().desc()); //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
         }
+        orderSpecifiers.add(strategy.subscriptionCount.sum().desc());
 
         // 전략순일때도 전략 -> 구독 -> 유저 id 순으로 정렬하기.
-        orderSpecifiers.add(totalSubCount.desc());
 
-        List<TraderProfileDto> content = queryFactory
-                .select(new QTraderProfileDto(
-                                qUser.userId,
-                                qUser.userName,
-                                qUser.nickname,
-                                qUser.imageUrl,
-                                strategyTotal,
-                                totalSubCount.as("totalSubCount")
-                        )
-                )
-                .from(qUser)
-                .where(qUser.role.in(Role.TRADER, Role.TRADER_ADMIN),
-                        keywordCondition(ColumnCondition.NICKNAME, traderNickname))
+        List<TraderProfileDto> content = queryFactory.select(
+                        new QTraderProfileDto(user.userId,
+                                user.userName,
+                                user.nickname,
+                                user.imageUrl,
+                                strategy.count(),
+                                strategy.subscriptionCount.sum()))
+                .from(user)
+                .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
+                .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN))
+                .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
                 .offset(pageable.getPageNumber())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
-                .select(qUser.count())
-                .from(qUser)
-                .where(qUser.role.in(Role.TRADER, Role.TRADER_ADMIN));
-
+                .select(user.count())
+                .from(user)
+                .where(user.role.in(Role.TRADER, Role.TRADER_ADMIN));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -253,8 +226,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
                         user.phone, user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
     }
-
-
 
 
 }

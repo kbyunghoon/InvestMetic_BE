@@ -32,7 +32,7 @@ class TraderListTest {
 
 
     @Test
-    @DisplayName("")
+    @DisplayName("트레이더 목록 조회 정상")
     void traderListTest1() {
         // given
         Pageable pageable = PageRequest.of(0, 12);
@@ -40,7 +40,7 @@ class TraderListTest {
         String keyword = null;
 
         List<TraderProfileDto> list = new ArrayList<>();
-        TraderProfileDto traderProfileDto = new TraderProfileDto(1, "userName", "nickname", "imageUrl", 4L, 100L);
+        TraderProfileDto traderProfileDto = new TraderProfileDto(1, "userName", "nickname", "imageUrl", 4L, 100);
         list.add(traderProfileDto);
 
         // size가 1인 목록 반환.

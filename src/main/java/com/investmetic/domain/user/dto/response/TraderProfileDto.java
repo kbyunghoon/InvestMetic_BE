@@ -16,12 +16,12 @@ public class TraderProfileDto {
     private String nickname;
     private String imageUrl;
     private long strategyCount;
-    private long totalSubCount;
+    private int totalSubCount;
 
 
     @QueryProjection
     public TraderProfileDto(long userId, String userName, String nickname, String imageUrl, long strategyCount,
-                            long totalSubCount) {
+                            int totalSubCount) {
         this.userId = userId;
         this.userName = userName;
         this.nickname = nickname;
