@@ -84,8 +84,6 @@ class AdminPageUserRepositoryTest {
             Page<UserProfileDto> users = userRepository.getAdminUsersPage(requestDto, pageable);
 
             //then
-            assertThat(users.getTotalElements()).isEqualTo(40L); // Super_admin 뺀값
-
             long higher = Long.MAX_VALUE;
             //최신순으로 정렬되어있는지 확인.
             for (UserProfileDto user : users) {

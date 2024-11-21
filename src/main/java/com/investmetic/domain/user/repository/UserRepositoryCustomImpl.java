@@ -1,11 +1,14 @@
 package com.investmetic.domain.user.repository;
 
+import static com.investmetic.domain.strategy.model.entity.QStrategy.strategy;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
+import com.investmetic.domain.user.dto.response.QTraderProfileDto;
 import com.investmetic.domain.user.dto.response.QUserProfileDto;
+import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.QUser;
@@ -39,8 +42,16 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
-                        user.phone, user.infoAgreement, user.role)).where(user.email.eq(email)).fetchOne());
+                .select(new QUserProfileDto(user.userId,
+                        user.userName,
+                        user.email,
+                        user.imageUrl,
+                        user.nickname,
+                        user.phone,
+                        user.infoAgreement,
+                        user.role))
+                .where(user.email.eq(email))
+                .fetchOne());
     }
 
     /**
@@ -67,16 +78,67 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         condition.add(roleCondition(requestDto.getRole()));
 
         List<UserProfileDto> content = queryFactory.select(
-                        new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname, user.phone,
-                                user.infoAgreement, user.role)).from(user).where(condition.toArray(new Predicate[0]))
-                .orderBy(orderByLatest()).offset(pageable.getPageNumber()).limit(pageable.getPageSize()).fetch();
-
+                        new QUserProfileDto(user.userId,
+                                user.userName,
+                                user.email,
+                                user.imageUrl,
+                                user.nickname,
+                                user.phone,
+                                user.infoAgreement,
+                                user.role)).from(user)
+                .where(condition.toArray(new Predicate[0]))
+                .orderBy(orderByLatest())
+                .offset(pageable.getPageNumber())
+                .limit(pageable.getPageSize())
+                .fetch();
 
         // PageableExecutionUtils 이용. count쿼리 최소화.
         JPAQuery<Long> countQuery = queryFactory.select(user.count()).where(condition.toArray(new Predicate[0]))
                 .from(user);
 
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
 
+    /**
+     * 트레이더 목록 조회 정렬 조건 - STRATEGY_TOTAL 과 SUBSCRIBE_TOTAL로 나누기
+     */
+    @Override
+    public Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageable) {
+
+        List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
+
+        // null safe
+        if (StringUtils.equals(orderBy, "STRATEGY_TOTAL")) {
+
+            //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
+            orderSpecifiers.add(strategy.count().desc());
+
+        }
+        orderSpecifiers.add(strategy.subscriptionCount.sum().desc());
+
+        // 전략순일때도 전략 -> 구독 -> 유저 id 순으로 정렬하기.
+        List<TraderProfileDto> content = queryFactory.select(
+                        new QTraderProfileDto(user.userId,
+                                user.userName,
+                                user.nickname,
+                                user.imageUrl,
+                                strategy.count().coalesce(0L),
+                                strategy.subscriptionCount.sum().coalesce(0))
+                )
+                .from(user)
+                .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
+                .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN))
+                .groupBy(user.userId)
+                .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
+                .offset(pageable.getPageNumber())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Long> countQuery = queryFactory
+                .select(user.count())
+                .from(user)
+                .where(user.role.in(Role.TRADER, Role.TRADER_ADMIN));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -167,4 +229,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
                         user.phone, user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
     }
+
+
 }
