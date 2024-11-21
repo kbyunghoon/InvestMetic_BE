@@ -85,7 +85,7 @@ public class DailyAnalysis extends BaseEntity {
 
     private Double maxCumulativeProfitLossRate; // 최대 누적손익률
 
-    private Long averageProfitLoss; // 평균손익비율
+    private Long averageProfitLoss; // 평균손익
 
     private Double averageProfitLossRatio; // 평균손익비율
 
