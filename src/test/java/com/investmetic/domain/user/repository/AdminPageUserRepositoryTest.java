@@ -83,7 +83,7 @@ class AdminPageUserRepositoryTest {
             //when
             Page<UserProfileDto> users = userRepository.getAdminUsersPage(requestDto, pageable);
 
-            //then
+
             long higher = Long.MAX_VALUE;
             //최신순으로 정렬되어있는지 확인.
             for (UserProfileDto user : users) {

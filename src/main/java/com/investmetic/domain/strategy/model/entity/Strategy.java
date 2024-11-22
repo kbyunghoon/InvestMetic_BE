@@ -70,7 +70,9 @@ public class Strategy extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private IsApproved isApproved; // 승인여부
 
-    private Integer subscriptionCount; // 구독수
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer subscriptionCount = 0; // 구독수
 
     private Double kpRatio;
 
@@ -124,5 +126,12 @@ public class Strategy extends BaseEntity {
         this.subscriptionCount = subscriptionCount;
         this.averageRating = averageRating;
         this.smScore = smScore;
+    }
+
+    public void plusSubscriptionCount() {
+        this.subscriptionCount+=1;
+    }
+    public void minusSubscriptionCount() {
+        this.subscriptionCount-=1;
     }
 }

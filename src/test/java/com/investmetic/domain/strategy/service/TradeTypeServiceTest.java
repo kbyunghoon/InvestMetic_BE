@@ -7,7 +7,9 @@ import com.investmetic.domain.strategy.dto.response.StockTypeResponseDTO;
 import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
@@ -30,12 +32,18 @@ class TradeTypeServiceTest {
     private TradeTypeRepository tradeTypeRepository;
 
     private ArrayList<TradeTypeRequestDTO> tradeTypeRequestDtoList;
+    @Autowired
+    private StrategyRepository strategyRepository;
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
 
 
     @BeforeEach
     void setUp() {
         tradeTypeRequestDtoList = new ArrayList<>();
-
+        subscriptionRepository.deleteAll();
+        strategyRepository.deleteAll();
+        tradeTypeRepository.deleteAll();
         for (int i = 1; i <= 5; i++) {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeTypeName("Sample_Trade" + i)
