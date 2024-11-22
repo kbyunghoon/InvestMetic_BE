@@ -16,4 +16,5 @@ public interface DailyAnalysisRepositoryCustom {
 
     Page<DailyAnalysisResponse> findByStrategyId(Long strategyId, Pageable pageable);
 
+    List<DailyAnalysisResponse> findDailyAnalysisForExcel(Long strategyId);
 }

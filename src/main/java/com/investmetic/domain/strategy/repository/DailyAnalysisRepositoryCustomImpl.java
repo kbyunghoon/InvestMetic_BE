@@ -95,6 +95,22 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    @Override
+    public List<DailyAnalysisResponse> findDailyAnalysisForExcel(Long strategyId) {
+        return queryFactory
+                .select(new QDailyAnalysisResponse(
+                        dailyAnalysis.dailyDate,
+                        dailyAnalysis.principal,
+                        dailyAnalysis.transaction,
+                        dailyAnalysis.dailyProfitLoss,
+                        dailyAnalysis.dailyProfitLossRate,
+                        dailyAnalysis.cumulativeProfitLoss,
+                        dailyAnalysis.cumulativeProfitLossRate))
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .fetch();
+    }
+
     private NumberExpression<Double> findByOption(AnalysisOption option) {
         switch (option) {
             case BALANCE -> {
@@ -109,14 +125,12 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
             case TRANSACTION -> {
                 return dailyAnalysis.transaction.doubleValue();
             }
-
             case DAILY_PROFIT_LOSS -> {
                 return dailyAnalysis.dailyProfitLoss.doubleValue();
             }
             case DAILY_PROFIT_LOSS_RATE -> {
                 return dailyAnalysis.dailyProfitLossRate;
             }
-
             case CUMULATIVE_PROFIT_LOSS -> {
                 return dailyAnalysis.cumulativeProfitLoss.doubleValue();
             }
@@ -153,7 +167,6 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
             default -> {
                 throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
             }
-
         }
 
     }
