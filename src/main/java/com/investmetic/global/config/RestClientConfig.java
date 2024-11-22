@@ -36,7 +36,8 @@ public class RestClientConfig {
         // 기본 설정
         RestClient restClient = RestClient.builder().baseUrl("https://api.stibee.com/v1/lists")
                 .defaultHeader("AccessToken", stibeeEmailKey)
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
 
         RestClientAdapter adapter = RestClientAdapter.create(restClient);
         HttpServiceProxyFactory proxyFactory = HttpServiceProxyFactory.builderFor(adapter).build();

@@ -1,9 +1,9 @@
 package com.investmetic.global.util.stibee.dto.request;
 
-import com.investmetic.domain.user.model.entity.User;
-import com.investmetic.global.util.stibee.dto.object.EmailAndName;
+import com.investmetic.global.util.stibee.dto.object.SubscriberField;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -33,24 +33,24 @@ public class EmailSubscribe {
      * */
     private final List<String> groupIds; // 이거 없앨까요.
 
-    private final List<EmailAndName> subscribers;
+    private final List<SubscriberField> subscribers;
 
-
-    private EmailSubscribe(String eventOccurredBy, List<String> groupIds, List<EmailAndName> subscribers) {
+    @Builder
+    EmailSubscribe(String eventOccurredBy, List<String> groupIds, List<SubscriberField> subscribers) {
         this.eventOccurredBy = eventOccurredBy;
         this.groupIds = groupIds;
         this.subscribers = subscribers;
     }
 
-    public static EmailSubscribe fromUser(User user, String eventOccurredBy) {
 
-        //이메일 수신 동의 -> 광고성 정보 수신 동의
-        String adAgreed = Boolean.TRUE.equals(user.getInfoAgreement()) ? "Y" : "N";
+    //회원 가입
+    public static EmailSubscribe toSubscriber(List<String> groupIds, SubscriberField subscriber) {
+        return new EmailSubscribe("SUBSCRIBER", groupIds, new ArrayList<>(List.of(subscriber)));
+    }
 
-        List<EmailAndName> subscribers = new ArrayList<>(
-                List.of(EmailAndName.create(user.getEmail(), user.getUserName(), adAgreed)));
-
-        return new EmailSubscribe(eventOccurredBy, null, subscribers);
+    //정보 수정
+    public static EmailSubscribe toManual(List<String> groupIds, SubscriberField subscriber) {
+        return new EmailSubscribe("MANUAL", groupIds, new ArrayList<>(List.of(subscriber)));
     }
 
 }
