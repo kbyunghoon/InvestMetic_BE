@@ -6,11 +6,8 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +17,12 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -35,8 +32,6 @@ public final class ExcelUtils implements ExcelSupport {
     private static final int MAX_ROW = 5000;
     private static final short DEFAULT_COLUMN_WIDTH = 300;
     private static final short DEFAULT_ROW_HEIGHT = 500;
-    private static final short HEADER_FONT_COLOR = 255;
-    private static final short HEADER_BACKGROUND_COLOR = 102;
 
     private SXSSFWorkbook workbook;
     private HttpServletResponse response;
@@ -54,8 +49,7 @@ public final class ExcelUtils implements ExcelSupport {
             createSheetWithData(clazz, modifiableData);
             modifiableData.clear();
         } catch (Exception e) {
-            log.error("Excel Draw Error: {}", e.getMessage(), e);
-            throw new IllegalArgumentException("Excel 생성 중 오류가 발생했습니다.", e);
+            throw new BusinessException(ErrorCode.EXCEL_CREATE_ERROR);
         }
     }
 
@@ -118,18 +112,26 @@ public final class ExcelUtils implements ExcelSupport {
 
     private CellStyle createHeaderCellStyle() {
         Font font = workbook.createFont();
-        font.setColor(HEADER_FONT_COLOR);
+        font.setFontHeightInPoints((short) 12); // 글꼴 크기 설정
+        font.setFontName("Arial");
+        font.setBold(true); // 굵게 표시
+        font.setColor(IndexedColors.WHITE.getIndex()); // 텍스트 색상: 흰색
 
         CellStyle style = workbook.createCellStyle();
-        style.setAlignment(HorizontalAlignment.CENTER);
-        style.setVerticalAlignment(VerticalAlignment.CENTER);
-        style.setBorderLeft(BorderStyle.MEDIUM);
-        style.setBorderRight(BorderStyle.MEDIUM);
-        style.setBorderTop(BorderStyle.MEDIUM);
-        style.setBorderBottom(BorderStyle.MEDIUM);
-        style.setFillForegroundColor(HEADER_BACKGROUND_COLOR);
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER); // 가로 정렬: 가운데
+        style.setVerticalAlignment(VerticalAlignment.CENTER); // 세로 정렬: 가운데
+
+        // 테두리 설정
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+
+        // 배경 색상 설정
+        style.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex()); // 배경 색상: 파란색
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 단색 배경
+
+        style.setFont(font); // 글꼴 스타일 적용
 
         return style;
     }
@@ -166,7 +168,7 @@ public final class ExcelUtils implements ExcelSupport {
                 workbook.close();
             }
         } catch (IOException e) {
-            log.error("Workbook Close Error: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.EXCEL_DOWNLOAD_ERROR);
         }
     }
 }
