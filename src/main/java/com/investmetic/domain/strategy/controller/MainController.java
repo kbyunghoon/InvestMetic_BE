@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/main/")
+@RequestMapping("/api/strategies/")
 public class MainController {
     private final MainService mainService;
 
-    @GetMapping("/api/strategies/top-ranking")
+    @GetMapping("/top-ranking")
     public ResponseEntity<BaseResponse<List<TopSubscriberStrategyResponseDto>>> getTopSubscribe(){
 
         return BaseResponse.success(mainService.getTopSubscriberStrategy());
