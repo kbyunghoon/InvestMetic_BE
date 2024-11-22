@@ -8,6 +8,7 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,21 +25,33 @@ public class StrategyAnalysisService {
             Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new BusinessException(
                     ErrorCode.STRATEGY_NOT_FOUND));
 
-            boolean existsDailyData = dailyAnalysisRepository.existsByStrategyAndDailyDate(strategy,
+            // proceed가 false이고 dailyDate가 같은 값을 가져옴
+            Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findByStrategyAndDailyDateAndProceedIsFalse(
+                    strategy,
                     analysisRequest.getDate());
 
-            if (existsDailyData) {
-                throw new BusinessException(ErrorCode.DAILY_ANALYSIS_ALREADY_EXISTS);
+            if (existsDailyData.isPresent()) {
+                DailyAnalysis updatedDailyAnalysis = existsDailyData.get().toBuilder()
+                        .transaction(analysisRequest.getTransaction())
+                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                        .build();
+
+                System.out.println("덮어씌움");
+
+                dailyAnalysisRepository.save(updatedDailyAnalysis);
+            } else {
+                DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
+                        .strategy(strategy)
+                        .dailyDate(analysisRequest.getDate())
+                        .transaction(analysisRequest.getTransaction())
+                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                        .proceed(false)
+                        .build();
+
+                System.out.println("새로추가");
+
+                dailyAnalysisRepository.save(dailyAnalysis);
             }
-
-            DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
-                    .strategy(strategy)
-                    .dailyDate(analysisRequest.getDate())
-                    .transaction(analysisRequest.getTransaction())
-                    .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
-                    .build();
-
-            dailyAnalysisRepository.save(dailyAnalysis);
         }
     }
 }
