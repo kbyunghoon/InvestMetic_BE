@@ -2,15 +2,22 @@ package com.investmetic.domain.strategy.repository;
 
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
+import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
+import com.investmetic.domain.strategy.dto.response.QDailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositoryCustom {
@@ -55,6 +62,37 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                 .from(dailyAnalysis)
                 .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
                 .fetch();
+    }
+
+
+    @Override
+    public Page<DailyAnalysisResponse> findByStrategyId(Long strategyId, Pageable pageable) {
+        List<DailyAnalysisResponse> content = queryFactory.select(new QDailyAnalysisResponse(
+                        dailyAnalysis.dailyDate,
+                        dailyAnalysis.principal,
+                        dailyAnalysis.transaction,
+                        dailyAnalysis.dailyProfitLoss,
+                        dailyAnalysis.dailyProfitLossRate,
+                        dailyAnalysis.cumulativeProfitLoss,
+                        dailyAnalysis.cumulativeProfitLossRate))
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 전략 존재 여부를 빈 데이터로 판단
+        if (content.isEmpty()) {
+            throw new BusinessException(ErrorCode.STRATEGY_NOT_FOUND);
+        }
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
     private NumberExpression<Double> findByOption(AnalysisOption option) {
