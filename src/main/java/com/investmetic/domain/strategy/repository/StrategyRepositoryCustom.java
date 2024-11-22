@@ -3,9 +3,10 @@ package com.investmetic.domain.strategy.repository;
 import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
-import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
@@ -26,7 +27,7 @@ public interface StrategyRepositoryCustom {
     Page<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest algorithmSearchRequest, Long userId,
                                                    Pageable pageable);
 
-    List<TopSubscriberStrategyResponseDto> findTopSubscribeStrategy();
+    List<TopRankingStrategyResponseDto> findTopRankingStrategy(OrderSpecifier<?> orderBy, int limit);
 
     List<Double> findProfitRateData(Long strategyId);
 }

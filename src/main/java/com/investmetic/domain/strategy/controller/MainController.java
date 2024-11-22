@@ -1,6 +1,6 @@
 package com.investmetic.domain.strategy.controller;
 
-import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.service.MainService;
 import com.investmetic.global.common.BaseEntity;
 import com.investmetic.global.exception.BaseResponse;
@@ -18,7 +18,7 @@ public class MainController {
     private final MainService mainService;
 
     @GetMapping("/top-ranking")
-    public ResponseEntity<BaseResponse<List<TopSubscriberStrategyResponseDto>>> getTopSubscribe(){
+    public ResponseEntity<BaseResponse<List<TopRankingStrategyResponseDto>>> getTopSubscribe(){
 
         return BaseResponse.success(mainService.getTopSubscriberStrategy());
     }

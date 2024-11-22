@@ -14,9 +14,9 @@ import com.investmetic.domain.strategy.dto.RangeDto;
 import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
-import com.investmetic.domain.strategy.dto.response.QTopSubscriberStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.QTopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
-import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.QStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.model.AlgorithmType;
@@ -266,9 +266,9 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 메인 페이지 구독 순 조회 쿼리
     @Override
-    public List<TopSubscriberStrategyResponseDto> findTopSubscribeStrategy() {
+    public List<TopRankingStrategyResponseDto> findTopRankingStrategy(OrderSpecifier<?> orderBy, int limit) {
         return queryFactory
-                .select(new QTopSubscriberStrategyResponseDto(
+                .select(new QTopRankingStrategyResponseDto(
                         strategy.strategyId,
                         strategy.strategyName,
                         user.imageUrl,
@@ -283,9 +283,9 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.user, user)
                 .where(isApprovedAndPublic())
-                .orderBy(strategy.subscriptionCount.desc())
+                .orderBy(orderBy)
                 .offset(0)
-                .limit(3)
+                .limit(limit)
                 .fetch();
     }
     @Override

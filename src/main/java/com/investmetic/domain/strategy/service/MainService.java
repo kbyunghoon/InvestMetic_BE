@@ -1,10 +1,10 @@
 package com.investmetic.domain.strategy.service;
 
-import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
+import com.investmetic.domain.strategy.model.entity.QStrategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
-import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +15,10 @@ public class MainService {
     private final StrategyService strategyService;
     private final StrategyRepository strategyRepository;
 
-    public List<TopSubscriberStrategyResponseDto> getTopSubscriberStrategy() {
-        List<TopSubscriberStrategyResponseDto> contents = strategyRepository.findTopSubscribeStrategy();
+    public List<TopRankingStrategyResponseDto> getTopSubscriberStrategy() {
+        int offset = 3;
+        OrderSpecifier<?> orderBy = QStrategy.strategy.subscriptionCount.desc();
+        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,offset);
         contents.forEach(response-> {
                     Long strategyId = response.getStrategyId();
                     List<Double> profitRateData =strategyRepository.findProfitRateData(strategyId);
