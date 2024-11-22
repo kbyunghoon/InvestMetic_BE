@@ -21,13 +21,15 @@ public class SubscriptionService {
     private final StrategyRepository strategyRepository;
 
     @Transactional
-    public void subScribe(Long strategyId, Long userId) {
+    public void subscribe(Long strategyId, Long userId) {
+        // fix me - 이후 스프링 시큐리티 유저 아이디 받아오는 걸로 변경 예정
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
-        Optional<Subscription> existingSubscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId, userId);
+        Optional<Subscription> existingSubscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId,
+                userId);
         if (existingSubscription.isPresent()) {
             strategy.minusSubscriptionCount();
             subscriptionRepository.delete(existingSubscription.get());

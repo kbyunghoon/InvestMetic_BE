@@ -71,25 +71,25 @@ public class SubscribtionServiceTest {
 
     @Test
     public void subscribe() {
-        List<Strategy> strategylist=strategyRepository.findAll();
-        List<User> userlist=userRepository.findAll();
-        Long strategyId=strategylist.get(0).getStrategyId();
-        Long userId=userlist.get(0).getUserId();
+        List<Strategy> strategylist = strategyRepository.findAll();
+        List<User> userlist = userRepository.findAll();
+        Long strategyId = strategylist.get(0).getStrategyId();
+        Long userId = userlist.get(0).getUserId();
 
-        subscriptionService.subScribe(strategyId, userId);
+        subscriptionService.subscribe(strategyId, userId);
 
         // 구독 확인
         Optional<Subscription> subscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId, userId);
         assertThat(subscription.get().getId().equals(userId));
         assertThat(subscription.get().getUser().getUserId().equals(strategyId));
         //구독 수 확인
-        Integer subscriptionCount=strategyRepository.findById(strategyId).get().getSubscriptionCount();
+        Integer subscriptionCount = strategyRepository.findById(strategyId).get().getSubscriptionCount();
         assertThat(subscriptionCount).isEqualTo(1);
         // 구독 취소 확인
-        subscriptionService.subScribe(strategyId, userId);
+        subscriptionService.subscribe(strategyId, userId);
 
         assertThat(subscriptionRepository.findAll().size()).isEqualTo(0);
-        subscriptionCount=strategyRepository.findById(strategyId).get().getSubscriptionCount();
+        subscriptionCount = strategyRepository.findById(strategyId).get().getSubscriptionCount();
         assertThat(subscriptionCount).isEqualTo(0);
 
     }
