@@ -21,7 +21,7 @@ public class SubscriptionService {
     private final StrategyRepository strategyRepository;
 
     @Transactional
-    public void SubScribe(Long strategyId, Long userId) {
+    public void subScribe(Long strategyId, Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
         User user = userRepository.findById(userId)
@@ -30,12 +30,10 @@ public class SubscriptionService {
         Optional<Subscription> existingSubscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId, userId);
         if (existingSubscription.isPresent()) {
             strategy.minusSubscriptionCount();
-            strategyRepository.save(strategy);
             subscriptionRepository.delete(existingSubscription.get());
             return;
         }
         strategy.plusSubscriptionCount();
-        strategyRepository.save(strategy);
         Subscription subscription = Subscription.builder()
                 .user(user)
                 .strategy(strategy)

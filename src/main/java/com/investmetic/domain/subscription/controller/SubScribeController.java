@@ -22,7 +22,7 @@ public class SubScribeController {
             @PathVariable Long strategyId,
             @RequestParam Long userId
     ) {
-        subscriptionService.SubScribe(strategyId, userId);
+        subscriptionService.subScribe(strategyId, userId);
         return BaseResponse.success();
     }
 }

@@ -76,7 +76,7 @@ public class SubscribtionServiceTest {
         Long strategyId=strategylist.get(0).getStrategyId();
         Long userId=userlist.get(0).getUserId();
 
-        subscriptionService.SubScribe(strategyId, userId);
+        subscriptionService.subScribe(strategyId, userId);
 
         // 구독 확인
         Optional<Subscription> subscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId, userId);
@@ -86,7 +86,7 @@ public class SubscribtionServiceTest {
         Integer subscriptionCount=strategyRepository.findById(strategyId).get().getSubscriptionCount();
         assertThat(subscriptionCount).isEqualTo(1);
         // 구독 취소 확인
-        subscriptionService.SubScribe(strategyId, userId);
+        subscriptionService.subScribe(strategyId, userId);
 
         assertThat(subscriptionRepository.findAll().size()).isEqualTo(0);
         subscriptionCount=strategyRepository.findById(strategyId).get().getSubscriptionCount();
