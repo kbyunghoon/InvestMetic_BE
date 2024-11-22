@@ -4,8 +4,12 @@ import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
+import com.investmetic.domain.strategy.model.entity.StockType;
+import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
@@ -29,6 +33,7 @@ public class StrategyRegisterService {
     private final TradeTypeRepository tradeTypeRepository;
     private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
+    private final StockTypeGroupRepository stockTypeGroupRepository;
 
     @Transactional
     public PresignedUrlResponseDto registerStrategy(
@@ -71,6 +76,18 @@ public class StrategyRegisterService {
         List<StockTypeDto> stockTypesDto = getAllStockTypes();
 
         return buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
+    }
+
+    public StrategyModifyInfoResponseDto loadStrategyModifyInfo(Long strategyId) {
+        Strategy strategy = strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        List<StockType> stockTypes = stockTypeGroupRepository.findStockTypeIdsByStrategy(strategy);
+
+        return StrategyModifyInfoResponseDto.builder()
+                .strategy(strategy)
+                .stockTypeIds(stockTypes)
+                .build();
     }
 
     private List<TradeTypeDto> getActiveTradeTypes() {
