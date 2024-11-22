@@ -14,7 +14,9 @@ import com.investmetic.domain.strategy.dto.RangeDto;
 import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.QTopSubscriberStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.QStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.model.AlgorithmType;
@@ -260,6 +262,38 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         tuple -> tuple.get(subscription.strategy.strategyId),
                         tuple -> true
                 ));
+    }
+
+    // 메인 페이지 구독 순 조회 쿼리
+    @Override
+    public List<TopSubscriberStrategyResponseDto> findTopSubscribeStrategy() {
+        return queryFactory
+                .select(new QTopSubscriberStrategyResponseDto(
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        user.imageUrl,
+                        user.nickname,
+                        strategyStatistics.smScore,
+                        strategyStatistics.cumulativeProfitRate,
+                        strategy.subscriptionCount,
+                        strategy.averageRating,
+                        strategy.reviewCount
+                ))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.user, user)
+                .where(isApprovedAndPublic())
+                .orderBy(strategy.subscriptionCount.desc())
+                .offset(0)
+                .limit(3)
+                .fetch();
+    }
+    @Override
+    public List<Double> findProfitRateData(Long strategyIdS) {
+        return queryFactory
+                .select(dailyAnalysis.cumulativeProfitLossRate)
+                .from(dailyAnalysis)
+                .fetch();
     }
 
     // 모든 필터 적용

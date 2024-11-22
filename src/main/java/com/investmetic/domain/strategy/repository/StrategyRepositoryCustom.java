@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.repository;
 import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.TopSubscriberStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.querydsl.core.Tuple;
 import java.util.List;
@@ -24,4 +25,8 @@ public interface StrategyRepositoryCustom {
 
     Page<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest algorithmSearchRequest, Long userId,
                                                    Pageable pageable);
+
+    List<TopSubscriberStrategyResponseDto> findTopSubscribeStrategy();
+
+    List<Double> findProfitRateData(Long strategyId);
 }
