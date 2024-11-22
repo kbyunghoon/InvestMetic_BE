@@ -26,7 +26,7 @@ public class Scheduler {
     private final StrategySmScoreScheduler strategySmScoreScheduler;
 
     // 매일 자정
-    @Scheduled(cron = "20 * * * * *")
+    @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void run() {
         // 새로운 데이터들을 모두 가져옴

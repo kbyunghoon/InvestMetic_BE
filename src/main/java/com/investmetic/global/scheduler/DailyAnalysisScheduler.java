@@ -18,7 +18,7 @@ public class DailyAnalysisScheduler {
     private final DailyAnalysisRepository dailyAnalysisRepository;
 
     @Transactional
-    protected void calculateDailyAnalysis(DailyAnalysis currentAnalysis) {
+    public void calculateDailyAnalysis(DailyAnalysis currentAnalysis) {
         // 1. 전날 데이터 가져오기
         Optional<DailyAnalysis> previousAnalysisOpt = dailyAnalysisRepository.findLatestBefore(
                 currentAnalysis.getStrategy().getStrategyId(),
@@ -418,8 +418,9 @@ public class DailyAnalysisScheduler {
                 .min()
                 .orElse(0.0), currentDrawdownRate);
 
-        double kpRatio = currentDrawdownRate == 0 ? 0 : 42 / (Math.abs(
-                29 * Math.sqrt((double) 13 / (23 + 1))));
+        // FIXME : 도움요청
+        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / (Math.abs(
+                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
 
         // 9. 새로운 DailyAnalysis 객체 생성 및 반환
         DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
