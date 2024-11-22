@@ -1,17 +1,11 @@
 package com.investmetic.global.scheduler;
 
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
-import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
-import com.investmetic.domain.strategy.repository.StrategyRepository;
-import com.investmetic.global.exception.BusinessException;
-import com.investmetic.global.exception.ErrorCode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +16,6 @@ public class Scheduler {
 
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final DailyAnalysisScheduler dailyAnalysisScheduler;
-    private final StrategyRepository strategyRepository;
     private final StrategySmScoreScheduler strategySmScoreScheduler;
 
     // 매일 자정

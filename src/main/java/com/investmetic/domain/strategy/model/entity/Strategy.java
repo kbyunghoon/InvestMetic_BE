@@ -128,10 +128,17 @@ public class Strategy extends BaseEntity {
         this.smScore = smScore;
     }
 
-    public void plusSubscriptionCount() {
-        this.subscriptionCount+=1;
+    public void resetStrategyDailyAnalysis() {
+        this.kpRatio = 0.0;
+        this.smScore = 0.0;
+        this.zScore = 0.0;
     }
+
+    public void plusSubscriptionCount() {
+        this.subscriptionCount += 1;
+    }
+
     public void minusSubscriptionCount() {
-        this.subscriptionCount-=1;
+        this.subscriptionCount -= 1;
     }
 }
