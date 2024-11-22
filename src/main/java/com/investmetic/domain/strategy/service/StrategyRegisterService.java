@@ -68,6 +68,18 @@ public class StrategyRegisterService {
 
         strategyRepository.save(strategy);
 
+        requestDto.getStockTypeIds().forEach(stockTypeId -> {
+            StockType stockType = stockTypeRepository.findById(stockTypeId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
+
+            StockTypeGroup stockTypeGroup = StockTypeGroup.builder()
+                    .strategy(strategy)
+                    .stockType(stockType)
+                    .build();
+
+            stockTypeGroupRepository.save(stockTypeGroup);
+        });
+
         return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
     }
 
