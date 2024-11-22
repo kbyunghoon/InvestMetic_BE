@@ -100,4 +100,11 @@ public class StrategyController {
                         "attachment; filename=\"" + encodedFileName + "\"")
                 .body(fileDownloadResponse.getResource());
     }
+
+    @DeleteMapping("{strategyId}/daily-analysis")
+    @Operation(summary = "전략 (일간 분석) 전체(일간 데이터) 삭제", description = "<a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId) {
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
 }

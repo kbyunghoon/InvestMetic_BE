@@ -77,5 +77,5 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     @Query("SELECT d.kpRatio FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate DESC LIMIT 1")
     Optional<Double> findLatestKpRatioByStrategyId(@Param("strategyId") Long strategyId);
 
-    boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
+    void deleteAllByStrategy(Strategy strategy);
 }

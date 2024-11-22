@@ -16,7 +16,7 @@ public class StrategySmScoreScheduler {
     private final DailyAnalysisRepository dailyAnalysisRepository;
 
     @Transactional
-    protected void calculateSmScores() {
+    public void calculateSmScores() {
         List<Strategy> strategiesList = strategyRepository.findAll();
 
         // 1. 각 전략의 최신 KP Ratio를 가져오고 설정
