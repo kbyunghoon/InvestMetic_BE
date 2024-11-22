@@ -25,7 +25,7 @@ public class StrategyDetailResponse {
     private double profitFactor;                    // Profit Factor
     private double winRate;                         // 승률
     private int subscriptionCount;                  // 구독 수
-    private boolean isSubscribed;                   // 구독 여부
+    private Boolean isSubscribed;                   // 구독 여부
     private String traderImgUrl;                        // 트레이더 프로필 이미지
     private String nickname;                        // 트레이더 이름
     private String minimumInvestmentAmount;         // 최소 운용 금액
