@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -35,7 +34,7 @@ public class StockType extends BaseEntity {
         this.stockTypeIconURL = stockTypeIconURL;
     }
 
-    public void changeActivateState(boolean activateState) {
-        this.activateState = activateState;
+    public void changeActivateState() {
+        this.activateState = !this.activateState;
     }
 }

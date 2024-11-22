@@ -58,9 +58,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/", "/signup").permitAll()
-                        .requestMatchers("/investor").hasAuthority("INVESTOR") // hasRole 대신 hasAuthority 사용
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll() // 모든 요청 허용
                 );
 
         http

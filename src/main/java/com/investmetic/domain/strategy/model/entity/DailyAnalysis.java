@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -84,7 +85,7 @@ public class DailyAnalysis extends BaseEntity {
 
     private Double maxCumulativeProfitLossRate; // 최대 누적손익률
 
-    private Long averageProfitLoss; // 평균손익비율
+    private Long averageProfitLoss; // 평균손익
 
     private Double averageProfitLossRatio; // 평균손익비율
 
@@ -112,4 +113,11 @@ public class DailyAnalysis extends BaseEntity {
 
     private Double sharpRatio; // Sharp 비율
 
+    @Builder
+    public DailyAnalysis(Strategy strategy, LocalDate dailyDate, Long transaction, Long dailyProfitLoss) {
+        this.strategy = strategy;
+        this.dailyDate = dailyDate;
+        this.transaction = transaction;
+        this.dailyProfitLoss = dailyProfitLoss;
+    }
 }

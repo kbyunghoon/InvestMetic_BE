@@ -59,7 +59,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .build();
 
 
-        CustomUserDetails customUserDetails=new CustomUserDetails(user,user.getRole());
+        CustomUserDetails customUserDetails = new CustomUserDetails(user, user.getRole());
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(
                 customUserDetails,
