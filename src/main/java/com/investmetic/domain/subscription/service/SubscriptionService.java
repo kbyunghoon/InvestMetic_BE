@@ -2,12 +2,10 @@ package com.investmetic.domain.subscription.service;
 
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
-import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.domain.subscription.model.entity.Subscription;
 import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
-import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -31,12 +29,12 @@ public class SubscriptionService {
 
         Optional<Subscription> existingSubscription = subscriptionRepository.findByStrategyIdAndUserId(strategyId, userId);
         if (existingSubscription.isPresent()) {
-            strategy.MinusSubscriptionCount();
+            strategy.minusSubscriptionCount();
             strategyRepository.save(strategy);
             subscriptionRepository.delete(existingSubscription.get());
             return;
         }
-        strategy.PlusSubscriptionCount();
+        strategy.plusSubscriptionCount();
         strategyRepository.save(strategy);
         Subscription subscription = Subscription.builder()
                 .user(user)

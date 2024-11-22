@@ -106,10 +106,10 @@ public class Strategy extends BaseEntity {
         this.isPublic = isPublic;
     }
 
-    public void PlusSubscriptionCount() {
+    public void plusSubscriptionCount() {
         this.subscriptionCount+=1;
     }
-    public void MinusSubscriptionCount() {
+    public void minusSubscriptionCount() {
         this.subscriptionCount-=1;
     }
 }

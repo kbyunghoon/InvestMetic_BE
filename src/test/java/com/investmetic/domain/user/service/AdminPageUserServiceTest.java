@@ -38,6 +38,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("관리자 회원 페이지")
 public class AdminPageUserServiceTest {
 
     @Mock
