@@ -42,6 +42,13 @@ public final class ExcelUtils implements ExcelSupport {
         this.response = response; // HTTP 응답 연결
     }
 
+
+    /**
+     * 엑셀 시트를 생성하고 데이터를 추가
+     *
+     * @param clazz 데이터 클래스 타입
+     * @param data  시트에 추가할 DB 데이터 목록
+     */
     @Override
     public void draw(Class<?> clazz, List<?> data) {
         try {
@@ -53,10 +60,17 @@ public final class ExcelUtils implements ExcelSupport {
         }
     }
 
+
+    /**
+     * 엑셀파일 다운로드
+     *
+     * @param fileName 다운로드될 엑셀 파일 이름 (확장자는 자동 추가)
+     */
     @Override
     public void download(String fileName) {
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        // 파일 이름을 헤더에 설정 (attachment로 다운로드)
         response.setHeader("Content-Disposition", "attachment;filename=" + fileName + ".xlsx");
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
@@ -69,6 +83,12 @@ public final class ExcelUtils implements ExcelSupport {
         }
     }
 
+    /**
+     * 클래스와 데이터 목록을 기반으로 엑셀 시트를 생성
+     *
+     * @param clazz 데이터 클래스 타입 (헤더 및 데이터 추출에 사용)
+     * @param data  시트에 추가할 데이터 목록
+     */
     private void createSheetWithData(Class<?> clazz, List<?> data) throws IllegalAccessException, IOException {
         String sheetName = findSheetName(clazz);
         Sheet sheet = workbook.createSheet(sheetName);
@@ -98,11 +118,18 @@ public final class ExcelUtils implements ExcelSupport {
         }
     }
 
+    /**
+     * 엑셀 시트에 데이터를 생성
+     *
+     * @param sheet 엑셀 데이터가 추가될 시트
+     * @param clazz 데이터의 클래스 타입 (필드 정보를 읽기 위해 사용)
+     * @param data  시트에 추가할 데이터 목록
+     */
     private void createBody(Sheet sheet, Class<?> clazz, List<?> data) throws IllegalAccessException {
-        int rowIndex = 1; // 데이터는 첫 번째 행 이후에 시작
+        int rowIndex = 1; // 데이터는 첫 번째 행 이후에 시작 ( 0번째 행은 헤더임)
         for (Object record : data) {
             Row row = sheet.createRow(rowIndex++);  // 새로운 행 생성
-            List<Object> fieldValues = findFieldValues(clazz, record);
+            List<Object> fieldValues = findFieldValues(clazz, record); // 값 추출
 
             for (int colIndex = 0; colIndex < fieldValues.size(); colIndex++) {
                 createCell(row, colIndex, String.valueOf(fieldValues.get(colIndex)), null);
@@ -110,6 +137,11 @@ public final class ExcelUtils implements ExcelSupport {
         }
     }
 
+    /**
+     * 헤더 셀에 적용할 스타일을 생성
+     *
+     * @return 헤더 셀 스타일 (글꼴, 정렬, 테두리, 배경색 포함)
+     */
     private CellStyle createHeaderCellStyle() {
         Font font = workbook.createFont();
         font.setFontHeightInPoints((short) 12); // 글꼴 크기 설정
@@ -128,22 +160,36 @@ public final class ExcelUtils implements ExcelSupport {
         style.setBorderBottom(BorderStyle.THIN);
 
         // 배경 색상 설정
-        style.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex()); // 배경 색상: 파란색
-        style.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 단색 배경
+        style.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex()); // 배경 색상 : 연파
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND); // 단색 배경 설정
 
         style.setFont(font); // 글꼴 스타일 적용
 
         return style;
     }
 
+    /**
+     * 주어진 행(Row)에 새로운 셀을 생성하고 값을 설정합니다.
+     *
+     * @param row      셀이 추가될 행
+     * @param colIndex 셀의 열 인덱스 (0부터 시작)
+     * @param value    셀에 입력될 값
+     * @param style    적용할 셀 스타일 (null일 경우 스타일 적용 안 함)
+     */
     private void createCell(Row row, int colIndex, String value, CellStyle style) {
-        Cell cell = row.createCell(colIndex);
+        Cell cell = row.createCell(colIndex); // // 지정된 열 인덱스에 셀 생성
         if (style != null) {
-            cell.setCellStyle(style);
+            cell.setCellStyle(style); // 스타일 있으면 셀적용 (헤더)
         }
-        cell.setCellValue(value);
+        cell.setCellValue(value); // 셀에 값설정
     }
 
+    /***
+     * 클래스의 필드에서 @ExcelColumn 어노테이션이 달린 필드를 찾아 헤더 이름 목록을 반환
+     *
+     * @param clazz 헤더 이름을 추출할 클래스(dto)
+     * @return 헤더 이름 목록 (어노테이션의 headerName 값)
+     */
     private List<String> findHeaderNames(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(ExcelColumn.class))
@@ -151,6 +197,12 @@ public final class ExcelUtils implements ExcelSupport {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 객체의 값 중 @ExcelColumn 어노테이션이 달린 필드의 값 추출
+     *
+     * @param clazz 값 추출 대상 클래스(dto)
+     * @param obj   값이 포함된 객체
+     */
     private List<Object> findFieldValues(Class<?> clazz, Object obj) throws IllegalAccessException {
         List<Object> fieldValues = new ArrayList<>();
         for (Field field : clazz.getDeclaredFields()) {
