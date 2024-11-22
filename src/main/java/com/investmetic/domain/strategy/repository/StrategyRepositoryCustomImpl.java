@@ -289,10 +289,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .fetch();
     }
     @Override
-    public List<Double> findProfitRateData(Long strategyIdS) {
+    public List<Double> findProfitRateData(Long strategyId) {
         return queryFactory
                 .select(dailyAnalysis.cumulativeProfitLossRate)
                 .from(dailyAnalysis)
+                .where(strategy.strategyId.eq(strategyId))
                 .fetch();
     }
 
