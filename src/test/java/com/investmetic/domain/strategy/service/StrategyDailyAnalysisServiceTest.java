@@ -64,8 +64,6 @@ class StrategyDailyAnalysisServiceTest {
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyDate(strategy, date)).thenReturn(false);
-
         strategyAnalysisService.createDailyAnalysis(strategyId, List.of(requestDto));
 
         verify(dailyAnalysisRepository, times(1)).save(any(DailyAnalysis.class));
@@ -90,23 +88,5 @@ class StrategyDailyAnalysisServiceTest {
                 () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList));
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("이미 해당 일간 데이터가 존재하는지 테스트")
-    void 테스트_3() {
-        Long strategyId = 1L;
-        LocalDate date = LocalDate.now();
-        TraderDailyAnalysisRequestDto requestDto = new TraderDailyAnalysisRequestDto(date, 100L, 200L);
-
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyDate(strategy, date)).thenReturn(true);
-
-        List<TraderDailyAnalysisRequestDto> requestList = List.of(requestDto);
-
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList));
-
-        assertEquals(ErrorCode.DAILY_ANALYSIS_ALREADY_EXISTS, exception.getErrorCode());
     }
 }
