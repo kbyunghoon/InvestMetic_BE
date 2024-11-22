@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,5 +89,53 @@ class StrategyDailyAnalysisServiceTest {
                 () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList));
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+    }
+
+
+    @Test
+    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 성공")
+    void 테스트_3() {
+        Long strategyId = 1L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+
+        verify(strategyRepository, times(1)).findById(strategyId);
+        verify(dailyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
+        verify(strategyRepository, never()).delete(strategy);
+    }
+
+    @Test
+    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 실패 (전략이 존재하지 않음)")
+    void 테스트_4() {
+        Long strategyId = 999L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId)
+        );
+
+        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository, times(1)).findById(strategyId);
+        verify(dailyAnalysisRepository, never()).deleteAllByStrategy(any(Strategy.class));
+    }
+
+    @Test
+    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 성공 (전략 초기화 확인)")
+    void 테스트_5() {
+        Long strategyId = 1L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+
+        verify(strategyRepository, times(1)).findById(strategyId);
+        verify(dailyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
+
+        assertEquals(0.0, strategy.getKpRatio());
+        assertEquals(0.0, strategy.getSmScore());
+        assertEquals(0.0, strategy.getZScore());
     }
 }
