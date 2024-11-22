@@ -74,6 +74,12 @@ public class Strategy extends BaseEntity {
     @Builder.Default
     private Integer subscriptionCount = 0; // 구독수
 
+    private Double kpRatio;
+
+    private Double smScore;
+
+    private Double zScore;
+
     @ColumnDefault("0.0")
     @Builder.Default
     private Double averageRating = 0.0; // 평균별점
@@ -102,8 +108,24 @@ public class Strategy extends BaseEntity {
         }
     }
 
+    public void setZScore(Double zScore) {
+        this.zScore = zScore;
+    }
+
+    public void setKpRatio(Double kpRatio) {
+        this.kpRatio = kpRatio;
+    }
+
+    public void setSmScore(Double smScore) {
+        this.smScore = smScore;
+    }
+
     public void setIsPublic(IsPublic isPublic) {
         this.isPublic = isPublic;
+        this.isApproved = isApproved;
+        this.subscriptionCount = subscriptionCount;
+        this.averageRating = averageRating;
+        this.smScore = smScore;
     }
 
     public void plusSubscriptionCount() {
