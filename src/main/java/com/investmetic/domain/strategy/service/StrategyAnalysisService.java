@@ -22,8 +22,7 @@ public class StrategyAnalysisService {
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests) {
         for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
-            Strategy strategy = strategyRepository.findById(strategyId).orElseThrow(() -> new BusinessException(
-                    ErrorCode.STRATEGY_NOT_FOUND));
+            Strategy strategy = findStrategyById(strategyId);
 
             // proceed가 false이고 dailyDate가 같은 값을 가져옴
             Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findByStrategyAndDailyDateAndProceedIsFalse(
@@ -36,8 +35,6 @@ public class StrategyAnalysisService {
                         .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
                         .build();
 
-                System.out.println("덮어씌움");
-
                 dailyAnalysisRepository.save(updatedDailyAnalysis);
             } else {
                 DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
@@ -48,10 +45,23 @@ public class StrategyAnalysisService {
                         .proceed(false)
                         .build();
 
-                System.out.println("새로추가");
-
                 dailyAnalysisRepository.save(dailyAnalysis);
             }
         }
+    }
+
+    @Transactional
+    public void deleteStrategyAllDailyAnalysis(Long strategyId) {
+        Strategy strategy = findStrategyById(strategyId);
+
+        // TODO : 유저 권한 확인 로직 추가 예정
+        strategy.resetStrategyDailyAnalysis();
+
+        dailyAnalysisRepository.deleteAllByStrategy(strategy);
+    }
+
+    private Strategy findStrategyById(Long strategyId) {
+        return strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
     }
 }
