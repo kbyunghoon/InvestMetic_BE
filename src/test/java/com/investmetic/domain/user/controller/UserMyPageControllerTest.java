@@ -18,6 +18,7 @@ import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.config.S3MockConfig;
+import com.investmetic.global.exception.ErrorCode;
 import io.findify.s3mock.S3Mock;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -201,7 +202,8 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("잘못된 입력 값"))
+            resultActions.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 
@@ -221,7 +223,8 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("잘못된 입력 값"))
+            resultActions.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 

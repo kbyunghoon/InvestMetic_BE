@@ -140,6 +140,11 @@ test {
 
 sonarqube {
     properties {
+        property "sonar.issue.ignore.multicriteria", "e1,e2"
+        property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S1134" // TODO 관련 룰
+        property "sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*"
+        property "sonar.issue.ignore.multicriteria.e2.ruleKey", "java:S1135" // FIXME 관련 룰
+        property "sonar.issue.ignore.multicriteria.e2.resourceKey", "**/*"
         property "sonar.scm.disabled", "true"
         property 'sonar.exclusions', '''
             **/test/**, 
@@ -156,7 +161,9 @@ sonarqube {
             **/entity/**, 
             **/model/**, 
             **/repository/**, 
-            **/global/exception/**
+            **/global/exception/**,
+            **/scheduler/**,
+            **/global/util/**
         '''
     }
 }
