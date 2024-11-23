@@ -30,7 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 class UserInfoModifyServiceTest {
 
     @Value("${cloud.aws.s3.defaultImgPath}")
-    private String BUCKET_NAME;
+    private String bucketName;
 
 
     @InjectMocks
@@ -71,7 +71,7 @@ class UserInfoModifyServiceTest {
 
     private User createOneUser() {
         User user = User.builder().userName("정룡우").nickname("jeongRyongWoo").email("jlwoo092513@gmail.com")
-                .password(passwordEncoder.encode("123456")).imageUrl(BUCKET_NAME + "IMG-3925.JPG").phone("01012345678")
+                .password(passwordEncoder.encode("123456")).imageUrl(bucketName + "IMG-3925.JPG").phone("01012345678")
                 .birthDate("000925").ipAddress("127.0.0.1").infoAgreement(Boolean.FALSE).userState(UserState.ACTIVE)
                 .role(Role.INVESTOR_ADMIN).build();
         userRepository.save(user);
@@ -96,9 +96,9 @@ class UserInfoModifyServiceTest {
         when(userRepository.findByEmail(userModifyDto.getEmail())).thenReturn(Optional.of(oneUser));
 
         when(s3FileService.getS3Path(FilePath.USER_PROFILE, imageMetadata.getImageName(), imageMetadata.getSize()))
-                .thenReturn(BUCKET_NAME + imageMetadata.getImageName()); // uuid 제외
+                .thenReturn(bucketName + imageMetadata.getImageName()); // uuid 제외
 
-        when(s3FileService.getPreSignedUrl(anyString())).thenReturn(BUCKET_NAME + imageMetadata.getImageName());
+        when(s3FileService.getPreSignedUrl(anyString())).thenReturn(bucketName + imageMetadata.getImageName());
 
         // when
         String presignedUrl = userMyPageService.changeUserInfo(userModifyDto, userModifyDto.getEmail());
@@ -121,10 +121,10 @@ class UserInfoModifyServiceTest {
         if (Boolean.TRUE.equals(userModifyDto.getImageChange()) && userModifyDto.getImageDto() != null) {
             when(s3FileService.getS3Path(FilePath.USER_PROFILE, userModifyDto.getImageDto().getImageName(),
                     userModifyDto.getImageDto().getSize())).thenReturn(
-                    BUCKET_NAME + userModifyDto.getImageDto().getImageName()); // uuid 제외
+                    bucketName + userModifyDto.getImageDto().getImageName()); // uuid 제외
 
             when(s3FileService.getPreSignedUrl(anyString())).thenReturn(
-                    BUCKET_NAME + userModifyDto.getImageDto().getImageName());
+                    bucketName + userModifyDto.getImageDto().getImageName());
         }
 
         //패스워드 변경시.

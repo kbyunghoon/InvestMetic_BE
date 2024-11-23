@@ -16,6 +16,7 @@ import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.global.exception.ErrorCode;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
@@ -105,7 +106,7 @@ class UserMyPageControllerTest {
         ResultActions resultActions2 = mockMvc.perform(
                 get("/api/users/mypage/profile").param("email", "NotFound@Email.com"));
 
-        resultActions2.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value(2001))// 실패 상태 확인
+        resultActions2.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value(ErrorCode.USER_INFO_NOT_FOUND.getCode()))// 실패 상태 확인
                 .andDo(print());
     }
 
@@ -160,7 +161,7 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("잘못된 입력 값"))
+            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 
@@ -180,7 +181,7 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("잘못된 입력 값"))
+            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 
