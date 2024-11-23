@@ -183,5 +183,7 @@ class UserMyPageControllerTest {
             resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value("잘못된 입력 값"))
                     .andDo(print());
         }
+
+
     }
 }
