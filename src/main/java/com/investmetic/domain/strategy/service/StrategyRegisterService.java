@@ -98,7 +98,7 @@ public class StrategyRegisterService {
 
         return StrategyModifyInfoResponseDto.builder()
                 .strategy(strategy)
-                .stockTypeIds(stockTypes)
+                .stockTypes(stockTypes)
                 .build();
     }
 
