@@ -1,4 +1,4 @@
-package com.investmetic.global.util.stibee.dto.object;
+package com.investmetic.global.util.stibee.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,13 +18,13 @@ public class SubscriberField {
     private LocalDateTime termDate; // 약관 동의일
 
     @JsonProperty("$ad_agreed")
-    private final String ad_agreed;
+    private final String adAgreed;
 
 
     private SubscriberField(String email, String name, String adAgreed) {
         this.email = email;
         this.name = name;
-        this.ad_agreed = adAgreed;
+        this.adAgreed = adAgreed;
     }
 
     public static SubscriberField create(String email, String name, String adAgreed){

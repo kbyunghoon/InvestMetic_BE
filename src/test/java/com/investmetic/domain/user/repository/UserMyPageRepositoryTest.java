@@ -46,7 +46,7 @@ class UserMyPageRepositoryTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    void testProfile() throws InterruptedException {
+    void testProfile(){
 
         //유저 생성.
         User user = createOneUser();
@@ -81,9 +81,9 @@ class UserMyPageRepositoryTest {
         User u = createOneUser();
 
         Optional<String> password = userRepository.findPasswordByEmail(u.getEmail());
-        assertThat(password.isPresent()).isTrue();
+        assertThat(password).isPresent();
 
-        assertThat(password.get()).isEqualTo(u.getPassword());
+        assertThat(password).contains(u.getPassword());
     }
 
     @Nested
@@ -130,7 +130,7 @@ class UserMyPageRepositoryTest {
             Optional<User> existUser = userRepository.findByEmail(user.getEmail());
 
             //생성한 유저 email로 DB를 찾아서 있는지 확인
-            assertThat(existUser.isPresent()).isTrue();
+            assertThat(existUser).isPresent();
 
             UserModifyDto userModifyDto = UserModifyDto.builder().nickname("테스트").infoAgreement(Boolean.TRUE)
                     .password("dirtyCheck!!").phone("01099999999")
@@ -147,7 +147,7 @@ class UserMyPageRepositoryTest {
 
             // then
 
-            assertThat(updateProfile.isPresent()).isTrue();
+            assertThat(updateProfile).isPresent();
 
             // existUser를 변경하고 flush한후 dirty checking 이 잘 되었는지 DB에서 검색해 보기.
             assertThat(updateProfile.get()).usingRecursiveComparison()
@@ -164,14 +164,14 @@ class UserMyPageRepositoryTest {
         @MethodSource("userModifyDtos")
         @DisplayName(" - Entity update 로직 null 제외 검증.")
             //userModifyDto에 변경하지 않을 필드는 null로 들어옴.
-        void testUpdateUser2(String displayname, UserModifyDto userModifyDto) {
+        void testUpdateUser2(String displayName, UserModifyDto userModifyDto) {
             // given
             User user = createOneUser();
 
             Optional<User> existUser = userRepository.findByEmail(user.getEmail());
 
             //생성한 유저 email로 DB를 찾아서 있는지 확인
-            assertThat(existUser.isPresent()).isTrue();
+            assertThat(existUser).isPresent();
 
             String s3Path = (userModifyDto.getImageDto() == null ? null
                     : testS3UrlCreate(userModifyDto.getImageDto().getImageName()));
@@ -186,7 +186,7 @@ class UserMyPageRepositoryTest {
             Optional<User> updateProfile = userRepository.findByEmail(user.getEmail());
 
             // then
-            assertThat(updateProfile.isPresent()).isTrue();
+            assertThat(updateProfile).isPresent();
 
             // existUser를 변경하고 flush한후 dirty checking 이 잘 되었는지 DB에서 검색해 보기.
             assertThat(updateProfile.get()).usingRecursiveComparison()
