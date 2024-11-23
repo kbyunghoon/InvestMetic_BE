@@ -3,7 +3,6 @@ package com.investmetic.domain.strategy.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.investmetic.domain.strategy.exceldownload.ExcelColumn;
 import com.investmetic.domain.strategy.exceldownload.ExcelSheet;
-import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDate;
 import lombok.Getter;

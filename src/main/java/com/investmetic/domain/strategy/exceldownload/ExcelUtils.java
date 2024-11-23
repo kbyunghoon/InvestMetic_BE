@@ -169,7 +169,7 @@ public final class ExcelUtils implements ExcelSupport {
     }
 
     /**
-     * 주어진 행(Row)에 새로운 셀을 생성하고 값을 설정합니다.
+     * 주어진 행(Row)에 새로운 셀을 생성하고 값을 설정
      *
      * @param row      셀이 추가될 행
      * @param colIndex 셀의 열 인덱스 (0부터 시작)

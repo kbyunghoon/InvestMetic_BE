@@ -86,8 +86,9 @@ public class StrategyDetailController {
         StrategyAnalysisResponse result = strategyDetailService.getStrategyAnalysis(strategyId, option1, option2);
         return BaseResponse.success(result);
     }
-
-    @GetMapping("daily-analysis/download")
+    @Operation(summary = "전략 일간분석 엑셀다운(전략 상세페이지) ",
+            description = "<a href='https://www.notion.so/42416d40378940648f4798070a6ac5ca' target='_blank'>API 명세서</a>")
+    @GetMapping("/daily-analysis/download")
     public void dailyAnalysisExcelDownload(
             @PathVariable Long strategyId,
             HttpServletResponse response) {
@@ -101,8 +102,9 @@ public class StrategyDetailController {
         // 엑셀 파일 다운로드
         excelUtils.download(DAILY_ANALYSIS_EXCEL_NAME);
     }
-
-    @GetMapping("monthly-analysis/download")
+    @Operation(summary = "전략 월간분석 엑셀다운(전략 상세페이지) ",
+            description = "<a href='https://www.notion.so/7ba6f427a5594eefb3e9bd103e6ccc31' target='_blank'>API 명세서</a>")
+    @GetMapping("/monthly-analysis/download")
     public void monthlyAnalysisExcelDownload(
             @PathVariable Long strategyId,
             HttpServletResponse response) {
