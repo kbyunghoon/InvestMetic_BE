@@ -6,15 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long>, DailyAnalysisRepositoryCustom {
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId")
-    Page<DailyAnalysis> findByStrategyId(@Param("strategyId") Long strategyId, Pageable pageable);
 
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = false")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsFalse(
@@ -76,6 +72,8 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
 
     @Query("SELECT d.kpRatio FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate DESC LIMIT 1")
     Optional<Double> findLatestKpRatioByStrategyId(@Param("strategyId") Long strategyId);
+
+    boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
 
     void deleteAllByStrategy(Strategy strategy);
 }
