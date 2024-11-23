@@ -23,11 +23,11 @@ public class StrategyModifyInfoResponseDto {
     private String proposalFileUrl;
 
     @Builder
-    public StrategyModifyInfoResponseDto(Strategy strategy, List<StockType> stockTypeIds) {
+    public StrategyModifyInfoResponseDto(Strategy strategy, List<StockType> stockTypes) {
         this.strategyName = strategy.getStrategyName();
         this.tradeTypeId = strategy.getTradeType().getTradeTypeId();
         this.operationCycle = strategy.getOperationCycle();
-        this.stockTypeIds = stockTypeIds.stream()
+        this.stockTypeIds = stockTypes.stream()
                 .map(StockType::getStockTypeId)
                 .toList();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
