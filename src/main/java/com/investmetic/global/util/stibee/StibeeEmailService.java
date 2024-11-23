@@ -111,17 +111,18 @@ public class StibeeEmailService {
      * 그룹 할당 - 회원 등급 변경시
      */
     public Boolean assignGroup(String email) {
-        return stibeeClient.assignGroup(defaultAddressBook, Integer.parseInt(adminGroup),
-                new ArrayList<>(List.of(email))).isOk();
+        return stibeeClient.assignGroup(
+                defaultAddressBook, Integer.parseInt(adminGroup), List.of(email)
+        ).isOk();
     }
 
     /**
      * 그룹 취소
      */
     public Boolean releaseGroup(String email) {
-        return stibeeClient.releaseGroup(defaultAddressBook, Integer.parseInt(adminGroup),
-                new ArrayList<>(List.of(email))).isOk();
-
+        return stibeeClient.releaseGroup(
+                defaultAddressBook, Integer.parseInt(adminGroup), List.of(email)
+        ).isOk();
     }
 
 
@@ -129,22 +130,17 @@ public class StibeeEmailService {
      * 주소록에서 삭제 - 회원 탈퇴시
      */
     public Boolean deleteSubscriber(String email) {
-
-        List<String> list = new ArrayList<>(List.of(email));
-
         // restClient.delete()로는 body() 사용 못함. method(HttpMethod.DELETE)로 해야 가능함.
-        return stibeeClient.deleteSubscriber(defaultAddressBook, list).isOk();
+        return stibeeClient.deleteSubscriber(defaultAddressBook, List.of(email)).isOk();
     }
 
 
     /**
      * 이메일 수신 거부 - 주소록에서 수신 거부로 표시됨.
+     *  - 수신 거부 취소할 때 addSubscriber사용하면 됨. 요청에 occuredBy subscriber로 설정하면 수신 거부 취소됨.
      */
     public Boolean unsubscribeEmail(String email) {
-
-        List<String> list = new ArrayList<>(List.of(email));
-
-        return stibeeClient.unsubscribeEmail(defaultAddressBook, list).isOk();
+        return stibeeClient.unsubscribeEmail(defaultAddressBook, List.of(email)).isOk();
     }
 
 
@@ -157,7 +153,6 @@ public class StibeeEmailService {
     public void sendAuthenticationCode(String email, String code) {
 
         EmailAndCode emailAndCode = new EmailAndCode(email, code);
-
 //         성공시 그냥 ok 만 옴
 //         실패시 "구독자 상태를 파악할 수 없습니다.", HttpClientErrorException&BadRequest -> 스티비 안에 해당 이메일이 없음.
 //         response.getBody() -> inputStream

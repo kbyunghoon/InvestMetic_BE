@@ -1,7 +1,6 @@
 package com.investmetic.global.util.stibee.dto.request;
 
 import com.investmetic.global.util.stibee.dto.object.SubscriberField;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,12 +44,12 @@ public class EmailSubscribe {
 
     //회원 가입
     public static EmailSubscribe toSubscriber(List<String> groupIds, SubscriberField subscriber) {
-        return new EmailSubscribe("SUBSCRIBER", groupIds, new ArrayList<>(List.of(subscriber)));
+        return new EmailSubscribe("SUBSCRIBER", groupIds, List.of(subscriber));
     }
 
     //정보 수정
     public static EmailSubscribe toManual(List<String> groupIds, SubscriberField subscriber) {
-        return new EmailSubscribe("MANUAL", groupIds, new ArrayList<>(List.of(subscriber)));
+        return new EmailSubscribe("MANUAL", groupIds, List.of(subscriber));
     }
 
 }

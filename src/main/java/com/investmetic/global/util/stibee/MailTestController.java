@@ -2,6 +2,7 @@ package com.investmetic.global.util.stibee;
 
 
 import com.investmetic.domain.user.dto.request.UserModifyDto;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.util.stibee.dto.DeleteRequest;
@@ -36,18 +37,22 @@ public class MailTestController {
         return BaseResponse.success(stibeeEmailService.deleteSubscriber(request.getEmail()));
     }
 
-    //확인
+    //회원 정보 업데이트 확인
     @PostMapping("/mail/info/update")
     public ResponseEntity<BaseResponse<Boolean>> infoUpdate(
-            @RequestBody InfoUpdateRequest infoUpdateRequest){
+            @RequestBody InfoUpdateRequest infoUpdateRequest) {
 
-        return BaseResponse.success(stibeeEmailService.updateSubscriberInfo(UserModifyDto.builder().email(
-                        infoUpdateRequest.getEmail()).infoAgreement(infoUpdateRequest.getInfoAgreement()).build(),
-                infoUpdateRequest.getRole()));
+        UserModifyDto userModifyDto = UserModifyDto.builder()
+                .email(infoUpdateRequest.getEmail())
+                .infoAgreement(infoUpdateRequest.getInfoAgreement())
+                .build();
 
+        Role role = infoUpdateRequest.getRole();
+
+        return BaseResponse.success(stibeeEmailService.updateSubscriberInfo(userModifyDto, role));
     }
 
-    //확인
+    // 약관 날짜 업데이트 확인
     @GetMapping("/mail/term/update")
     public ResponseEntity<BaseResponse<Boolean>>  updateSubscriberTermDate(
             @RequestParam String email
@@ -56,7 +61,7 @@ public class MailTestController {
     }
 
 
-    //확인
+    //그룹 할당 확인
     @GetMapping("/mail/group/assign")
     public ResponseEntity<BaseResponse<Boolean>> assign(
             @RequestParam String email
@@ -64,7 +69,7 @@ public class MailTestController {
         return BaseResponse.success(stibeeEmailService.assignGroup(email));
     }
 
-    //확인
+    //그룹 할당 취소 확인
     @GetMapping("/mail/group/release")
     public ResponseEntity<BaseResponse<Boolean>> release(
             @RequestParam String email
@@ -72,7 +77,7 @@ public class MailTestController {
         return BaseResponse.success(stibeeEmailService.releaseGroup(email));
     }
 
-    //확인
+    // 인증코드 확인
     @PostMapping("/mail/code")
     public ResponseEntity<BaseResponse<Void>> codeAuth(@RequestBody EmailAndCode emailAndCode) {
 
@@ -82,7 +87,7 @@ public class MailTestController {
     }
 
 
-    //확인
+    // 수신 거부 확인
     @GetMapping("/mail/unsubscribe")
     public ResponseEntity<BaseResponse<Boolean>> unsubscribe(
             @RequestParam String email
