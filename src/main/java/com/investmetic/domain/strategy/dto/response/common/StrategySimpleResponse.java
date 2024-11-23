@@ -20,7 +20,7 @@ public class StrategySimpleResponse {
     private double cumulativeProfitRate;            // 누적 수익률
     private double recentYearProfitLossRate;        // 최근 1년 수익률
     private int subscriptionCount;                  // 구독 수
-    private boolean isSubscribed;                   // 구독 여부
+    private Boolean isSubscribed;                   // 구독 여부
     private double averageRating;                   // 평균 별점
     private int totalReviews;                       // 총리뷰수
 

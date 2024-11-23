@@ -6,13 +6,19 @@ import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategyService;
+import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,4 +77,25 @@ public class StrategyController {
         return BaseResponse.success();
     }
 
+
+    @GetMapping("/{strategyId}/download-proposal")
+    @Operation(summary = "트레이더 전략 제안서 다운로드 기능", description = "<a href='https://field-sting-eff.notion.site/0b7c02614c9e485180a3f2e010773c11?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId) {
+        FileDownloadResponseDto fileDownloadResponse = strategyService.downloadFileFromUrl(strategyId);
+
+        String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + encodedFileName + "\"")
+                .body(fileDownloadResponse.getResource());
+    }
+
+    @DeleteMapping("{strategyId}/daily-analysis")
+    @Operation(summary = "전략 (일간 분석) 전체(일간 데이터) 삭제", description = "<a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId) {
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
 }

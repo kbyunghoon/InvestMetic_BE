@@ -5,8 +5,10 @@ import jakarta.persistence.EntityManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
+@EnableScheduling
 public class InvestMeticApplication {
 
     public static void main(String[] args) {
@@ -14,7 +16,7 @@ public class InvestMeticApplication {
     }
 
     @Bean
-    JPAQueryFactory jpaQueryFactory(EntityManager em){
+    JPAQueryFactory jpaQueryFactory(EntityManager em) {
         return new JPAQueryFactory(em);
     }
 }

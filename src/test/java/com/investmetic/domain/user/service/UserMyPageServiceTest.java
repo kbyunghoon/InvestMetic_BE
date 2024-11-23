@@ -43,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Transactional
 @Import(S3MockConfig.class)
+@DisplayName("회원 마이페이지 Service")
 class UserMyPageServiceTest {
 
     private static final String BUCKET_NAME = "fastcampus-team3";

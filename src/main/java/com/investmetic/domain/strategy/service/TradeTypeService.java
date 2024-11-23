@@ -8,8 +8,8 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import jakarta.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class TradeTypeService {
 
         return tradeTypes;
     }
-
+    @Transactional
     public void changeActivateState(Long tradeTypeId) {
         TradeType tradeType = tradeTypeRepository
                 .findById(tradeTypeId)

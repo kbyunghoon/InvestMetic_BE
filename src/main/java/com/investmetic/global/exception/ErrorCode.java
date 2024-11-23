@@ -66,6 +66,8 @@ public enum ErrorCode {
     STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 종목이 존재하지 않습니다."),
     TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3022, "해당 매매 유형이 존재하지 않습니다."),
     ACCOUNT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 3030, "해당 실계좌 인증 이미지가 존재하지 않습니다."),
+    EXCEL_CREATE_ERROR(HttpStatus.NOT_FOUND, 3031, "Excel 생성 중 오류가 발생했습니다."),
+    EXCEL_DOWNLOAD_ERROR(HttpStatus.NOT_FOUND, 3032, "Excel 다운로드 중 오류가 발생했습니다."),
 
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다.");

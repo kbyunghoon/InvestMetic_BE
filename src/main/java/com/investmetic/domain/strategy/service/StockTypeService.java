@@ -9,7 +9,7 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
-import java.util.Optional;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,7 @@ public class StockTypeService {
 
         return new PageResponseDto<>(stocks);
     }
-
+    @Transactional
     public void changeActivateState(Long StockTypeId) {
         StockType stockType = stockTypeRepository
                 .findByStockTypeId(StockTypeId)
