@@ -4,6 +4,7 @@ import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
 import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
@@ -57,6 +58,14 @@ public class StrategyController {
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
         return BaseResponse.success(strategyRegisterService.loadStrategyRegistrationInfo());
+    }
+
+    @GetMapping("/modify/{strategyId}")
+    @Operation(summary = "전략 수정 페이지 진입 시 해당 전략 정보 조회", description = "<a href='https://field-sting-eff.notion.site/b5f3a515edd6479f8c22a40732b42475?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
+            @PathVariable Long strategyId
+    ) {
+        return BaseResponse.success(strategyRegisterService.loadStrategyModifyInfo(strategyId));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
