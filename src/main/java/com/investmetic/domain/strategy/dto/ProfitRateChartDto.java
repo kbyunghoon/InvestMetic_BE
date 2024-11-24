@@ -9,12 +9,12 @@ import lombok.Getter;
 @JsonPropertyOrder({"xAxis", "yAxis"})
 public class ProfitRateChartDto {
 
-    private List<String> xAxis; // x축 데이터 ( YYYY-mm-dd)
-    private List<Double> yAxis; // 수익률 리스트
+    private List<String> dates; // x축 데이터 ( YYYY-mm-dd)
+    private List<Double> profitRates; // 수익률 리스트
 
     @Builder
-    public ProfitRateChartDto(List<String> xAxis, List<Double> yAxis) {
-        this.xAxis = xAxis;
-        this.yAxis = yAxis;
+    public ProfitRateChartDto(List<String> dates, List<Double> profitRates) {
+        this.dates = dates;
+        this.profitRates = profitRates;
     }
 }
