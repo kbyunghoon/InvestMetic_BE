@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@JsonPropertyOrder({"xAxis", "yAxis"})
+@JsonPropertyOrder({"dates", "profitRates"})
 public class ProfitRateChartDto {
 
     private List<String> dates; // x축 데이터 ( YYYY-mm-dd)
