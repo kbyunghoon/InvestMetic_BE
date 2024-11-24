@@ -50,9 +50,10 @@ public class JWTUtil {
     }
 
 
-    public String createJwt(String username, String role, Long expiredMs) {
+    public String createJwt(String category,String username, String role, Long expiredMs) {
 
         return Jwts.builder()
+                .claim("category",category)  // 토큰 종류
                 .claim("username", username) // 사용자 이름 추가
                 .claim("role", role)         // 사용자 역할 추가
                 .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간
@@ -61,4 +62,13 @@ public class JWTUtil {
                 .compact(); // JWT 생성
     }
 
+    public String getCategory(String token) {
+
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)  // Secret key 설정
+                .build()
+                .parseClaimsJws(token) // JWT 토큰을 파싱
+                .getBody() // Payload 추출
+                .get("category", String.class); // Payload에서 "category" 필드 추출
+    }
 }

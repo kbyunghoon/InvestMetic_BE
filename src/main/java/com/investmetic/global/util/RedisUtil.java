@@ -1,6 +1,7 @@
 package com.investmetic.global.util;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class RedisUtil {
+
     private final StringRedisTemplate template;
 
     public String getData(String key) {
@@ -28,5 +30,17 @@ public class RedisUtil {
 
     public void deleteData(String key) {
         template.delete(key);
+    }
+
+    public void saveRefreshToken(String username, String refreshToken, long durationInSeconds) {
+        template.opsForValue().set("REFRESH_TOKEN:" + username, refreshToken, durationInSeconds, TimeUnit.SECONDS);
+    }
+
+    public String getRefreshToken(String username) {
+        return template.opsForValue().get("REFRESH_TOKEN:" + username);
+    }
+
+    public void deleteRefreshToken(String username) {
+        template.delete("REFRESH_TOKEN:" + username);
     }
 }

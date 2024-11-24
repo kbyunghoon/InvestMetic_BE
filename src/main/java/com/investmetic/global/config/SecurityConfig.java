@@ -1,9 +1,14 @@
 package com.investmetic.global.config;
 
+import com.investmetic.global.security.handler.CustomAuthenticationFailureHandler;
+import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
+import com.investmetic.global.security.jwt.CustomLogoutFilter;
 import com.investmetic.global.security.jwt.JWTFilter;
 import com.investmetic.global.security.jwt.JWTUtil;
 import com.investmetic.global.security.jwt.LoginFilter;
+import com.investmetic.global.util.RedisUtil;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,19 +20,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil) {
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
+    private final RedisUtil redisUtil;
+    private final CustomAuthenticationSuccessHandler successHandler;
+    private final CustomAuthenticationFailureHandler failureHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -37,6 +42,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+
         return configuration.getAuthenticationManager();
     }
 
@@ -58,15 +64,23 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/reissue").permitAll()
                         .anyRequest().permitAll() // 모든 요청 허용
                 );
+
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil,
+                redisUtil);
+        loginFilter.setAuthenticationSuccessHandler(successHandler); // 성공 핸들러 설정
+        loginFilter.setAuthenticationFailureHandler(failureHandler); // 실패 핸들러 설정
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
-                        UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+
+        http
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class);
 
         http
                 .sessionManagement((session) -> session
