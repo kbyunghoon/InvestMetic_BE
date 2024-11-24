@@ -243,6 +243,47 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     }
 
+    @Override
+    public Page<StrategySimpleResponse> findSubscribedStrategies(Long userId, Pageable pageable) {
+
+        List<StrategySimpleResponse> content = queryFactory
+                .select(new QStrategySimpleResponse(
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        user.imageUrl,
+                        user.nickname,
+                        tradeType.tradeTypeIconURL,
+                        strategyStatistics.maxDrawdown,
+                        strategyStatistics.smScore,
+                        strategyStatistics.cumulativeProfitRate,
+                        strategyStatistics.recentYearProfitRate,
+                        strategy.subscriptionCount,
+                        strategy.averageRating,
+                        strategy.reviewCount
+                ))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .join(subscription).on(subscription.strategy.eq(strategy))  // 구독 테이블 조인
+                .where(isApprovedAndPublic(), subscription.user.userId.eq(userId))
+                .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(strategy)
+                .where(isApprovedAndPublic());
+
+        // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
+        // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+
     // ENUM에서 알고리즘 공식 처리 (전략 패턴)
     private OrderSpecifier<?> getOrderByAlgorithm(AlgorithmType algorithmType) {
         return algorithmType != null ? algorithmType.getOrderSpecifier(strategyStatistics)

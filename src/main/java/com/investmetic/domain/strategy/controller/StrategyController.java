@@ -5,6 +5,7 @@ import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
 import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
@@ -120,9 +121,20 @@ public class StrategyController {
     @Operation(summary = "트레이더 나의 전략목록 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/2ddd1d0be73a47a7a683394d77943b20' target='_blank'>API 명세서</a>")
     @GetMapping
-    public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> searchByFilters(
+    public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> getMyStrategies(
             @RequestParam Long userId,
             @PageableDefault(size = 4) Pageable pageable) {
         return BaseResponse.success(strategyListingService.getMyStrategies(userId,pageable));
     }
+
+    //TODO : 스프링 시큐리티 적용시 수정
+    @Operation(summary = "구독한 전략목록 조회(마이페이지) ",
+            description = "<a href='https://www.notion.so/5a2dd36508804ca8945692d269c47710' target='_blank'>API 명세서</a>")
+    @GetMapping("/subscribed")
+    public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getSubscribedStrategies(
+            @RequestParam Long userId,
+            @PageableDefault(size = 8) Pageable pageable) {
+        return BaseResponse.success(strategyListingService.getSubscribedStrategies(userId,pageable));
+    }
+
 }

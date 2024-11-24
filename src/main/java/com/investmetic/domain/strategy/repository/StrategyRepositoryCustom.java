@@ -26,5 +26,7 @@ public interface StrategyRepositoryCustom {
     Page<StrategySimpleResponse> searchByAlgorithm(String searchWord, AlgorithmType algorithmType, Pageable pageable);
 
     Page<MyStrategySimpleResponse> findMyStrategies(Long userId,Pageable pageable);
+
+    Page<StrategySimpleResponse> findSubscribedStrategies(Long userId,Pageable pageable);
 }
 
