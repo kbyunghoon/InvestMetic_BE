@@ -23,12 +23,12 @@ public class RoundUtil {
         return round(value, 2);
     }
 
-    // 소수점 셋째 자리에서 반올림
+    // 소수점 넷째 자리에서 반올림
     public static double roundToFourth(double value) {
         return round(value, 3);
     }
 
-    // 소수점 셋째 자리에서 반올림
+    // 소수점 다섯째 자리에서 반올림
     public static double roundToFifth(double value) {
         return round(value, 4);
     }

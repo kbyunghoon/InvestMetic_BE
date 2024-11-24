@@ -40,8 +40,8 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
         );
 
         return StrategyAnalysisResponse.builder()
-                .xAxis(xAxis)
-                .yAxis(yaxis)
+                .dates(xAxis)
+                .data(yaxis)
                 .build();
     }
 
