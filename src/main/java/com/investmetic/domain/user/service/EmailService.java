@@ -23,18 +23,22 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String configEmail;
 
-    private String createdCode() {
+    public String createdCode(String email) {
 
         int leftLimit = 48; // number '0'
         int rightLimit = 122; // alphabet 'z'
         int targetStringLength = 6;
         SecureRandom secureRandom = new SecureRandom();
 
-        return secureRandom.ints(leftLimit, rightLimit + 1)
+        String code = secureRandom.ints(leftLimit, rightLimit + 1)
                 .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
                 .limit(targetStringLength)
                 .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                 .toString();
+
+        redisUtil.setDataExpire(email, code, 60 * 30L);
+
+        return code;
     }
 
     private String generateEmailContent(String code) {
@@ -50,7 +54,7 @@ public class EmailService {
 
     private MimeMessage createEmailForm(String email) throws MessagingException {
 
-        String authCode = createdCode();
+        String authCode = createdCode(email);
 
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
@@ -88,6 +92,10 @@ public class EmailService {
         if (!codeFoundByEmail.equals(code)) {
             throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
         }
+
+        //성공 하고 나면 해당 데이터 메모리에서 삭제
+        redisUtil.deleteData(email);
+
         return true;
     }
 
