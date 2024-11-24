@@ -96,8 +96,8 @@ public class StrategyDetailService {
         List<Double> yAxis = dailyAnalysisRepository.findYAxis(strategyId, option);
 
         return StrategyAnalysisResponse.builder()
-                .xAxis(xAxis)
-                .yAxis(Map.of(option.name(), yAxis))
+                .dates(xAxis)
+                .data(Map.of(option.name(), yAxis))
                 .build();
     }
 
