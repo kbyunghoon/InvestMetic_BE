@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class ReIssueController {
 
     private final JWTUtil jwtUtil;
-
     private final RedisUtil redisUtil;
 
     @PostMapping("/reissue")
@@ -31,23 +30,18 @@ public class ReIssueController {
         Cookie[] cookies = request.getCookies();
 
         for (Cookie cookie : cookies) {
-
             if (cookie.getName().equals("refresh")) {
-
                 refresh = cookie.getValue();
             }
         }
 
         if (refresh == null) {
-
             return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
         }
 
         try {
             jwtUtil.isExpired(refresh);
-
         } catch (ExpiredJwtException e) {
-
             return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
         }
 
@@ -55,11 +49,10 @@ public class ReIssueController {
         String category = jwtUtil.getCategory(refresh);
 
         if (!category.equals("refresh")) {
-
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
-        String username = jwtUtil.getUsername(refresh);
+        String username = jwtUtil.getUsername(refresh); //이메일
         String role = jwtUtil.getRole(refresh);
 
         //새 토큰 발급
@@ -80,14 +73,11 @@ public class ReIssueController {
     }
 
     private Cookie createCookie(String key, String value) {
-
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(7 * 24 * 60 * 60);
         //cookie.setSecure(true);
         //cookie.setPath("/");
         cookie.setHttpOnly(true);
-
         return cookie;
     }
-
 }

@@ -54,7 +54,7 @@ public class JWTUtil {
 
         return Jwts.builder()
                 .claim("category",category)  // 토큰 종류
-                .claim("username", username) // 사용자 이름 추가
+                .claim("username", username) // 사용자 이메일 추가
                 .claim("role", role)         // 사용자 역할 추가
                 .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간
                 .setExpiration(new Date(System.currentTimeMillis() + expiredMs)) // 만료 시간

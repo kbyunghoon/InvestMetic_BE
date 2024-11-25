@@ -33,6 +33,6 @@ public class CustomUserDetailService implements UserDetailsService {
         Role role = user.getRole();
 
         // CustomUserDetails 생성 후 반환
-        return new CustomUserDetails(user, role);
+        return new CustomUserDetails(user,role);
     }
 }

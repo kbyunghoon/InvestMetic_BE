@@ -19,7 +19,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                                         AuthenticationException exception) throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
-
         ErrorCode errorCode = ErrorCode.LOGIN_FAILED;
 
         if (exception instanceof BadCredentialsException) {
