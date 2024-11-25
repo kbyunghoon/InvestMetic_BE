@@ -5,7 +5,6 @@ import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
-import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -26,11 +25,10 @@ public class UserController {
 
     //회원가입
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<Void>> signup(@RequestBody UserSignUpDto userSignUpDto) {
-        userService.signUp(userSignUpDto);
+    public ResponseEntity<BaseResponse<String>> signup(@RequestBody UserSignUpDto userSignUpDto) {
 
-        return BaseResponse.success(SuccessCode.CREATED);
-
+        // 이미지 저장시 presignedUrl 반환.
+        return BaseResponse.success(userService.signUp(userSignUpDto));
     }
 
     //닉네임 중복 검사

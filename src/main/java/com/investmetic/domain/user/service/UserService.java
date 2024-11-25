@@ -40,7 +40,7 @@ public class UserService {
 
     //회원 가입
     @Transactional
-    public void signUp(UserSignUpDto userSignUpDto) {
+    public String signUp(UserSignUpDto userSignUpDto) {
 
         // imageUrl 초기화.
         String presignedUrl = null;
@@ -53,6 +53,7 @@ public class UserService {
             presignedUrl = s3FileService.getS3Path(USER_PROFILE, userSignUpDto.getImageMetadata().getImageName(),
                     userSignUpDto.getImageMetadata().getSize());
         }
+
         User createUser = UserSignUpDto.toEntity(userSignUpDto, presignedUrl, bCryptPasswordEncoder);
 
         //명시적 세이브...
@@ -60,6 +61,8 @@ public class UserService {
 
         // 스티비 주소록에 회원 추가.
         emailService.addSubscriber(createUser);
+
+        return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
 
     // 이메일 찾기 시 인증코드 발송.
