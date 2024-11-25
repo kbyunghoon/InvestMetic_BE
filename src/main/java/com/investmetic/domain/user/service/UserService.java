@@ -3,6 +3,7 @@ package com.investmetic.domain.user.service;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.EMAIL;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.NICKNAME;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.PHONE;
+import static com.investmetic.global.util.s3.FilePath.USER_PROFILE;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
@@ -12,6 +13,7 @@ import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,19 +30,30 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final StibeeEmailService emailService;
+    private final S3FileService s3FileService;
 
     //회원 가입
     public void signUp(UserSignUpDto userSignUpDto) {
+
+        // imageUrl 초기화.
+        String presignedUrl = null;
+
         //중복 검증
         extracted(userSignUpDto);
 
-        User createUser = UserSignUpDto.toEntity(userSignUpDto, bCryptPasswordEncoder);
+        // 사진 저장시.
+        if (userSignUpDto.getImageMetadata() != null) {
+            presignedUrl = s3FileService.getS3Path(USER_PROFILE, userSignUpDto.getImageMetadata().getImageName(),
+                    userSignUpDto.getImageMetadata().getSize());
+        }
+
+        User createUser = UserSignUpDto.toEntity(userSignUpDto, presignedUrl, bCryptPasswordEncoder);
+
+        //명시적 세이브...
         userRepository.save(createUser);
 
         // 스티비 주소록에 회원 추가.
         emailService.addSubscriber(createUser);
-
-        // 회원 imageUrl null일 경우 제외 하고 PresignedUrl 반환하도록
     }
 
     // 회원 가입시에 새로 생겼을지도 모르는 중복 금지 데이터 다시 검증.
@@ -67,7 +80,6 @@ public class UserService {
     public void checkPhoneDuplicate(String phone) {
         validateDuplicate(PHONE, phone, userRepository::existsByPhone);
     }
-
 
 
     /**
