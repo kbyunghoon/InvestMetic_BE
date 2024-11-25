@@ -27,4 +27,16 @@ public class MainService {
         );
         return contents;
     }
+    public List<TopRankingStrategyResponseDto> getTopSmscoreStrategy() {
+        int offset = 5;
+        OrderSpecifier<?> orderBy = QStrategy.strategy.smScore.desc();
+        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,offset);
+        contents.forEach(response-> {
+                    Long strategyId = response.getStrategyId();
+                    List<Double> profitRateData =strategyRepository.findProfitRateData(strategyId);
+                    response.updateProfitRateChartData(profitRateData);
+                }
+        );
+        return contents;
+    }
 }

@@ -22,4 +22,9 @@ public class MainController {
 
         return BaseResponse.success(mainService.getTopSubscriberStrategy());
     }
+    @GetMapping("/top-ranking-smscore")
+    public ResponseEntity<BaseResponse<List<TopRankingStrategyResponseDto>>> getTopSmScore(){
+
+        return BaseResponse.success(mainService.getTopSmscoreStrategy());
+    }
 }
