@@ -1,11 +1,11 @@
 package com.investmetic.domain.strategy.controller;
 
-import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
+import com.investmetic.domain.strategy.model.AlgorithmType;
+import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
-import com.investmetic.domain.strategy.service.StrategySearchService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/strategies/search")
 @Tag(name = "전략 랭킹페이지 API", description = "전략 랭킹페이지 관련 API")
 public class StrategyRankingController {
-    private final StrategySearchService strategySearchService;
+    private final StrategyListingService strategyListingService;
     private final StrategyRegisterService strategyRegisterService;
 
     @Operation(summary = "전략 항목별 검색(전략 랭킹페이지) ",
@@ -39,7 +39,7 @@ public class StrategyRankingController {
             @RequestBody FilterSearchRequest filterSearchRequest,
             @RequestParam Long userId,
             @PageableDefault(size = 8, sort = "cumulativeProfitRate", direction = Direction.DESC) Pageable pageable) {
-        PageResponseDto<StrategySimpleResponse> result = strategySearchService.searchByFilters(
+        PageResponseDto<StrategySimpleResponse> result = strategyListingService.searchByFilters(
                 filterSearchRequest, userId, pageable);
 
         return BaseResponse.success(result);
@@ -47,13 +47,14 @@ public class StrategyRankingController {
 
     @Operation(summary = "전략 알고리즘별 검색(전략 랭킹페이지) ",
             description = "<a href='https://www.notion.so/10dad66378804aedb83e9672ea419329' target='_blank'>API 명세서</a>")
-    @PostMapping("/algorithm")
+    @GetMapping("/algorithm")
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> searchByAlgorithm(
-            @RequestBody AlgorithmSearchRequest algorithmSearchRequest,
+            @RequestParam(required = false) String searchWord,
+            @RequestParam(required = false) AlgorithmType algorithmType,
             @RequestParam Long userId,
             @PageableDefault(size = 8, sort = "cumulativeProfitRate", direction = Direction.DESC) Pageable pageable) {
-        PageResponseDto<StrategySimpleResponse> result = strategySearchService.searchByAlgorithm(
-                algorithmSearchRequest, userId, pageable);
+        PageResponseDto<StrategySimpleResponse> result = strategyListingService
+                .searchByAlgorithm(searchWord, algorithmType, userId, pageable);
 
         return BaseResponse.success(result);
     }

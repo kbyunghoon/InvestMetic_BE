@@ -97,6 +97,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
@@ -109,6 +110,7 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -118,8 +120,6 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-
-    testImplementation "io.findify:s3mock_2.13:0.2.6" // s3Mock
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -138,6 +138,11 @@ test {
 
 sonarqube {
     properties {
+        property "sonar.issue.ignore.multicriteria", "e1,e2"
+        property "sonar.issue.ignore.multicriteria.e1.ruleKey", "java:S1134" // TODO 관련 룰
+        property "sonar.issue.ignore.multicriteria.e1.resourceKey", "**/*"
+        property "sonar.issue.ignore.multicriteria.e2.ruleKey", "java:S1135" // FIXME 관련 룰
+        property "sonar.issue.ignore.multicriteria.e2.resourceKey", "**/*"
         property "sonar.scm.disabled", "true"
         property 'sonar.exclusions', '''
             **/test/**, 
@@ -154,7 +159,9 @@ sonarqube {
             **/entity/**, 
             **/model/**, 
             **/repository/**, 
-            **/global/exception/**
+            **/global/exception/**,
+            **/scheduler/**,
+            **/global/util/**
         '''
     }
 }

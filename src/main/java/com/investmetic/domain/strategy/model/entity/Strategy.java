@@ -70,7 +70,15 @@ public class Strategy extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private IsApproved isApproved; // 승인여부
 
-    private Integer subscriptionCount; // 구독수
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer subscriptionCount = 0; // 구독수
+
+    private Double kpRatio;
+
+    private Double smScore;
+
+    private Double zScore;
 
     @ColumnDefault("0.0")
     @Builder.Default
@@ -100,7 +108,37 @@ public class Strategy extends BaseEntity {
         }
     }
 
+    public void setZScore(Double zScore) {
+        this.zScore = zScore;
+    }
+
+    public void setKpRatio(Double kpRatio) {
+        this.kpRatio = kpRatio;
+    }
+
+    public void setSmScore(Double smScore) {
+        this.smScore = smScore;
+    }
+
     public void setIsPublic(IsPublic isPublic) {
         this.isPublic = isPublic;
+        this.isApproved = isApproved;
+        this.subscriptionCount = subscriptionCount;
+        this.averageRating = averageRating;
+        this.smScore = smScore;
+    }
+
+    public void resetStrategyDailyAnalysis() {
+        this.kpRatio = 0.0;
+        this.smScore = 0.0;
+        this.zScore = 0.0;
+    }
+
+    public void plusSubscriptionCount() {
+        this.subscriptionCount += 1;
+    }
+
+    public void minusSubscriptionCount() {
+        this.subscriptionCount -= 1;
     }
 }

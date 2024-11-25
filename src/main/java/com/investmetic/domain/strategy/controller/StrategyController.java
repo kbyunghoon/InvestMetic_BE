@@ -2,10 +2,14 @@ package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
+import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
+import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategyService;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
@@ -17,6 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +34,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,6 +45,7 @@ public class StrategyController {
     private final StrategyRegisterService strategyRegisterService;
     private final StrategyAnalysisService strategyAnalysisService;
     private final StrategyService strategyService;
+    private final StrategyListingService strategyListingService;
 
     @PostMapping("/register")
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
@@ -49,6 +58,14 @@ public class StrategyController {
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
         return BaseResponse.success(strategyRegisterService.loadStrategyRegistrationInfo());
+    }
+
+    @GetMapping("/modify/{strategyId}")
+    @Operation(summary = "전략 수정 페이지 진입 시 해당 전략 정보 조회", description = "<a href='https://field-sting-eff.notion.site/b5f3a515edd6479f8c22a40732b42475?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
+            @PathVariable Long strategyId
+    ) {
+        return BaseResponse.success(strategyRegisterService.loadStrategyModifyInfo(strategyId));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
@@ -90,5 +107,22 @@ public class StrategyController {
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + encodedFileName + "\"")
                 .body(fileDownloadResponse.getResource());
+    }
+
+    @DeleteMapping("{strategyId}/daily-analysis")
+    @Operation(summary = "전략 (일간 분석) 전체(일간 데이터) 삭제", description = "<a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId) {
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
+
+    //TODO : 스프링 시큐리티 적용시 수정
+    @Operation(summary = "트레이더 나의 전략목록 조회(마이페이지) ",
+            description = "<a href='https://www.notion.so/2ddd1d0be73a47a7a683394d77943b20' target='_blank'>API 명세서</a>")
+    @GetMapping
+    public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> searchByFilters(
+            @RequestParam Long userId,
+            @PageableDefault(size = 4) Pageable pageable) {
+        return BaseResponse.success(strategyListingService.getMyStrategies(userId,pageable));
     }
 }

@@ -15,6 +15,8 @@ import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
 import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
+import com.investmetic.domain.strategy.dto.response.common.QMyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.QStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.model.AlgorithmType;
@@ -30,6 +32,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
@@ -96,15 +99,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .fetchOne();
     }
 
-    private List<Tuple> getStockTypeInfos(Long strategyId) {
-        return queryFactory
-                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
-                .from(stockTypeGroup)
-                .join(stockTypeGroup.stockType, stockType)
-                .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
-                .fetch();
-    }
-
     private @NotNull List<String> getStockTypeIconURLs(List<Tuple> stockTypes, StringPath stockType) {
         return stockTypes.stream()
                 .map(tuple -> tuple.get(stockType))
@@ -119,7 +113,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
      * 페이징
      */
     @Override
-    public Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest request, Long userId,
+    public Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest request,
                                                         Pageable pageable) {
 
         List<StrategySimpleResponse> content = queryFactory
@@ -141,8 +135,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
-                .join(stockTypeGroup).on(stockTypeGroup.strategy.eq(strategy))
-                .join(stockTypeGroup.stockType, stockType)
                 .where(isApprovedAndPublic(), applyAllFilters(request))
                 .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
                 .offset(pageable.getOffset())
@@ -167,7 +159,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
      * 페이징
      */
     @Override
-    public Page<StrategySimpleResponse> searchByAlgorithm(AlgorithmSearchRequest request, Long userId,
+    public Page<StrategySimpleResponse> searchByAlgorithm(String searchWord, AlgorithmType algorithmType,
                                                           Pageable pageable) {
 
         List<StrategySimpleResponse> content = queryFactory
@@ -189,8 +181,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
-                .where(isApprovedAndPublic(), applySearchWordFilter(request.getSearchWord()))
-                .orderBy(getOrderByAlgorithm(request.getAlgorithmType())) // 알고리즘별로 정렬
+                .where(isApprovedAndPublic(), applySearchWordFilter(searchWord))
+                .orderBy(getOrderByAlgorithm(algorithmType)) // 알고리즘별로 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -199,25 +191,72 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
                 .from(strategy)
-                .where(isApprovedAndPublic());
+                .where(isApprovedAndPublic(), applySearchWordFilter(searchWord));
 
         // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
         // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
 
+    /**
+     * 나의 전략목록 조회(트레이더), 구독 많은수로 정렬
+     *
+     * @param userId 로그인한 트레이더 id
+     */
+    @Override
+    public Page<MyStrategySimpleResponse> findMyStrategies(Long userId, Pageable pageable) {
+
+        List<MyStrategySimpleResponse> content = queryFactory
+                .select(new QMyStrategySimpleResponse(
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        user.imageUrl,
+                        user.nickname,
+                        tradeType.tradeTypeIconURL,
+                        strategyStatistics.maxDrawdown,
+                        strategyStatistics.smScore,
+                        strategyStatistics.cumulativeProfitRate,
+                        strategyStatistics.recentYearProfitRate,
+                        strategy.subscriptionCount,
+                        strategy.averageRating,
+                        strategy.reviewCount
+                ))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .where(user.userId.eq(userId))
+                .orderBy(strategy.subscriptionCount.desc()) // 구독많은수로 정렬
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(strategy)
+                .where(user.userId.eq(userId));
+
+        // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
+        // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+
+    }
+
     // ENUM에서 알고리즘 공식 처리 (전략 패턴)
     private OrderSpecifier<?> getOrderByAlgorithm(AlgorithmType algorithmType) {
-        return algorithmType.getOrderSpecifier(strategyStatistics);
+        return algorithmType != null ? algorithmType.getOrderSpecifier(strategyStatistics)
+                : strategyStatistics.cumulativeProfitRate.desc();
     }
 
     // 수익률 그래프 데이터 조회 배치 쿼리
     @Override
-    public Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIdS) {
+    public Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIds) {
         return queryFactory
-                .select(dailyAnalysis.strategy.strategyId, dailyAnalysis.dailyDate,
+                .select(dailyAnalysis.strategy.strategyId, dailyAnalysis.dailyDate.stringValue(),
                         dailyAnalysis.cumulativeProfitLossRate)
                 .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.in(strategyIds))
                 .fetch()
                 .stream()
                 .collect(Collectors.groupingBy(
@@ -227,12 +266,13 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 종목 아이콘목록 조회 배치 쿼리
     @Override
-    public Map<Long, List<String>> findStockTypeIconsMap(List<Long> strategyIdS) {
+    public Map<Long, List<String>> findStockTypeIconsMap(List<Long> strategyIds) {
         // 종목 아이콘 조회
         List<Tuple> stockTypeIcons = queryFactory
                 .select(stockTypeGroup.strategy.strategyId, stockType.stockTypeIconURL)
                 .from(stockTypeGroup)
                 .join(stockTypeGroup.stockType, stockType)
+                .where(stockTypeGroup.stockType.stockTypeId.in(strategyIds))
                 .fetch();
 
         Map<Long, List<String>> stockTypeIconUrlsMap = new HashMap<>();
@@ -249,12 +289,12 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 구독여부 조회 배치 쿼리
     @Override
-    public Map<Long, Boolean> findBySubscriptionMap(Long userId, List<Long> strategyIdS) {
+    public Map<Long, Boolean> findBySubscriptionMap(Long userId, List<Long> strategyIds) {
         // 구독 여부 조회
         return queryFactory
                 .select(subscription.strategy.strategyId, subscription.user.userId)
                 .from(subscription)
-                .where(subscription.user.userId.eq(userId))
+                .where(subscription.user.userId.eq(userId), subscription.strategy.strategyId.in(strategyIds))
                 .fetch()
                 .stream().collect(Collectors.toMap(
                         tuple -> tuple.get(subscription.strategy.strategyId),
@@ -293,17 +333,28 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 운용방식(매매유형) 필터
     private BooleanExpression applyTradeTypeFilter(List<String> tradeTypeNames) {
-        return tradeTypeNames == null ? null : tradeType.tradeTypeName.in(tradeTypeNames);
+        return tradeTypeNames == null || tradeTypeNames.isEmpty() ? null : tradeType.tradeTypeName.in(tradeTypeNames);
     }
 
     // 운용주기 필터 (데이/포지션)
     private BooleanExpression applyOperationCycleFilter(List<OperationCycle> operationCycles) {
-        return operationCycles == null ? null : strategy.operationCycle.in(operationCycles);
+        return operationCycles == null || operationCycles.isEmpty() ? null
+                : strategy.operationCycle.in(operationCycles);
     }
 
     // 운용종목 필터
     private BooleanExpression applyStockTypeFilter(List<String> stockTypeNames) {
-        return stockTypeNames == null ? null : stockType.stockTypeName.in(stockTypeNames);
+        if (stockTypeNames == null || stockTypeNames.isEmpty()) {
+            return null;
+        }
+
+        return strategy.strategyId.in(
+                JPAExpressions
+                        .select(stockTypeGroup.strategy.strategyId)
+                        .from(stockTypeGroup)
+                        .join(stockTypeGroup.stockType, stockType)
+                        .where(stockType.stockTypeName.in(stockTypeNames))
+        );
     }
 
     // 운용기간 필터

@@ -49,8 +49,7 @@ public class StrategyDetailService {
 
     // 일간 분석 조회
     public PageResponseDto<DailyAnalysisResponse> getDailyAnalysis(Long strategyId, Pageable pageable) {
-        Page<DailyAnalysisResponse> page = dailyAnalysisRepository.findByStrategyId(strategyId, pageable)
-                .map(DailyAnalysisResponse::from);
+        Page<DailyAnalysisResponse> page = dailyAnalysisRepository.findByStrategyId(strategyId, pageable);
 
         return new PageResponseDto<>(page);
     }
@@ -97,9 +96,20 @@ public class StrategyDetailService {
         List<Double> yAxis = dailyAnalysisRepository.findYAxis(strategyId, option);
 
         return StrategyAnalysisResponse.builder()
-                .xAxis(xAxis)
-                .yAxis(Map.of(option.name(), yAxis))
+                .dates(xAxis)
+                .data(Map.of(option.name(), yAxis))
                 .build();
+    }
+
+    public List<DailyAnalysisResponse> getDailyAnalysisExcelData(Long strategyId) {
+        return dailyAnalysisRepository.findDailyAnalysisForExcel(strategyId);
+    }
+
+    public List<MonthlyAnalysisResponse> getMonthlyAnalysisExcelData(Long strategyId) {
+        return monthlyAnalysisRepository.findByStrategyStrategyId(strategyId)
+                .stream()
+                .map(MonthlyAnalysisResponse::from)
+                .toList();
     }
 
 }
