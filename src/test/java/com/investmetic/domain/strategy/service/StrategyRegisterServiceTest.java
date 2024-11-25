@@ -14,8 +14,10 @@ import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.strategy.model.entity.StockType;
+import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
@@ -54,6 +56,9 @@ class StrategyRegisterServiceTest {
     private StockTypeRepository stockTypeRepository;
 
     @Mock
+    private StockTypeGroupRepository stockTypeGroupRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     private StrategyRegisterRequestDto requestDto;
@@ -70,70 +75,80 @@ class StrategyRegisterServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Mock 데이터 생성
+
         tradeTypeList = List.of(
-                new TradeType(1L, "TradeType1", true, "https://example.com/TradeType1.png"),
-                new TradeType(2L, "TradeType2", true, "https://example.com/TradeType2.png")
+                TradeType.builder().tradeTypeId(1L).tradeTypeName("TradeType1").activateState(true)
+                        .tradeTypeIconURL("https://example.com/TradeType1.png").build(),
+                TradeType.builder().tradeTypeId(2L).tradeTypeName("TradeType2").activateState(true)
+                        .tradeTypeIconURL("https://example.com/TradeType2.png").build()
         );
 
         stockTypeList = List.of(
-                new StockType(1L, "StockType1", true, "https://example.com/StockType1.png"),
-                new StockType(2L, "StockType2", true, "https://example.com/StockType2.png")
+                StockType.builder().stockTypeId(1L).stockTypeName("StockType1").activateState(true)
+                        .stockTypeIconURL("https://example.com/StockType1.png").build(),
+                StockType.builder().stockTypeId(2L).stockTypeName("StockType2").activateState(true)
+                        .stockTypeIconURL("https://example.com/StockType2.png").build()
         );
 
-        // 테스트용 유저 생성
         user = User.builder()
                 .userName("testUser")
                 .nickname("Tester")
                 .email("test@example.com")
                 .build();
 
-        // 테스트용 요청 DTO 생성
         requestDto = StrategyRegisterRequestDto.builder()
                 .strategyName("Test Strategy")
                 .tradeTypeId(1L)
                 .operationCycle(OperationCycle.DAY)
+                .stockTypeIds(List.of(1L, 2L))
                 .minimumInvestmentAmount(MinimumInvestmentAmount.ABOVE_100M)
-                .proposalFile(ProposalFileDto.builder().proposalFileName("test.xls").proposalFileSize(1024).build())
+                .proposalFile(ProposalFileDto.builder()
+                        .proposalFileName("test.xls")
+                        .proposalFileSize(1024)
+                        .build())
                 .build();
     }
 
+
     @Test
     @DisplayName("전략 등록 테스트")
-    void registerStrategySuccessTest() {
-        // given
-        TradeType tradeType = TradeType.builder().tradeTypeId(1L).tradeTypeName("Swing Trading").build();
+    void 테스트_1() {
+
+        TradeType tradeType = tradeTypeList.get(0);
         String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.pdf";
         String proposalFilePath = "strategies/proposals/test.pdf";
 
-        // Mocking
         when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeId(anyLong())).thenReturn(java.util.Optional.of(tradeType));
         when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
+        when(stockTypeRepository.findById(anyLong()))
+                .thenAnswer(invocation -> stockTypeList.stream()
+                        .filter(stockType -> stockType.getStockTypeId().equals(invocation.getArgument(0)))
+                        .findFirst());
         when(strategyRepository.save(any(Strategy.class))).thenReturn(Strategy.builder().build());
+        when(stockTypeGroupRepository.save(any(StockTypeGroup.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // when
         PresignedUrlResponseDto responseDto = strategyRegisterService.registerStrategy(requestDto);
 
-        // then
         assertEquals(presignedUrl, responseDto.getPresignedUrl());
     }
 
     @Test
     @DisplayName("유저 검증 테스트")
-    void notFoundUserTest() {
-        // given
+    void 테스트_2() {
+
         when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
 
-        // when & then
         assertThrows(BusinessException.class, () -> strategyRegisterService.registerStrategy(requestDto),
                 ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
 
     @Test
     @DisplayName("TradeType과 StockType 목록 요청 테스트")
-    void loadStrategyRegistrationInfoTest() {
+    void 테스트_3() {
+
         when(tradeTypeRepository.findByActivateStateTrue()).thenReturn(tradeTypeList);
         when(stockTypeRepository.findAll()).thenReturn(stockTypeList);
 

@@ -17,8 +17,7 @@ public class ReviewDetailResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
     private final int starRating;
-    private final boolean isOwner;
-
+    private final Boolean isOwner;
 
     // 정적 팩토리 메서드
     public static ReviewDetailResponse from(Review review, User user) {
