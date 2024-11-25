@@ -26,7 +26,7 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
         }
 
         // 응답 설정
-        response.setStatus(errorCode.getStatusCode());
+        response.setStatus(errorCode.getStatus().value());
         response.setContentType("application/json; charset=UTF-8"); // Content-Type에 UTF-8 설정
 
         mapper.writeValue(response.getWriter(), Map.of(
