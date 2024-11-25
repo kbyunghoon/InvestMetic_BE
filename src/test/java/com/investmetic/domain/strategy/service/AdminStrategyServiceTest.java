@@ -2,12 +2,16 @@ package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.model.IsApproved;
+import com.investmetic.domain.strategy.model.IsPublic;
+import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
+import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,20 +43,31 @@ public class AdminStrategyServiceTest {
         userRepository.save(user);
         TradeType tradeType = TestEntityFactory.createTestTradeType();
         tradeTypeRepository.save(tradeType);
-        Strategy strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+        Strategy strategy = Strategy.builder()
+                .user(user)
+                .tradeType(tradeType)
+                .strategyName("매매 전략")
+                .operationCycle(OperationCycle.DAY)
+                .minimumInvestmentAmount(MinimumInvestmentAmount.ABOVE_100M)
+                .strategyDescription("전략상세")
+                .proposalFilePath("http://~")
+                .isPublic(IsPublic.PUBLIC)
+                .isApproved(IsApproved.PENDING)
+                .subscriptionCount(100).build();
         strategyRepository.save(strategy);
 
         //기본 승인 유무 확인
-        assertEquals(strategy.getIsApproved(), IsApproved.APPROVED);
+        assertEquals(strategy.getIsApproved(), IsApproved.PENDING);
 
         // 승인 거부로 변경
         adminStrategyService.AproveRejectStrategy(strategy.getStrategyId(), IsApproved.DENY);
-        Strategy DBStrategy = strategyRepository.getReferenceById(strategy.getStrategyId());
-        assertEquals(DBStrategy.getIsApproved(), IsApproved.DENY);
+        List<Strategy> DBstrategys = strategyRepository.findAll();
+
+        assertEquals(DBstrategys.get(DBstrategys.size()-1).getIsApproved(), IsApproved.DENY);
 
         //승인으로 변경
         adminStrategyService.AproveRejectStrategy(strategy.getStrategyId(), IsApproved.APPROVED);
-        DBStrategy = strategyRepository.getReferenceById(strategy.getStrategyId());
-        assertEquals(DBStrategy.getIsApproved(), IsApproved.APPROVED);
+        DBstrategys = strategyRepository.findAll();
+        assertEquals(DBstrategys.get(DBstrategys.size()-1).getIsApproved(), IsApproved.APPROVED);
     }
 }
