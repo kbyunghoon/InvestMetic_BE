@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
+import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
@@ -124,7 +125,7 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> getMyStrategies(
             @RequestParam Long userId,
             @PageableDefault(size = 4) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getMyStrategies(userId,pageable));
+        return BaseResponse.success(strategyListingService.getMyStrategies(userId, pageable));
     }
 
     //TODO : 스프링 시큐리티 적용시 수정
@@ -134,7 +135,17 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getSubscribedStrategies(
             @RequestParam Long userId,
             @PageableDefault(size = 8) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getSubscribedStrategies(userId,pageable));
+        return BaseResponse.success(strategyListingService.getSubscribedStrategies(userId, pageable));
+    }
+
+    //TODO : 스프링 시큐리티 적용시 수정
+    @Operation(summary = "나의 전략 일간분석 조회(마이페이지) ",
+            description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
+    @GetMapping("/{strategyId}/daily-analysis")
+    public ResponseEntity<BaseResponse<PageResponseDto<DailyAnalysisResponse>>> getMyDailyAnalysis(
+            @PathVariable Long strategyId,
+            @PageableDefault(size = 5, sort = "dailyDate", direction = Direction.DESC) Pageable pageable) {
+        return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
 }
