@@ -4,7 +4,6 @@ import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
-import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import java.util.List;
 import lombok.AccessLevel;
@@ -19,9 +18,9 @@ import lombok.NoArgsConstructor;
 public class StrategyModifyInfoResponseDto {
     private String strategyName;
     private TradeTypeDto tradeType;
-    private OperationCycle operationCycle;
     private List<StockTypeDto> stockTypes;
     private MinimumInvestmentAmount minimumInvestmentAmount;
+    private OperationCycle operationCycle;
     //    private String proposalFileUrl;
     private String description;
 
