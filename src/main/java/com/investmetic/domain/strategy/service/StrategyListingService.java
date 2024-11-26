@@ -3,12 +3,16 @@ package com.investmetic.domain.strategy.service;
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
 import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
-import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
+import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.SearchInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.BaseStrategyResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
-import com.investmetic.domain.strategy.model.AlgorithmType;
+import com.investmetic.domain.strategy.model.entity.StockType;
+import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.querydsl.core.Tuple;
 import java.util.List;
@@ -18,44 +22,30 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 //TODO : 조회 성능개선 예정
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class StrategyListingService {
 
     private final StrategyRepository strategyRepository;
+    private final StockTypeRepository stockTypeRepository;
+    private final TradeTypeRepository tradeTypeRepository;
+
 
     /**
-     * 필터 기반 전략목록 조회 - (구독 여부 포함)
+     * 항목 + 알고리즘 기반 전략목록 조회 (구독여부 포함)
      *
      * @param request  전략 검색필터 요청
      * @param userId   로그인한 유저id
      * @param pageable 페이징 정보
-     * @return : 전략 목록에 대한 페이지 응답
-     */
-    public PageResponseDto<StrategySimpleResponse> searchByFilters(FilterSearchRequest request, Long userId,
-                                                                   Pageable pageable) {
-        // 데이터 조회
-        Page<StrategySimpleResponse> content = strategyRepository.searchByFilters(request, pageable);
-        Map<Long, Boolean> subscriptionMap = generateSubscriptionMap(userId, getStrategyIds(content));
-        return processStrategyResponses(content, subscriptionMap);
-    }
-
-    /**
-     * 알고리즘 기반 전략목록 조회 - (구독여부 포함)
-     *
-     * @param searchWord    검색어
-     * @param algorithmType 알고리즘별 타입
-     * @param userId        로그인한 유저id
-     * @param pageable      페이징 정보
      * @return 전략 목록에 대한 페이지 응답
      */
-    public PageResponseDto<StrategySimpleResponse> searchByAlgorithm(String searchWord, AlgorithmType algorithmType,
-                                                                     Long userId, Pageable pageable) {
+    public PageResponseDto<StrategySimpleResponse> search(SearchRequest request, Long userId, Pageable pageable) {
         // 데이터 조회
-        Page<StrategySimpleResponse> content = strategyRepository.searchByAlgorithm(searchWord, algorithmType,
-                pageable);
+        Page<StrategySimpleResponse> content = strategyRepository.searchBy(request, pageable);
         Map<Long, Boolean> subscriptionMap = generateSubscriptionMap(userId, getStrategyIds(content));
         return processStrategyResponses(content, subscriptionMap);
     }
@@ -187,4 +177,10 @@ public class StrategyListingService {
                 .build();
     }
 
+    //TODO : 캐시 적용해야댐
+    public SearchInfoResponseDto loadSearchInfo() {
+        List<StockType> stockTypes = stockTypeRepository.findAll();
+        List<TradeType> tradeTypes = tradeTypeRepository.findAll();
+        return SearchInfoResponseDto.from(stockTypes, tradeTypes);
+    }
 }
