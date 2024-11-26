@@ -1,0 +1,52 @@
+name: PR Build Test
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  build:
+    name: Build and Test Spring Boot Application
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. Set up JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Cache Gradle Dependencies
+      - name: Cache Gradle Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 4. Grant Execute Permission for Gradle Wrapper
+      - name: Grant Execute Permission for Gradle Wrapper
+        run: chmod +x gradlew
+
+      # 5. Run Gradle Build
+      - name: Run Gradle Build
+        run: ./gradlew build --no-daemon --stacktrace
+
+      # 6. Run Tests
+      - name: Run Tests
+        run: ./gradlew test --no-daemon --stacktrace
+
+      # 7. Upload Test Results (Optional)
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: build/reports/tests/test
