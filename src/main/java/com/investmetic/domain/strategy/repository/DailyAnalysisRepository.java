@@ -12,12 +12,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long>, DailyAnalysisRepositoryCustom {
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = false")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = 'NO'")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsFalse(
             @Param("strategy") Strategy strategy,
             @Param("dailyDate") LocalDate dailyDate);
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = true")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = 'YES'")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsTrue(
             @Param("strategy") Strategy strategy,
             @Param("dailyDate") LocalDate dailyDate);
@@ -49,16 +49,16 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategy(@Param("strategyId") Long strategyId);
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.proceed = false")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.proceed = 'NO'")
     List<DailyAnalysis> findAllByProceedIsFalse();
 
     @Query("""
             SELECT d FROM DailyAnalysis d
-                WHERE d.proceed = false
+                WHERE d.proceed = 'NO'
                   AND d.dailyDate = (
                       SELECT MIN(d2.dailyDate) FROM DailyAnalysis d2
                       WHERE d2.strategy.strategyId = d.strategy.strategyId
-                        AND d2.proceed = false
+                        AND d2.proceed = 'NO'
                   )
                 ORDER BY d.dailyDate ASC
             """)

@@ -1,6 +1,7 @@
 package com.investmetic.global.scheduler;
 
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
+import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -160,7 +161,7 @@ public class DailyAnalysisScheduler {
                     .roa(RoundUtil.roundToFifth(roa))
                     .coefficientOfVariation(RoundUtil.roundToFifth(coefficientOfVariation))
                     .sharpRatio(RoundUtil.roundToFifth(sharpRatio))
-                    .proceed(true)
+                    .proceed(Proceed.YES)
                     .build();
             dailyAnalysisRepository.save(dailyAnalysis);
             return;
@@ -470,7 +471,7 @@ public class DailyAnalysisScheduler {
                 .maxDrawDownInRate(RoundUtil.roundToFifth(maxDrawDownInRate))
                 .kpRatio(RoundUtil.roundToFifth(kpRatio))
                 .drawDownPeriod(drawDownPeriod)
-                .proceed(true)
+                .proceed(Proceed.YES)
                 .build();
 
         dailyAnalysisRepository.save(dailyAnalysis);
