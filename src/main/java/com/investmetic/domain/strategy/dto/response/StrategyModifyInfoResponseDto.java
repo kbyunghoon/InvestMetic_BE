@@ -22,7 +22,7 @@ public class StrategyModifyInfoResponseDto {
     private OperationCycle operationCycle;
     private List<StockTypeDto> stockTypes;
     private MinimumInvestmentAmount minimumInvestmentAmount;
-    private String proposalFileUrl;
+    //    private String proposalFileUrl;
     private String description;
 
     @Builder
@@ -32,7 +32,7 @@ public class StrategyModifyInfoResponseDto {
         this.tradeType = tradeType;
         this.operationCycle = strategy.getOperationCycle();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
-        this.proposalFileUrl = strategy.getProposalFilePath();
+//        this.proposalFileUrl = strategy.getProposalFilePath();
         this.description = strategy.getStrategyDescription();
     }
 }
