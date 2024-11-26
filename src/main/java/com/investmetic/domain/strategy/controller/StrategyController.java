@@ -1,6 +1,7 @@
 package com.investmetic.domain.strategy.controller;
 
-import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
@@ -22,7 +23,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -66,6 +66,15 @@ public class StrategyController {
             @PathVariable Long strategyId
     ) {
         return BaseResponse.success(strategyRegisterService.loadStrategyModifyInfo(strategyId));
+    }
+
+    @PostMapping("/modify/{strategyId}")
+    @Operation(summary = "전략 수정", description = "<a href='https://field-sting-eff.notion.site/cec6a33cd3ba4d598fd31793c6d086cc?pvs=4' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> modifyStrategyInfo(
+            @PathVariable Long strategyId,
+            @RequestBody StrategyModifyRequestDto requestDto
+    ) {
+        return BaseResponse.success(strategyRegisterService.modifyStrategy(strategyId, requestDto));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
@@ -123,6 +132,6 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> searchByFilters(
             @RequestParam Long userId,
             @PageableDefault(size = 4) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getMyStrategies(userId,pageable));
+        return BaseResponse.success(strategyListingService.getMyStrategies(userId, pageable));
     }
 }

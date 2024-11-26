@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
-import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
@@ -32,6 +36,7 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,6 +68,7 @@ class StrategyRegisterServiceTest {
 
     private StrategyRegisterRequestDto requestDto;
     private User user;
+    private Strategy strategy;
 
     private List<TradeType> tradeTypeList;
     private List<StockType> stockTypeList;
@@ -107,6 +113,10 @@ class StrategyRegisterServiceTest {
                         .proposalFileSize(1024)
                         .build())
                 .build();
+
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
+
+        strategy = TestEntityFactory.createTestStrategy(user, tradeType);
     }
 
 
@@ -115,11 +125,11 @@ class StrategyRegisterServiceTest {
     void 테스트_1() {
 
         TradeType tradeType = tradeTypeList.get(0);
-        String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.pdf";
-        String proposalFilePath = "strategies/proposals/test.pdf";
+        String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.xls";
+        String proposalFilePath = "strategies/proposals/test.xls";
 
-        when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.of(user));
-        when(tradeTypeRepository.findByTradeTypeId(anyLong())).thenReturn(java.util.Optional.of(tradeType));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(tradeTypeRepository.findByTradeTypeId(anyLong())).thenReturn(Optional.of(tradeType));
         when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
         when(stockTypeRepository.findById(anyLong()))
@@ -170,5 +180,93 @@ class StrategyRegisterServiceTest {
         StockTypeDto stockTypeDto = responseDto.getStockTypes().get(0);
         assertThat(stockTypeDto.getStockTypeName()).isEqualTo("StockType1");
         assertThat(stockTypeDto.getStockIconUrl()).isEqualTo("https://example.com/StockType1.png");
+    }
+
+
+    @Test
+    @DisplayName("전략 수정 성공")
+    void 테스트_4() {
+        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+                .strategyName("Updated Strategy")
+                .proposalFile(
+                        ProposalFileDto.builder()
+                                .proposalFileName("proposal.xls")
+                                .proposalFileSize(1024)
+                                .build()
+                )
+                .description("Updated description")
+                .build();
+
+        String proposalFilePath = "strategies/proposals/proposal.xls";
+        String presignedUrl = "https://s3.amazonaws.com/test-bucket/proposal.xls";
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(strategyRepository.findById(anyLong())).thenReturn(Optional.of(strategy));
+        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "proposal.xls", 1024))
+                .thenReturn(proposalFilePath);
+        when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
+
+        PresignedUrlResponseDto responseDto = strategyRegisterService.modifyStrategy(1L, requestDto);
+
+        assertThat(responseDto).isNotNull();
+        assertThat(responseDto.getPresignedUrl()).isEqualTo(presignedUrl);
+
+        verify(strategyRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("전략 수정 실패 - 전략 미존재")
+    void 테스트_5() {
+        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+                .strategyName("Updated Strategy")
+                .proposalFile(
+                        ProposalFileDto.builder()
+                                .proposalFileName("proposal.pdf")
+                                .proposalFileSize(1024)
+                                .build()
+                )
+                .description("Updated description")
+                .build();
+
+        User user = TestEntityFactory.createTestUser();
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(strategyRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyRegisterService.modifyStrategy(1L, requestDto)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.STRATEGY_NOT_FOUND);
+
+        verify(strategyRepository).findById(1L);
+    }
+
+    @Test
+    @DisplayName("전략 수정 실패 - 사용자 미존재")
+    void 테스트_6() {
+        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+                .strategyName("Updated Strategy")
+                .proposalFile(
+                        ProposalFileDto.builder()
+                                .proposalFileName("proposal.pdf")
+                                .proposalFileSize(1024)
+                                .build()
+                )
+                .description("Updated description")
+                .build();
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyRegisterService.modifyStrategy(1L, requestDto)
+        );
+
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ENTITY_NOT_FOUND);
+
+        verify(userRepository).findById(1L);
+        verify(strategyRepository, never()).findById(anyLong());
     }
 }

@@ -1,7 +1,8 @@
 package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.strategy.dto.StockTypeDto;
-import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
@@ -64,6 +65,7 @@ public class StrategyRegisterService {
                 .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
                 .proposalFilePath(proposalFilePath)
+                .strategyDescription(requestDto.getDescription())
                 .build();
 
         strategyRepository.save(strategy);
@@ -79,6 +81,35 @@ public class StrategyRegisterService {
 
             stockTypeGroupRepository.save(stockTypeGroup);
         });
+
+        return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
+    }
+
+
+    @Transactional
+    public PresignedUrlResponseDto modifyStrategy(
+            Long strategyId,
+            StrategyModifyRequestDto requestDto) {
+        // TODO: 추후 삭제 ----------
+        // TODO: 유저 가져오기, tradeType 가져오기, stockType 추가 예정
+        User user = userRepository.findById(1L)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
+        // TODO: 추후 삭제 ----------
+
+        // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
+        String proposalFilePath = s3FileService.getS3Path(
+                FilePath.STRATEGY_PROPOSAL,
+                requestDto.getProposalFile().getProposalFileName(),
+                requestDto.getProposalFile().getProposalFileSize()
+        );
+
+        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
+
+        Strategy strategy = strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        strategy.modifyStrategy(requestDto.getStrategyName(), proposalFilePath, requestDto.getDescription());
 
         return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
     }

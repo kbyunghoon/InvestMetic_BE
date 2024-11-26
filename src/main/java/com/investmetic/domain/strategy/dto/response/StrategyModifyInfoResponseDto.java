@@ -21,6 +21,7 @@ public class StrategyModifyInfoResponseDto {
     private List<Long> stockTypeIds;
     private MinimumInvestmentAmount minimumInvestmentAmount;
     private String proposalFileUrl;
+    private String description;
 
     @Builder
     public StrategyModifyInfoResponseDto(Strategy strategy, List<StockType> stockTypes) {
@@ -32,5 +33,6 @@ public class StrategyModifyInfoResponseDto {
                 .toList();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
         this.proposalFileUrl = strategy.getProposalFilePath();
+        this.description = strategy.getStrategyDescription();
     }
 }

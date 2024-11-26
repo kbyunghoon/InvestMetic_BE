@@ -134,6 +134,12 @@ public class Strategy extends BaseEntity {
         this.zScore = 0.0;
     }
 
+    public void modifyStrategy(String strategyName, String proposalFilePath, String strategyDescription) {
+        this.strategyName = strategyName;
+        this.proposalFilePath = proposalFilePath;
+        this.strategyDescription = strategyDescription;
+    }
+
     public void plusSubscriptionCount() {
         this.subscriptionCount += 1;
     }
