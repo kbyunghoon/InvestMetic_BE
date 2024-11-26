@@ -170,4 +170,9 @@ public class DailyAnalysis extends BaseEntity {
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private Proceed proceed = Proceed.YES; // 등록, 수정 시 NO
+
+    public void modifyDailyAnalysis(Long transaction, Long dailyProfitLoss) {
+        this.transaction = transaction;
+        this.dailyProfitLoss = dailyProfitLoss;
+    }
 }
