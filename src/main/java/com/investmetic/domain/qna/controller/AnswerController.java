@@ -2,6 +2,7 @@ package com.investmetic.domain.qna.controller;
 
 import com.investmetic.domain.qna.dto.request.AnswerRequestDto;
 import com.investmetic.domain.qna.service.AnswerService;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
 import jakarta.validation.Valid;
@@ -25,10 +26,10 @@ public class AnswerController {
     @PostMapping("/trader/questions/{questionId}/answers")
     public ResponseEntity<BaseResponse<Void>> addAnswer(
             @PathVariable Long questionId,
-            @RequestParam Long traderId,
+            @RequestParam Long userId,
             @RequestBody @Valid AnswerRequestDto answerRequestDto) {
 
-        answerService.createAnswer(questionId, traderId, answerRequestDto);
+        answerService.createAnswer(questionId, userId, answerRequestDto);
         return BaseResponse.success(SuccessCode.CREATED);
     }
 
@@ -36,16 +37,19 @@ public class AnswerController {
     @DeleteMapping("/trader/questions/{questionId}/answers/{answerId}")
     public ResponseEntity<BaseResponse<Void>> deleteTraderAnswer(
             @PathVariable Long questionId,
-            @PathVariable Long answerId) {
-        answerService.deleteAnswer(questionId, answerId, "trader");
+            @PathVariable Long answerId,
+            @RequestParam Long userId
+            ) {
+        answerService.deleteAnswer(answerId, questionId, Role.TRADER, userId);
         return BaseResponse.success(SuccessCode.DELETED);
     }
     //문의 답변 삭제 (관리자)
     @DeleteMapping("/admin/questions/{questionId}/answers/{answerId}")
     public ResponseEntity<BaseResponse<Void>> deleteAdminAnswer(
             @PathVariable Long questionId,
-            @PathVariable Long answerId) {
-        answerService.deleteAnswer(questionId, answerId, "admin");
+            @PathVariable Long answerId,
+            @RequestParam Long userId) {
+        answerService.deleteAnswer(answerId, questionId, Role.SUPER_ADMIN, userId);
         return BaseResponse.success(SuccessCode.DELETED);
     }
 }

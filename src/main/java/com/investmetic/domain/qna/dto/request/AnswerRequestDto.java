@@ -1,18 +1,18 @@
 package com.investmetic.domain.qna.dto.request;
 
-import com.investmetic.domain.qna.model.entity.Answer;
-import com.investmetic.domain.qna.model.entity.Question;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
+@NoArgsConstructor
 public class AnswerRequestDto {
-    @NotBlank
+    @NotBlank(message = "문의 내용을 입력해주세요.")
     private String content;
 
-    public Answer toEntity(Question question) {
-        return Answer.createAnswer(question, content);
+    @Builder
+    public AnswerRequestDto(String content){
+        this.content = content;
     }
 }
