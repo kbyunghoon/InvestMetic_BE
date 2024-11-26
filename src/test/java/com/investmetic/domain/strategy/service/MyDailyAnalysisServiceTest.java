@@ -54,14 +54,18 @@ class MyDailyAnalysisServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 사용자 생성 및 영속화
         User user = TestEntityFactory.createTestUser();
-        userRepository.save(user);
-        TradeType tradeType = TestEntityFactory.createTestTradeType();
-        tradeTypeRepository.save(tradeType);
-        strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+        user = userRepository.save(user); // 영속화
 
-        // 전략 저장 및 영속화
-        strategyRepository.save(strategy);
+        // 거래 유형 생성 및 영속화
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
+        tradeType = tradeTypeRepository.save(tradeType); // 영속화
+
+        // 전략 생성 및 영속화
+        strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+        strategy = strategyRepository.save(strategy);
+
         em.flush(); // 데이터베이스에 반영
         em.clear(); // 영속성 컨텍스트 초기화
     }
