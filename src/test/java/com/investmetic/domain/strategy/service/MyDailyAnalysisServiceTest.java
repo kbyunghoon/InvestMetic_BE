@@ -9,8 +9,12 @@ import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -32,15 +36,38 @@ class MyDailyAnalysisServiceTest {
     private StrategyAnalysisService strategyAnalysisService;
 
     @Autowired
+    private StrategyRepository strategyRepository;
+
+    @Autowired
+    private TradeTypeRepository tradeTypeRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private DailyAnalysisRepository dailyAnalysisRepository;
+
+    @Autowired
+    private EntityManager em;
 
     private Strategy strategy;
 
     @BeforeEach
     void setUp() {
+        // 사용자 생성 및 영속화
         User user = TestEntityFactory.createTestUser();
+        user = userRepository.save(user); // 영속화
+
+        // 거래 유형 생성 및 영속화
         TradeType tradeType = TestEntityFactory.createTestTradeType();
+        tradeType = tradeTypeRepository.save(tradeType); // 영속화
+
+        // 전략 생성 및 영속화
         strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+        strategy = strategyRepository.save(strategy);
+
+        em.flush(); // 데이터베이스에 반영
+        em.clear(); // 영속성 컨텍스트 초기화
     }
 
     @Test
@@ -65,6 +92,9 @@ class MyDailyAnalysisServiceTest {
 
         dailyAnalysisRepository.save(dailyAnalysis1);
         dailyAnalysisRepository.save(dailyAnalysis2);
+
+        em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -103,6 +133,9 @@ class MyDailyAnalysisServiceTest {
 
         dailyAnalysisRepository.save(dailyAnalysis1);
         dailyAnalysisRepository.save(dailyAnalysis2);
+
+        em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
 
