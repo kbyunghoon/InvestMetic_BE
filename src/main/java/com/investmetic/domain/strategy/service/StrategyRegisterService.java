@@ -128,17 +128,26 @@ public class StrategyRegisterService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        List<StockType> stockTypes = stockTypeGroupRepository.findStockTypeIdsByStrategy(strategy);
+        TradeTypeDto tradeTypeDto = TradeTypeDto.fromEntity(strategy.getTradeType());
 
         return StrategyModifyInfoResponseDto.builder()
                 .strategy(strategy)
-                .stockTypes(stockTypes)
+                .stockTypes(getStrategyStockTypes(strategy))
+                .tradeType(tradeTypeDto)
                 .build();
     }
 
     private List<TradeTypeDto> getActiveTradeTypes() {
         return tradeTypeRepository.findByActivateStateTrue().stream()
                 .map(TradeTypeDto::fromEntity)
+                .toList();
+    }
+
+    private List<StockTypeDto> getStrategyStockTypes(Strategy strategy) {
+        List<StockType> stockTypes = stockTypeGroupRepository.findStockTypeIdsByStrategy(strategy);
+
+        return stockTypes.stream()
+                .map(StockTypeDto::from)
                 .toList();
     }
 
