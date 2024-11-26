@@ -12,7 +12,6 @@ import com.investmetic.domain.strategy.dto.response.common.StrategySimpleRespons
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.domain.strategy.service.StrategyListingService;
-import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.FileDownloadResponseDto;
@@ -47,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "전략 API", description = "전략 관련 API")
 public class StrategyController {
-    private final StrategyRegisterService strategyRegisterService;
     private final StrategyAnalysisService strategyAnalysisService;
     private final StrategyDetailService strategyDetailService;
     private final StrategyService strategyService;
@@ -57,13 +55,13 @@ public class StrategyController {
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
             @RequestBody StrategyRegisterRequestDto requestDto) {
-        return BaseResponse.success(SuccessCode.CREATED, strategyRegisterService.registerStrategy(requestDto));
+        return BaseResponse.success(SuccessCode.CREATED, strategyService.registerStrategy(requestDto));
     }
 
     @GetMapping("/register")
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
-        return BaseResponse.success(strategyRegisterService.loadStrategyRegistrationInfo());
+        return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
     }
 
     @GetMapping("/modify/{strategyId}")
@@ -71,7 +69,7 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
             @PathVariable Long strategyId
     ) {
-        return BaseResponse.success(strategyRegisterService.loadStrategyModifyInfo(strategyId));
+        return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId));
     }
 
     @PostMapping("/modify/{strategyId}")
@@ -81,7 +79,7 @@ public class StrategyController {
             @RequestBody StrategyModifyRequestDto requestDto
     ) {
         return BaseResponse.success(SuccessCode.UPDATED,
-                strategyRegisterService.modifyStrategy(strategyId, requestDto));
+                strategyService.modifyStrategy(strategyId, requestDto));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")

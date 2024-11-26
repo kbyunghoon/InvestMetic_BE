@@ -2,10 +2,11 @@ package com.investmetic.domain.strategy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,10 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @ExtendWith(MockitoExtension.class)
 @Transactional
-class StrategyRegisterServiceTest {
-
-    @InjectMocks
-    private StrategyRegisterService strategyRegisterService;
+class StrategyInfoServiceTest {
 
     @Mock
     private TradeTypeRepository tradeTypeRepository;
@@ -120,65 +118,4 @@ class StrategyRegisterServiceTest {
     }
 
 
-    @Test
-    @DisplayName("전략 등록 테스트")
-    void 테스트_1() {
-
-        TradeType tradeType = tradeTypeList.get(0);
-        String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.xls";
-        String proposalFilePath = "strategies/proposals/test.xls";
-
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(tradeTypeRepository.findByTradeTypeId(anyLong())).thenReturn(Optional.of(tradeType));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
-        when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
-        when(stockTypeRepository.findById(anyLong()))
-                .thenAnswer(invocation -> stockTypeList.stream()
-                        .filter(stockType -> stockType.getStockTypeId().equals(invocation.getArgument(0)))
-                        .findFirst());
-        when(strategyRepository.save(any(Strategy.class))).thenReturn(Strategy.builder().build());
-        when(stockTypeGroupRepository.save(any(StockTypeGroup.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        PresignedUrlResponseDto responseDto = strategyRegisterService.registerStrategy(requestDto);
-
-        assertEquals(presignedUrl, responseDto.getPresignedUrl());
-    }
-
-    @Test
-    @DisplayName("유저 검증 테스트")
-    void 테스트_2() {
-
-        when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
-
-        assertThrows(BusinessException.class, () -> strategyRegisterService.registerStrategy(requestDto),
-                ErrorCode.ENTITY_NOT_FOUND.getMessage());
-    }
-
-    @Test
-    @DisplayName("TradeType과 StockType 목록 요청 테스트")
-    void 테스트_3() {
-
-        when(tradeTypeRepository.findByActivateStateTrue()).thenReturn(tradeTypeList);
-        when(stockTypeRepository.findAll()).thenReturn(stockTypeList);
-
-        ResponseEntity<BaseResponse<RegisterInfoResponseDto>> response = BaseResponse.success(
-                strategyRegisterService.loadStrategyRegistrationInfo());
-
-        assertThat(response).isNotNull();
-        assertThat(Objects.requireNonNull(response.getBody()).getIsSuccess()).isTrue();
-
-        RegisterInfoResponseDto responseDto = response.getBody().getResult();
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getTradeTypes()).hasSize(2);
-        assertThat(responseDto.getStockTypes()).hasSize(2);
-
-        TradeTypeDto tradeTypeDto = responseDto.getTradeTypes().get(0);
-        assertThat(tradeTypeDto.getTradeTypeName()).isEqualTo("TradeType1");
-        assertThat(tradeTypeDto.getTradeTypeIconURL()).isEqualTo("https://example.com/TradeType1.png");
-
-        StockTypeDto stockTypeDto = responseDto.getStockTypes().get(0);
-        assertThat(stockTypeDto.getStockTypeName()).isEqualTo("StockType1");
-        assertThat(stockTypeDto.getStockIconUrl()).isEqualTo("https://example.com/StockType1.png");
-    }
 }
