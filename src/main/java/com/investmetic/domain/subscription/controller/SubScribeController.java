@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubScribeController {
     private final SubscriptionService subscriptionService;
     @GetMapping("/{strategyId}/subscribe")
-    public ResponseEntity<BaseResponse<Void>> subscribe(
+    public ResponseEntity<BaseResponse<Void>> Subscribe(
             @PathVariable Long strategyId,
             @RequestParam Long userId
     ) {

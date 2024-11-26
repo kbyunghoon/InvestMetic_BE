@@ -61,13 +61,13 @@ public class AdminStrategyServiceTest {
 
         // 승인 거부로 변경
         adminStrategyService.manageAproveState(strategy.getStrategyId(), IsApproved.DENY);
-        List<Strategy> DBstrategies = strategyRepository.findAll();
+        List<Strategy> strategies = strategyRepository.findAll();
 
-        assertEquals(DBstrategies.get(DBstrategies.size()-1).getIsApproved(), IsApproved.DENY);
+        assertEquals(strategies.get(strategies.size()-1).getIsApproved(), IsApproved.DENY);
 
         //승인으로 변경
         adminStrategyService.manageAproveState(strategy.getStrategyId(), IsApproved.APPROVED);
-        DBstrategies = strategyRepository.findAll();
-        assertEquals(DBstrategies.get(DBstrategies.size()-1).getIsApproved(), IsApproved.APPROVED);
+        strategies = strategyRepository.findAll();
+        assertEquals(strategies.get(strategies.size()-1).getIsApproved(), IsApproved.APPROVED);
     }
 }
