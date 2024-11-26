@@ -36,7 +36,7 @@ public class AdminStrategyServiceTest {
 
     @Test
     @DisplayName("승인 상태 변경 테스트")
-    void UserDenyTest() {
+    void userDenyApproveTest() {
 
         // 더미 데이터 입력
         User user = TestEntityFactory.createTestUser();
@@ -60,14 +60,14 @@ public class AdminStrategyServiceTest {
         assertEquals(strategy.getIsApproved(), IsApproved.PENDING);
 
         // 승인 거부로 변경
-        adminStrategyService.AproveRejectStrategy(strategy.getStrategyId(), IsApproved.DENY);
-        List<Strategy> DBstrategys = strategyRepository.findAll();
+        adminStrategyService.manageAproveState(strategy.getStrategyId(), IsApproved.DENY);
+        List<Strategy> DBstrategies = strategyRepository.findAll();
 
-        assertEquals(DBstrategys.get(DBstrategys.size()-1).getIsApproved(), IsApproved.DENY);
+        assertEquals(DBstrategies.get(DBstrategies.size()-1).getIsApproved(), IsApproved.DENY);
 
         //승인으로 변경
-        adminStrategyService.AproveRejectStrategy(strategy.getStrategyId(), IsApproved.APPROVED);
-        DBstrategys = strategyRepository.findAll();
-        assertEquals(DBstrategys.get(DBstrategys.size()-1).getIsApproved(), IsApproved.APPROVED);
+        adminStrategyService.manageAproveState(strategy.getStrategyId(), IsApproved.APPROVED);
+        DBstrategies = strategyRepository.findAll();
+        assertEquals(DBstrategies.get(DBstrategies.size()-1).getIsApproved(), IsApproved.APPROVED);
     }
 }

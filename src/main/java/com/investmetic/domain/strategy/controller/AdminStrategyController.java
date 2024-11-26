@@ -18,7 +18,7 @@ public class AdminStrategyController {
     private final AdminStrategyService adminStrategyService;
     @PatchMapping("{strategyId}")
     public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId, IsApproved isApproved) {
-        adminStrategyService.AproveRejectStrategy(strategyId, isApproved);
+        adminStrategyService.manageAproveState(strategyId, isApproved);
         return BaseResponse.success();
     }
 }

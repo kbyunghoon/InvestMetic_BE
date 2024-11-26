@@ -15,7 +15,7 @@ public class AdminStrategyService {
     private final StrategyRepository strategyRepository;
 
     @Transactional
-    public void AproveRejectStrategy(Long strategyId, IsApproved isApproved) {
+    public void manageAproveState(Long strategyId, IsApproved isApproved) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
         // Fixme : 권한 체크 로직 추가 예정
