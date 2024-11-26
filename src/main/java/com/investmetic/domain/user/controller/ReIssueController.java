@@ -1,7 +1,7 @@
 package com.investmetic.domain.user.controller;
 
 
-import com.investmetic.global.security.jwt.JWTUtil;
+import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,12 @@ public class ReIssueController {
 
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
+
+    @Value("${jwt.expiration.access}")
+    private Long accessExpiration;
+
+    @Value("${jwt.expiration.refresh}")
+    private Long refreshExpiration;
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
@@ -56,15 +63,15 @@ public class ReIssueController {
         String role = jwtUtil.getRole(refresh);
 
         //새 토큰 발급
-        String newAccess = jwtUtil.createJwt("access", username, role, 30 * 60 * 1000L); //30분
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 7 * 24 * 60 * 60 * 1000L); //7일
+        String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration); //30분
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration); //7일
 
         response.setHeader("access", "Bearer " + newAccess);
         response.addCookie(createCookie("refresh", newRefresh));
 
         //기존 refresh token 삭제
         redisUtil.deleteRefreshToken(username);
-        redisUtil.saveRefreshToken(username, newRefresh, 7 * 24 * 60 * 60 * 1000L);
+        redisUtil.saveRefreshToken(username, newRefresh, refreshExpiration);
 
         return ResponseEntity.ok(Map.of(
                 "accessToken", "Bearer " + newAccess,

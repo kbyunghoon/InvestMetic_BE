@@ -1,4 +1,4 @@
-package com.investmetic.global.security.jwt;
+package com.investmetic.global.security.filter;
 
 import com.investmetic.domain.user.dto.response.CustomUserDetails;
 import com.investmetic.domain.user.model.Role;
@@ -70,7 +70,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .role(Role.valueOf(role))
                 .build();
 
-        CustomUserDetails customUserDetails = new CustomUserDetails(user, user.getRole());
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(
                 customUserDetails,

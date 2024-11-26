@@ -1,4 +1,4 @@
-package com.investmetic.global.security.jwt;
+package com.investmetic.global.security.filter;
 
 import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;

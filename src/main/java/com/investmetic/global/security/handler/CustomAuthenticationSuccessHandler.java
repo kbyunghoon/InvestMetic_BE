@@ -1,7 +1,7 @@
 package com.investmetic.global.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.investmetic.global.security.jwt.JWTUtil;
+import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,6 +24,13 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${jwt.expiration.access}")
+    private Long accessExpiration;
+
+    @Value("${jwt.expiration.refresh}")
+    private Long refreshExpiration;
+
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -38,10 +46,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String role = auth.getAuthority();
 
         // 토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 30 * 60 * 1000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, 7 * 24 * 60 * 60 * 1000L);
+        String access = jwtUtil.createJwt("access", username, role, accessExpiration);
+        String refresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
 
-        redisUtil.saveRefreshToken(username, refresh, 7 * 24 * 60 * 60L);
+        redisUtil.saveRefreshToken(username, refresh, refreshExpiration);
 
         // 응답 헤더와 JSON 설정
         response.setHeader("access", "Bearer " + access);

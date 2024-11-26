@@ -1,7 +1,6 @@
-package com.investmetic.domain.user.service;
+package com.investmetic.global.security.service;
 
 import com.investmetic.domain.user.dto.response.CustomUserDetails;
-import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import java.util.Optional;
@@ -29,10 +28,7 @@ public class CustomUserDetailService implements UserDetailsService {
                 new UsernameNotFoundException("User not found with email: " + username)
         );
 
-        // User 객체에서 Role 가져오기
-        Role role = user.getRole();
-
         // CustomUserDetails 생성 후 반환
-        return new CustomUserDetails(user,role);
+        return new CustomUserDetails(user);
     }
 }

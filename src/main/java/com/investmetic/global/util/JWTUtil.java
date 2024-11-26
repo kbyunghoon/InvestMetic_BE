@@ -1,4 +1,4 @@
-package com.investmetic.global.security.jwt;
+package com.investmetic.global.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;

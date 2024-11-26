@@ -2,10 +2,10 @@ package com.investmetic.global.config;
 
 import com.investmetic.global.security.handler.CustomAuthenticationFailureHandler;
 import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
-import com.investmetic.global.security.jwt.CustomLogoutFilter;
-import com.investmetic.global.security.jwt.JWTFilter;
-import com.investmetic.global.security.jwt.JWTUtil;
-import com.investmetic.global.security.jwt.LoginFilter;
+import com.investmetic.global.security.filter.CustomLogoutFilter;
+import com.investmetic.global.security.filter.JWTFilter;
+import com.investmetic.global.util.JWTUtil;
+import com.investmetic.global.security.filter.LoginFilter;
 import com.investmetic.global.util.RedisUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
