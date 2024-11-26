@@ -1,16 +1,15 @@
 package com.investmetic.domain.qna.repository;
 
+import com.investmetic.domain.qna.dto.SearchCondition;
+import com.investmetic.domain.qna.dto.StateCondition;
 import com.investmetic.domain.qna.model.entity.Question;
-import com.investmetic.domain.qna.model.QnaState;
-import com.investmetic.domain.strategy.model.entity.Strategy;
-import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.model.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface QuestionRepositoryCustom {
-    Page<Question> findQuestionsForInvestor(String keyword, QnaState qnaState, User user, Pageable pageable);
 
-    Page<Question> findQuestionsForTrader(String keyword, QnaState qnaState, Strategy strategy, Pageable pageable);
-
-    Page<Question> findQuestionsForAdmin(String keyword, QnaState qnaState, Pageable pageable);
+    Page<Question> searchQuestions(Long userId, String keyword, SearchCondition searchCondition,
+                                   StateCondition stateCondition, Role role, Pageable pageable,
+                                   String strategyName, String traderName, String investorName);
 }
