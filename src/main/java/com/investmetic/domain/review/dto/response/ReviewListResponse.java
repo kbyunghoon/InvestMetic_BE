@@ -9,13 +9,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReviewListResponse {
     private final double averageRating;
-    private final int reviewCount;
     private final PageResponseDto<ReviewDetailResponse> reviews;
 
     // 정적 팩토리 메서드
-    public static ReviewListResponse createReviewListResponse(double averageRating,int reviewCount,
+    public static ReviewListResponse createReviewListResponse(double averageRating,
                                                               PageResponseDto<ReviewDetailResponse> reviews) {
-        return new ReviewListResponse(RoundUtil.roundToSecond(averageRating), reviewCount,reviews);
+        return new ReviewListResponse(RoundUtil.roundToSecond(averageRating),reviews);
     }
 
 }
