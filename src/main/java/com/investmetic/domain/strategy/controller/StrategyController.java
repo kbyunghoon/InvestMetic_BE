@@ -3,9 +3,9 @@ package com.investmetic.domain.strategy.controller;
 import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
 import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
-import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
 import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
@@ -74,7 +74,8 @@ public class StrategyController {
             @PathVariable Long strategyId,
             @RequestBody StrategyModifyRequestDto requestDto
     ) {
-        return BaseResponse.success(strategyRegisterService.modifyStrategy(strategyId, requestDto));
+        return BaseResponse.success(SuccessCode.UPDATED,
+                strategyRegisterService.modifyStrategy(strategyId, requestDto));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")

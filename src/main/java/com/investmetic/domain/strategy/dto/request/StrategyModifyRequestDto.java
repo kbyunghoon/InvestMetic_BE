@@ -12,11 +12,14 @@ public class StrategyModifyRequestDto {
     private String strategyName; // 전략명
     private ProposalFileDto proposalFile; // 제안서 파일 정보
     private String description;
+    private Boolean proposalModified;
 
     @Builder
-    public StrategyModifyRequestDto(String strategyName, ProposalFileDto proposalFile, String description) {
+    public StrategyModifyRequestDto(String strategyName, ProposalFileDto proposalFile, String description,
+                                    Boolean proposalModified) {
         this.strategyName = strategyName;
         this.proposalFile = proposalFile;
         this.description = description;
+        this.proposalModified = proposalModified;
     }
 }

@@ -97,21 +97,24 @@ public class StrategyRegisterService {
         // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
         // TODO: 추후 삭제 ----------
 
-        // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
-        String proposalFilePath = s3FileService.getS3Path(
-                FilePath.STRATEGY_PROPOSAL,
-                requestDto.getProposalFile().getProposalFileName(),
-                requestDto.getProposalFile().getProposalFileSize()
-        );
-
-        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
-
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        strategy.modifyStrategy(requestDto.getStrategyName(), proposalFilePath, requestDto.getDescription());
+        strategy.modifyStrategy(requestDto.getStrategyName(), requestDto.getDescription());
 
-        return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
+        if (requestDto.getProposalModified()) {
+            // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
+            String proposalFilePath = s3FileService.getS3Path(
+                    FilePath.STRATEGY_PROPOSAL,
+                    requestDto.getProposalFile().getProposalFileName(),
+                    requestDto.getProposalFile().getProposalFileSize()
+            );
+
+            String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
+            return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
+        } else {
+            return null;
+        }
     }
 
     public RegisterInfoResponseDto loadStrategyRegistrationInfo() {
