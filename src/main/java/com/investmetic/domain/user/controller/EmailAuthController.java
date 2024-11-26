@@ -7,10 +7,10 @@ import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -21,23 +21,22 @@ public class EmailAuthController {
     private final UserService userService;
 
     // 이메일 인증 코드 전송
-    @GetMapping("/email/{emailAddr}/authcode")
+    @GetMapping
     public ResponseEntity<BaseResponse<Void>> sendEmailPath(
-            @PathVariable String emailAddr) {
+            @RequestParam String email) {
 
         // 코드 생성 및 발송.
-        userService.sendAuthenticationCode(emailAddr); //코드 redis 저장 있어야함.
+        userService.sendAuthenticationCode(email); //코드 redis 저장 있어야함.
 
         return BaseResponse.success(SuccessCode.OK);
     }
 
     // 인증 코드 검증
-    @PostMapping("/email/{emailAddr}/authcode")
+    @PostMapping
     public ResponseEntity<BaseResponse<Void>> sendEmailAndCode(
-            @PathVariable String emailAddr,
-            @RequestBody EmailRequestDto emailRequestDto) {
+            @RequestBody EmailRequestDto requestDto) {
 
-        userService.verifyEmailCode(emailAddr, emailRequestDto.getCode());
+        userService.verifyEmailCode(requestDto.getEmail(), requestDto.getCode());
 
         return BaseResponse.success(SuccessCode.OK);
 
