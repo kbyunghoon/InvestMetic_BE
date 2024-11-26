@@ -3,6 +3,7 @@ package com.investmetic.global.security.jwt;
 import com.investmetic.domain.user.dto.response.CustomUserDetails;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.global.util.JWTUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

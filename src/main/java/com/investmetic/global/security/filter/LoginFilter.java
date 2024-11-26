@@ -1,6 +1,7 @@
 package com.investmetic.global.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

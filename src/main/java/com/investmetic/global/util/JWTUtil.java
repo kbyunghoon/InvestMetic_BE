@@ -13,7 +13,7 @@ public class JWTUtil {
 
     private final SecretKey secretKey;
 
-    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+    public JWTUtil(@Value("${jwt.secret}") String secret) {
         // 전달받은 문자열을 바이트 배열로 변환하여 SecretKeySpec 객체로 생성
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)); // HS256 알고리즘 사용
     }

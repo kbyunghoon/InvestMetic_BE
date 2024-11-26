@@ -1,5 +1,6 @@
 package com.investmetic.global.security.jwt;
 
+import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
