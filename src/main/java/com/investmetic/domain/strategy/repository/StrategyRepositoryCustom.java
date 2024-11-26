@@ -1,17 +1,21 @@
 package com.investmetic.domain.strategy.repository;
 
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.querydsl.core.Tuple;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface StrategyRepositoryCustom {
-    StrategyDetailResponse findStrategyDetail(Long strategyId);
+    Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId);
+
+    Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId);
 
     Map<Long, List<String>> findStockTypeIconsMap(List<Long> strategyIdS);
 

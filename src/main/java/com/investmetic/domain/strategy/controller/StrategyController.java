@@ -3,11 +3,13 @@ package com.investmetic.domain.strategy.controller;
 import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
+import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.service.StrategyAnalysisService;
+import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.strategy.service.StrategyRegisterService;
 import com.investmetic.domain.strategy.service.StrategyService;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StrategyController {
     private final StrategyRegisterService strategyRegisterService;
     private final StrategyAnalysisService strategyAnalysisService;
+    private final StrategyDetailService strategyDetailService;
     private final StrategyService strategyService;
     private final StrategyListingService strategyListingService;
 
@@ -146,6 +149,14 @@ public class StrategyController {
             @PathVariable Long strategyId,
             @PageableDefault(size = 5, sort = "dailyDate", direction = Direction.DESC) Pageable pageable) {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
+    }
+
+    @Operation(summary = "나의 전략 기본정보 조회(마이페이지) ",
+            description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
+    @GetMapping("/{strategyId}")
+    public ResponseEntity<BaseResponse<MyStrategyDetailResponse>> getMyStrategiesDetail(
+            @PathVariable Long strategyId) {
+        return BaseResponse.success(strategyDetailService.getMyStrategyDetail(strategyId));
     }
 
 }

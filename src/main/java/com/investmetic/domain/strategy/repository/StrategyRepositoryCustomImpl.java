@@ -12,6 +12,8 @@ import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.strategy.dto.RangeDto;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.QMyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +54,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
 
     @Override
-    public StrategyDetailResponse findStrategyDetail(Long strategyId) {
+    public Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId) {
 
         List<Tuple> stockTypes = queryFactory
                 .select(stockType.stockTypeIconURL, stockType.stockTypeName)
@@ -66,7 +69,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // 종목 이름목록
         List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
 
-        return queryFactory
+        StrategyDetailResponse response = queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
                         Expressions.constant(stockTypeIconURLs), // List를 Expression으로 변환
@@ -95,6 +98,54 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
+
+        return Optional.ofNullable(response);
+    }
+
+    @Override
+    public Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId) {
+
+        List<Tuple> stockTypes = queryFactory
+                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
+                .from(stockTypeGroup)
+                .join(stockTypeGroup.stockType, stockType)
+                .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
+                .fetch();
+
+        // 종목 아이콘 목록
+        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypes, stockType.stockTypeIconURL);
+
+        // 종목 이름목록
+        List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
+
+        MyStrategyDetailResponse response = queryFactory
+                .select(new QMyStrategyDetailResponse(
+                        strategy.strategyName,
+                        Expressions.constant(stockTypeIconURLs),
+                        tradeType.tradeTypeIconURL,
+                        Expressions.constant(stockTypeNames),
+                        tradeType.tradeTypeName,
+                        strategy.operationCycle,
+                        strategy.strategyDescription,
+                        strategy.subscriptionCount,
+                        user.imageUrl,
+                        user.nickname,
+                        strategy.minimumInvestmentAmount,
+                        strategyStatistics.initialInvestment,
+                        strategyStatistics.kpRatio,
+                        strategyStatistics.smScore,
+                        strategyStatistics.finalProfitLossDate,
+                        strategy.createdAt,
+                        strategy.isPublic,
+                        strategy.isApproved))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .where(strategy.strategyId.eq(strategyId))
+                .fetchOne();
+
+        return Optional.ofNullable(response);
     }
 
     private @NotNull List<String> getStockTypeIconURLs(List<Tuple> stockTypes, StringPath stockType) {
@@ -169,7 +220,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
                         strategy.averageRating,
-                        strategy.reviewCount
+                        strategy.reviewCount,
+                        strategy.isPublic
                 ))
                 .from(strategy)
                 .join(strategy.strategyStatistics, strategyStatistics)
