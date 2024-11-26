@@ -15,18 +15,18 @@ public class StrategyDetailResponse {
     private String strategyName;                    // 전략명
     private List<String> stockTypeIconURLs;         // 종목 아이콘 이미지 경로 리스트
     private List<String> stockTypeNames;            // 종목 이름 리스트
-    private String tradeTypeIconURL;                   // 매매 유형 이미지 경로
+    private String tradeTypeIconURL;                // 매매 유형 이미지 경로
     private String tradeTypeName;                   // 투자 종류 (자동, 반자동, 수동)
-    private OperationCycle operationCycle;         // 투자 주기 (데이, 포지션)
+    private OperationCycle operationCycle;          // 투자 주기 (데이, 포지션)
     private String strategyDescription;             // 전략 상세 소개
     private double cumulativeProfitRate;            // 누적 수익률
-    private double maxDrawdownRate;                 // 최대 자본 인하율
+    private double maxDrawdownRate;                 // 최대 자본 인하율(MDD)
     private double averageProfitLossRate;           // 평균 손익률
     private double profitFactor;                    // Profit Factor
     private double winRate;                         // 승률
     private int subscriptionCount;                  // 구독 수
     private Boolean isSubscribed;                   // 구독 여부
-    private String traderImgUrl;                        // 트레이더 프로필 이미지
+    private String traderImgUrl;                    // 트레이더 프로필 이미지
     private String nickname;                        // 트레이더 이름
     private String minimumInvestmentAmount;         // 최소 운용 금액
     private long initialInvestment;                 // 투자 원금
