@@ -1,5 +1,7 @@
 package com.investmetic.domain.strategy.service;
 
+import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
@@ -34,6 +36,7 @@ public class StrategyDetailService {
     private final MonthlyAnalysisRepository monthlyAnalysisRepository;
     private final StrategyRepository strategyRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final AccountVerificationRepository accountVerificationRepository;
 
     // 통계 조회
     public StrategyStatisticsResponse getStatistics(Long strategyId) {
@@ -120,6 +123,12 @@ public class StrategyDetailService {
                 .stream()
                 .map(MonthlyAnalysisResponse::from)
                 .toList();
+    }
+
+    public PageResponseDto<AccountImagesResponseDto> getAccountImages(Long strategyId, Pageable pageable) {
+        Page<AccountImagesResponseDto> result = accountVerificationRepository.findByStrategyId(strategyId, pageable)
+                .map(AccountImagesResponseDto::createAccountImages);
+        return new PageResponseDto<>(result);
     }
 
 }
