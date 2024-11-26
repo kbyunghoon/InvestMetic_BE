@@ -5,7 +5,7 @@ import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatisticsResponse;
-import com.investmetic.domain.strategy.exceldownload.ExcelUtils;
+import com.investmetic.global.util.exceldownload.ExcelUtils;
 import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;

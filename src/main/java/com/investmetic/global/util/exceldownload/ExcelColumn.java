@@ -1,12 +1,12 @@
-package com.investmetic.domain.strategy.exceldownload;
+package com.investmetic.global.util.exceldownload;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ExcelSheet {
-    String name();
+public @interface ExcelColumn {
+    String headerName();
 }
