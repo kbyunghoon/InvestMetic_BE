@@ -7,9 +7,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import com.investmetic.domain.strategy.dto.StockTypeDto;
-import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
-import com.investmetic.domain.strategy.dto.TradeTypeDto;
+import com.investmetic.domain.strategy.dto.object.StockTypeDto;
+import com.investmetic.domain.strategy.dto.object.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.object.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;

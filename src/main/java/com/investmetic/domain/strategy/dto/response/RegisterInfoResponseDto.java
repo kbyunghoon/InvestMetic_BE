@@ -1,7 +1,7 @@
 package com.investmetic.domain.strategy.dto.response;
 
-import com.investmetic.domain.strategy.dto.StockTypeDto;
-import com.investmetic.domain.strategy.dto.TradeTypeDto;
+import com.investmetic.domain.strategy.dto.object.StockTypeDto;
+import com.investmetic.domain.strategy.dto.object.TradeTypeDto;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;

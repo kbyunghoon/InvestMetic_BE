@@ -1,8 +1,8 @@
 package com.investmetic.domain.strategy.service;
 
-import com.investmetic.domain.strategy.dto.StockTypeDto;
-import com.investmetic.domain.strategy.dto.StrategyRegisterRequestDto;
-import com.investmetic.domain.strategy.dto.TradeTypeDto;
+import com.investmetic.domain.strategy.dto.object.StockTypeDto;
+import com.investmetic.domain.strategy.dto.object.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.object.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
 import com.investmetic.domain.strategy.model.entity.StockType;
