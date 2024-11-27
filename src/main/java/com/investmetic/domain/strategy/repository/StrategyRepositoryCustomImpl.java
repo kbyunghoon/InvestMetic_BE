@@ -11,8 +11,9 @@ import static com.investmetic.domain.subscription.model.entity.QSubscription.sub
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.strategy.dto.RangeDto;
-import com.investmetic.domain.strategy.dto.request.AlgorithmSearchRequest;
-import com.investmetic.domain.strategy.dto.request.FilterSearchRequest;
+import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.QMyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -48,12 +50,11 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
-
     private final JPAQueryFactory queryFactory;
 
 
     @Override
-    public StrategyDetailResponse findStrategyDetail(Long strategyId) {
+    public Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId) {
 
         List<Tuple> stockTypes = queryFactory
                 .select(stockType.stockTypeIconURL, stockType.stockTypeName)
@@ -68,7 +69,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // 종목 이름목록
         List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
 
-        return queryFactory
+        StrategyDetailResponse response = queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
                         Expressions.constant(stockTypeIconURLs), // List를 Expression으로 변환
@@ -97,6 +98,54 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
+
+        return Optional.ofNullable(response);
+    }
+
+    @Override
+    public Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId) {
+
+        List<Tuple> stockTypes = queryFactory
+                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
+                .from(stockTypeGroup)
+                .join(stockTypeGroup.stockType, stockType)
+                .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
+                .fetch();
+
+        // 종목 아이콘 목록
+        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypes, stockType.stockTypeIconURL);
+
+        // 종목 이름목록
+        List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
+
+        MyStrategyDetailResponse response = queryFactory
+                .select(new QMyStrategyDetailResponse(
+                        strategy.strategyName,
+                        Expressions.constant(stockTypeIconURLs),
+                        tradeType.tradeTypeIconURL,
+                        Expressions.constant(stockTypeNames),
+                        tradeType.tradeTypeName,
+                        strategy.operationCycle,
+                        strategy.strategyDescription,
+                        strategy.subscriptionCount,
+                        user.imageUrl,
+                        user.nickname,
+                        strategy.minimumInvestmentAmount,
+                        strategyStatistics.initialInvestment,
+                        strategyStatistics.kpRatio,
+                        strategyStatistics.smScore,
+                        strategyStatistics.finalProfitLossDate,
+                        strategy.createdAt,
+                        strategy.isPublic,
+                        strategy.isApproved))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .where(strategy.strategyId.eq(strategyId))
+                .fetchOne();
+
+        return Optional.ofNullable(response);
     }
 
     private @NotNull List<String> getStockTypeIconURLs(List<Tuple> stockTypes, StringPath stockType) {
@@ -106,16 +155,14 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     }
 
     /***
-     * 항목별 검색 조회 쿼리(운용방식, 운용주기, 운용종목, 기간, 수익률, 원금, MDD, SM Score로 검색)
-     * 각 항목들은 중복 체크가 가능
-     * 공개중인 전략과 승인완료된 전략만 조회가능
-     * 수익률로 정렬
-     * 페이징
+     * - 항목 및 알고리즘 검색 조회 동적쿼리(운용방식, 운용주기, 운용종목, 기간, 수익률, 원금, MDD, SM Score, 알고리즘별 로 검색) <br>
+     * - 검색어는 전략명으로 검색  <br>
+     * - 공개중인 전략과 승인완료된 전략만 조회가능 <br>
+     * - 기본은 수익률로 정렬, 알고리즘 선택시 알고리즘별로 정렬 <br>
+     * - 페이징 <br>
      */
     @Override
-    public Page<StrategySimpleResponse> searchByFilters(FilterSearchRequest request,
-                                                        Pageable pageable) {
-
+    public Page<StrategySimpleResponse> searchBy(SearchRequest searchRequest, Pageable pageable) {
         List<StrategySimpleResponse> content = queryFactory
                 .select(new QStrategySimpleResponse(
                         strategy.strategyId,
@@ -135,8 +182,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
-                .where(isApprovedAndPublic(), applyAllFilters(request))
-                .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
+                .where(isApprovedAndPublic(), applyAllFilters(searchRequest))
+                .orderBy(getOrderByAlgorithm(searchRequest.getAlgorithmType())) // 알고리즘 타입으로 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -145,53 +192,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
                 .from(strategy)
-                .where(isApprovedAndPublic(), applyAllFilters(request));
-
-        // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
-        // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
-        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
-    }
-
-    /***
-     * 검색어(전략명) + 알고리즘 검색
-     * 알고리즘은 중복체크 X, 알고리즘별로 정렬
-     * 공개중인 전략과 승인완료된 전략만 조회가능
-     * 페이징
-     */
-    @Override
-    public Page<StrategySimpleResponse> searchByAlgorithm(String searchWord, AlgorithmType algorithmType,
-                                                          Pageable pageable) {
-
-        List<StrategySimpleResponse> content = queryFactory
-                .select(new QStrategySimpleResponse(
-                        strategy.strategyId,
-                        strategy.strategyName,
-                        user.imageUrl,
-                        user.nickname,
-                        tradeType.tradeTypeIconURL,
-                        strategyStatistics.maxDrawdown,
-                        strategyStatistics.smScore,
-                        strategyStatistics.cumulativeProfitRate,
-                        strategyStatistics.recentYearProfitRate,
-                        strategy.subscriptionCount,
-                        strategy.averageRating,
-                        strategy.reviewCount
-                ))
-                .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
-                .join(strategy.tradeType, tradeType)
-                .join(strategy.user, user)
-                .where(isApprovedAndPublic(), applySearchWordFilter(searchWord))
-                .orderBy(getOrderByAlgorithm(algorithmType)) // 알고리즘별로 정렬
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        // 페이징 count 쿼리 최적화
-        JPAQuery<Long> countQuery = queryFactory
-                .select(Wildcard.count)
-                .from(strategy)
-                .where(isApprovedAndPublic(), applySearchWordFilter(searchWord));
+                .where(isApprovedAndPublic(), applyAllFilters(searchRequest));
 
         // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
         // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
@@ -199,7 +200,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     }
 
     /**
-     * 나의 전략목록 조회(트레이더), 구독 많은수로 정렬
+     * 나의 전략목록 조회(트레이더), 최신순 정렬
      *
      * @param userId 로그인한 트레이더 id
      */
@@ -219,14 +220,15 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
                         strategy.averageRating,
-                        strategy.reviewCount
+                        strategy.reviewCount,
+                        strategy.isPublic
                 ))
                 .from(strategy)
                 .join(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(user.userId.eq(userId))
-                .orderBy(strategy.subscriptionCount.desc()) // 구독많은수로 정렬
+                .orderBy(strategy.createdAt.desc()) // 최신순으로 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -242,6 +244,47 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
 
     }
+
+    @Override
+    public Page<StrategySimpleResponse> findSubscribedStrategies(Long userId, Pageable pageable) {
+
+        List<StrategySimpleResponse> content = queryFactory
+                .select(new QStrategySimpleResponse(
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        user.imageUrl,
+                        user.nickname,
+                        tradeType.tradeTypeIconURL,
+                        strategyStatistics.maxDrawdown,
+                        strategyStatistics.smScore,
+                        strategyStatistics.cumulativeProfitRate,
+                        strategyStatistics.recentYearProfitRate,
+                        strategy.subscriptionCount,
+                        strategy.averageRating,
+                        strategy.reviewCount
+                ))
+                .from(strategy)
+                .join(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .join(subscription).on(subscription.strategy.eq(strategy))  // 구독 테이블 조인
+                .where(isApprovedAndPublic(), subscription.user.userId.eq(userId))
+                .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(strategy)
+                .where(isApprovedAndPublic());
+
+        // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
+        // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
 
     // ENUM에서 알고리즘 공식 처리 (전략 패턴)
     private OrderSpecifier<?> getOrderByAlgorithm(AlgorithmType algorithmType) {
@@ -303,23 +346,22 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     }
 
     // 모든 필터 적용
-    private BooleanBuilder applyAllFilters(FilterSearchRequest filterSearchRequest) {
+    private BooleanBuilder applyAllFilters(SearchRequest searchRequest) {
         BooleanBuilder builder = new BooleanBuilder();
 
         // 조건 추가
-        builder.and(applySearchWordFilter(filterSearchRequest.getSearchWord()));
-        builder.and(applyTradeTypeFilter(filterSearchRequest.getTradeTypeNames()));
-        builder.and(applyOperationCycleFilter(filterSearchRequest.getOperationCycles()));
-        builder.and(applyStockTypeFilter(filterSearchRequest.getStockTypeNames()));
-        builder.and(applyOperationPeriodFilter(filterSearchRequest.getDurations()));
-        builder.and(applyProfitRangeFilter(filterSearchRequest.getProfitRanges()));
-        builder.and(applyPrincipalRangeFilter(filterSearchRequest.getPrincipalRange()));
-        builder.and(applyMddRangeFilter(filterSearchRequest.getMddRange()));
-        builder.and(applySmScoreRangeFilter(filterSearchRequest.getSmScoreRange()));
+        builder.and(applySearchWordFilter(searchRequest.getSearchWord()));
+        builder.and(applyTradeTypeFilter(searchRequest.getTradeTypeNames()));
+        builder.and(applyOperationCycleFilter(searchRequest.getOperationCycles()));
+        builder.and(applyStockTypeFilter(searchRequest.getStockTypeNames()));
+        builder.and(applyOperationPeriodFilter(searchRequest.getDurations()));
+        builder.and(applyProfitRangeFilter(searchRequest.getProfitRanges()));
+        builder.and(applyPrincipalRangeFilter(searchRequest.getPrincipalRange()));
+        builder.and(applyMddRangeFilter(searchRequest.getMddRange()));
+        builder.and(applySmScoreRangeFilter(searchRequest.getSmScoreRange()));
 
         return builder;
     }
-
 
     private BooleanExpression isApprovedAndPublic() {
         return strategy.isApproved.eq(IsApproved.APPROVED)

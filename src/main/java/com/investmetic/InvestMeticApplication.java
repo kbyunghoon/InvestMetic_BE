@@ -15,8 +15,4 @@ public class InvestMeticApplication {
         SpringApplication.run(InvestMeticApplication.class, args);
     }
 
-    @Bean
-    JPAQueryFactory jpaQueryFactory(EntityManager em) {
-        return new JPAQueryFactory(em);
-    }
 }

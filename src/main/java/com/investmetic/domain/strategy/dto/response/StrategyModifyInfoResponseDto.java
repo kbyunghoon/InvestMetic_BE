@@ -1,8 +1,9 @@
 package com.investmetic.domain.strategy.dto.response;
 
+import com.investmetic.domain.strategy.dto.StockTypeDto;
+import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
-import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import java.util.List;
 import lombok.AccessLevel;
@@ -16,21 +17,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StrategyModifyInfoResponseDto {
     private String strategyName;
-    private Long tradeTypeId;
-    private OperationCycle operationCycle;
-    private List<Long> stockTypeIds;
+    private TradeTypeDto tradeType;
+    private List<StockTypeDto> stockTypes;
     private MinimumInvestmentAmount minimumInvestmentAmount;
-    private String proposalFileUrl;
+    private OperationCycle operationCycle;
+    //    private String proposalFileUrl;
+    private String description;
 
     @Builder
-    public StrategyModifyInfoResponseDto(Strategy strategy, List<StockType> stockTypes) {
+    public StrategyModifyInfoResponseDto(Strategy strategy, List<StockTypeDto> stockTypes, TradeTypeDto tradeType) {
         this.strategyName = strategy.getStrategyName();
-        this.tradeTypeId = strategy.getTradeType().getTradeTypeId();
+        this.stockTypes = stockTypes;
+        this.tradeType = tradeType;
         this.operationCycle = strategy.getOperationCycle();
-        this.stockTypeIds = stockTypes.stream()
-                .map(StockType::getStockTypeId)
-                .toList();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
-        this.proposalFileUrl = strategy.getProposalFilePath();
+//        this.proposalFileUrl = strategy.getProposalFilePath();
+        this.description = strategy.getStrategyDescription();
     }
 }

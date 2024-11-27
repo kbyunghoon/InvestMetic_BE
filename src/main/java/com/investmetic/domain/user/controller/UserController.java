@@ -5,9 +5,9 @@ import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
-import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,38 +25,37 @@ public class UserController {
 
     //회원가입
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<Void>> signup(@RequestBody UserSignUpDto userSignUpDto) {
-        userService.signUp(userSignUpDto);
+    public ResponseEntity<BaseResponse<String>> signup(@RequestBody UserSignUpDto userSignUpDto) {
 
-        return BaseResponse.success(SuccessCode.CREATED);
-
+        // 이미지 저장시 presignedUrl 반환.
+        return BaseResponse.success(userService.signUp(userSignUpDto));
     }
 
     //닉네임 중복 검사
     @GetMapping("/check/nickname")
-    public ResponseEntity<BaseResponse<Boolean>> checkNicknameDuplicate(@RequestParam String nickname) {
+    public ResponseEntity<BaseResponse<Void>> checkNicknameDuplicate(@RequestParam String nickname) {
 
-        boolean response = userService.checkNicknameDuplicate(nickname);
+        userService.checkNicknameDuplicate(nickname);
 
-        return BaseResponse.success(response);
+        return BaseResponse.success();
     }
 
     // 이메일 중복 검사
     @GetMapping("/check/email")
-    public ResponseEntity<BaseResponse<Boolean>> checkEmailDuplicate(@RequestParam String email) {
+    public ResponseEntity<BaseResponse<Void>> checkEmailDuplicate(@RequestParam String email) {
 
-        boolean response = userService.checkEmailDuplicate(email);
+        userService.checkEmailDuplicate(email);
 
-        return BaseResponse.success(response);
+        return BaseResponse.success();
     }
 
     // 전화번호 중복 검사
     @GetMapping("/check/phone")
-    public ResponseEntity<BaseResponse<Boolean>> checkPhoneDuplicate(@RequestParam String phone) {
+    public ResponseEntity<BaseResponse<Void>> checkPhoneDuplicate(@RequestParam String phone) {
 
-        boolean isDuplicate = userService.checkPhoneDuplicate(phone);
+        userService.checkPhoneDuplicate(phone);
 
-        return BaseResponse.success(isDuplicate);
+        return BaseResponse.success();
     }
 
     /**
@@ -70,7 +69,7 @@ public class UserController {
     public ResponseEntity<BaseResponse<PageResponseDto<TraderProfileDto>>> getTraderList(
             @RequestParam String orderBy,
             @RequestParam String keyword,
-            @RequestParam Pageable pageable) {
+            @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(orderBy, keyword, pageable));
 
     }

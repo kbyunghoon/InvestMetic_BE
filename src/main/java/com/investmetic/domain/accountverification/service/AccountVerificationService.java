@@ -74,7 +74,7 @@ public class AccountVerificationService {
 
     @Transactional(readOnly = true)
     public PageResponseDto<AccountImagesResponseDto> getAccountImagesByStrategyId(Long strategyId, Pageable pageable) {
-        return new PageResponseDto<>(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)
+        return new PageResponseDto<>(accountVerificationRepository.findByStrategyId(strategyId, pageable)
                 .map(AccountImagesResponseDto::from));
     }
 

@@ -139,7 +139,6 @@ public class ReviewService {
 
         PageResponseDto<ReviewDetailResponse> responsePageResponseDto = new PageResponseDto<>(reviews);
 
-        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(), strategy.getReviewCount(),
-                responsePageResponseDto);
+        return ReviewListResponse.createReviewListResponse(strategy.getAverageRating(), responsePageResponseDto);
     }
 }

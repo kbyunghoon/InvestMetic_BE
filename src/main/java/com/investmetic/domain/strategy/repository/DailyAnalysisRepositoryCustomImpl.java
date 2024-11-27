@@ -6,10 +6,14 @@ import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.QDailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.model.AnalysisOption;
+import com.investmetic.domain.strategy.model.entity.Proceed;
+import com.investmetic.domain.strategy.model.entity.QDailyAnalysis;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -76,7 +80,8 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                         dailyAnalysis.cumulativeProfitLoss,
                         dailyAnalysis.cumulativeProfitLossRate))
                 .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId), dailyAnalysis.proceed.eq(Proceed.YES))
+                .orderBy(dailyAnalysis.dailyDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -90,7 +95,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
                 .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId));
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId), dailyAnalysis.proceed.eq(Proceed.YES));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -109,6 +114,51 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                 .from(dailyAnalysis)
                 .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
                 .fetch();
+    }
+
+    @Override
+    public Page<DailyAnalysisResponse> findMyDailyAnalysis(Long strategyId, Pageable pageable) {
+        List<DailyAnalysisResponse> content = queryFactory
+                .select(new QDailyAnalysisResponse(
+                        dailyAnalysis.dailyDate,
+                        dailyAnalysis.principal,
+                        dailyAnalysis.transaction,
+                        dailyAnalysis.dailyProfitLoss,
+                        dailyAnalysis.dailyProfitLossRate,
+                        dailyAnalysis.cumulativeProfitLoss,
+                        dailyAnalysis.cumulativeProfitLossRate))
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId),
+                        isLatestDailyAnalysis(dailyAnalysis, strategyId))
+                .orderBy(dailyAnalysis.dailyDate.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 전략 존재 여부를 빈 데이터로 판단
+        if (content.isEmpty()) {
+            throw new BusinessException(ErrorCode.STRATEGY_NOT_FOUND);
+        }
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId));
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
+    private BooleanExpression isLatestDailyAnalysis(QDailyAnalysis d1, Long strategyId) {
+
+        QDailyAnalysis d2 = new QDailyAnalysis("d2");
+
+        return d1.proceed.eq(
+                JPAExpressions.select(d2.proceed.min())
+                        .from(d2)
+                        .where(d2.strategy.strategyId.eq(strategyId)
+                                .and(d2.dailyDate.eq(d1.dailyDate)))
+        );
     }
 
     private NumberExpression<Double> findByOption(AnalysisOption option) {
