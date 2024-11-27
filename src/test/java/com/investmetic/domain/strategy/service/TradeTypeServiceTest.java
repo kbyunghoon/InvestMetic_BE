@@ -3,18 +3,14 @@ package com.investmetic.domain.strategy.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
-import com.investmetic.domain.strategy.dto.response.StockTypeResponseDTO;
 import com.investmetic.domain.strategy.dto.response.TradeTypeResponseDTO;
-import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.subscription.repository.SubscriptionRepository;
-import com.investmetic.global.common.PageResponseDto;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +40,7 @@ class TradeTypeServiceTest {
         for (int i = 1; i <= 5; i++) {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeTypeName("Sample_Trade" + i)
-                    .tradeTypeIconURL(String.format("/icons/sample-icon%d.png", i))
+                    .tradeTypeIconUrl(String.format("/icons/sample-icon%d.png", i))
                     .size(1200)
                     .build();
 
