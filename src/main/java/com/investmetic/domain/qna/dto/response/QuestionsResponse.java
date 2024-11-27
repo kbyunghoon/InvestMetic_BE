@@ -23,12 +23,16 @@ public class QuestionsResponse {
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
                 .questionContent(question.getContent())
-                .strategyName(question.getStrategy().getStrategyName())
-                .traderImageUrl(question.getStrategy().getUser().getImageUrl())
-                .investorImageUrl(question.getUser().getImageUrl())
-                .traderName(question.getStrategy().getUser().getNickname())
-                .investorName(question.getUser().getNickname())
-                .stateCondition(question.getQnaState().name())
+                .strategyName(question.getStrategy() != null ? question.getStrategy().getStrategyName() : "N/A")
+                .traderImageUrl(question.getStrategy() != null && question.getStrategy().getUser() != null
+                        ? question.getStrategy().getUser().getImageUrl()
+                        : "N/A")
+                .investorImageUrl(question.getUser() != null ? question.getUser().getImageUrl() : "N/A")
+                .traderName(question.getStrategy() != null && question.getStrategy().getUser() != null
+                        ? question.getStrategy().getUser().getNickname()
+                        : "N/A")
+                .investorName(question.getUser() != null ? question.getUser().getNickname() : "N/A")
+                .stateCondition(question.getQnaState() != null ? question.getQnaState().name() : "UNKNOWN")
                 .createdAt(question.getCreatedAt() != null ? question.getCreatedAt().toString() : "N/A")
                 .build();
     }
