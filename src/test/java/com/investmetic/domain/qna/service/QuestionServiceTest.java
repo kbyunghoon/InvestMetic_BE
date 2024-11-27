@@ -3,6 +3,7 @@ package com.investmetic.domain.qna.service;
 import static com.investmetic.domain.user.model.Role.TRADER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.any;
@@ -25,6 +26,8 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -387,6 +390,51 @@ class QuestionServiceTest {
         assertNotNull(response);
         assertEquals("문의 제목", response.getTitle());
         assertEquals("문의 내용", response.getQuestionContent());
+        verify(questionRepository).findById(questionId);
+    }
+
+    @Test
+    @DisplayName("문의 상세 조회 실패 - 투자자 권한 없음")
+    void getQuestionDetail_Investor_Forbidden() {
+        // Given
+        Long questionId = 1L;
+        Long investorId = 2L; // 실제 호출하는 투자자의 ID
+
+        // 투자자 (다른 사용자로 설정)
+        User mockInvestor = mock(User.class);
+        when(mockInvestor.getUserId()).thenReturn(3L); // userId 설정
+        when(mockInvestor.getNickname()).thenReturn("다른 투자자");
+        when(mockInvestor.getRole()).thenReturn(Role.INVESTOR);
+
+        // 트레이더
+        User mockTrader = mock(User.class);
+        when(mockTrader.getUserId()).thenReturn(4L);
+        when(mockTrader.getNickname()).thenReturn("트레이더");
+        when(mockTrader.getRole()).thenReturn(Role.TRADER);
+
+        // 전략
+        Strategy mockStrategy = Strategy.builder()
+                .strategyId(1L)
+                .user(mockTrader) // 전략의 트레이더 설정
+                .strategyName("전략명")
+                .build();
+
+        // 문의 생성
+        QuestionRequestDto questionRequestDto = QuestionRequestDto.builder()
+                .title("문의 제목")
+                .content("문의 내용")
+                .build();
+        Question mockQuestion = Question.from(mockInvestor, mockStrategy, questionRequestDto);
+
+        // Repository Mock 설정
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            questionService.getQuestionDetail(questionId, investorId, Role.INVESTOR);
+        });
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
         verify(questionRepository).findById(questionId);
     }
 
