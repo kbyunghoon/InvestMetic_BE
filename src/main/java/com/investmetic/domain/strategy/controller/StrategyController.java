@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
@@ -134,9 +135,14 @@ public class StrategyController {
     }
 
     @DeleteMapping("{strategyId}/daily-analysis")
-    @Operation(summary = "전략 (일간 분석) 전체(일간 데이터) 삭제", description = "<a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId) {
-        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+    @Operation(summary = "전략 (일간 분석) 삭제(전체 삭제 포함)", description = "<a href='https://field-sting-eff.notion.site/ca5091b0aaa54a39b94c6f1cd4a832af?pvs=4' target='_blank'>API 명세서(1개 삭제)</a><br/><a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서(전체 삭제)</a>")
+    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId,
+                                                                             @RequestParam(required = false) Optional<String> analysisId) {
+        analysisId.ifPresentOrElse(
+                id -> strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, id),
+                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId)
+        );
+
         return BaseResponse.success(SuccessCode.DELETED);
     }
 

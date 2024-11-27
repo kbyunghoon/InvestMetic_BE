@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.service;
 
+import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
@@ -73,9 +74,30 @@ public class StrategyAnalysisService {
         Strategy strategy = findStrategyById(strategyId);
 
         // TODO : 유저 권한 확인 로직 추가 예정
+        verifyUserPermission(strategy);
+
         strategy.resetStrategyDailyAnalysis();
 
         dailyAnalysisRepository.deleteAllByStrategy(strategy);
+    }
+
+    @Transactional
+    public void deleteStrategyDailyAnalysis(Long strategyId, String analysisId) {
+        Strategy strategy = findStrategyById(strategyId);
+
+        // TODO : 유저 권한 확인 로직 추가 예정
+        verifyUserPermission(strategy);
+
+        // analysisId Long 변환
+        Long analysisIdAsLong = parseAnalysisId(analysisId);
+
+        // 존재 여부 확인
+        boolean exists = dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
+        if (!exists) {
+            throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
+        }
+
+        dailyAnalysisRepository.deleteByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
     }
 
     private Strategy findStrategyById(Long strategyId) {
@@ -87,5 +109,19 @@ public class StrategyAnalysisService {
     public PageResponseDto<DailyAnalysisResponse> getMyDailyAnalysis(Long strategyId, Pageable pageable) {
         Page<DailyAnalysisResponse> myDailyAnalysis = dailyAnalysisRepository.findMyDailyAnalysis(strategyId, pageable);
         return new PageResponseDto<>(myDailyAnalysis);
+    }
+
+    private Long parseAnalysisId(String analysisId) {
+        try {
+            return Long.parseLong(analysisId);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
+        }
+    }
+
+    private void verifyUserPermission(Strategy strategy) {
+        // TODO: 유저 권한 확인 로직 구현
+        // e.g., 현재 사용자와 전략 소유자 등
+        // if (!userHasPermission()) throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
     }
 }
