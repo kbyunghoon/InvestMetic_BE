@@ -1,8 +1,8 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.investmetic.domain.strategy.exceldownload.ExcelColumn;
-import com.investmetic.domain.strategy.exceldownload.ExcelSheet;
+import com.investmetic.global.util.exceldownload.ExcelColumn;
+import com.investmetic.global.util.exceldownload.ExcelSheet;
 import com.investmetic.domain.strategy.model.entity.MonthlyAnalysis;
 import java.time.format.DateTimeFormatter;
 import lombok.Getter;

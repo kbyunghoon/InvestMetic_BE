@@ -65,6 +65,7 @@ public enum ErrorCode {
     STATISTICS_NOT_FOUND(HttpStatus.BAD_REQUEST, 3018, "전략 통계가 존재하지 않습니다."),
     ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST, 3019, "유효하지 않은 옵션입니다."),
     DAILY_ANALYSIS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 3020, "해당 날짜의 전략 통계가 이미 존재합니다."),
+    DAILY_ANALYSIS_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 날짜의 전략 통계가 존재하지 않습니다."),
 
     STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 종목이 존재하지 않습니다."),
     TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3022, "해당 매매 유형이 존재하지 않습니다."),

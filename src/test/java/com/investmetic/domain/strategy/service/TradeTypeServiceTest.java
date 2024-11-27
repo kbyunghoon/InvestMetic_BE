@@ -41,9 +41,6 @@ class TradeTypeServiceTest {
     @BeforeEach
     void setUp() {
         tradeTypeRequestDtoList = new ArrayList<>();
-        subscriptionRepository.deleteAll();
-        strategyRepository.deleteAll();
-        tradeTypeRepository.deleteAll();
         for (int i = 1; i <= 5; i++) {
             TradeTypeRequestDTO tradetype = TradeTypeRequestDTO.builder()
                     .tradeTypeName("Sample_Trade" + i)

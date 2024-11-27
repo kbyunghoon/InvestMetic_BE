@@ -68,7 +68,8 @@ public class Strategy extends BaseEntity {
     private IsPublic isPublic = IsPublic.PRIVATE; // 공개여부 (default : 비공개)
 
     @Enumerated(EnumType.STRING)
-    private IsApproved isApproved; // 승인여부
+    @Builder.Default
+    private IsApproved isApproved = IsApproved.PENDING; // 승인여부
 
     @ColumnDefault("0")
     @Builder.Default
@@ -134,11 +135,24 @@ public class Strategy extends BaseEntity {
         this.zScore = 0.0;
     }
 
+    public void modifyStrategy(String strategyName, String strategyDescription) {
+        this.strategyName = strategyName;
+        this.strategyDescription = strategyDescription;
+    }
+
+    public void modifyStrategyProposalFilePath(String proposalFilePath) {
+        this.proposalFilePath = proposalFilePath;
+    }
+
     public void plusSubscriptionCount() {
         this.subscriptionCount += 1;
     }
 
     public void minusSubscriptionCount() {
         this.subscriptionCount -= 1;
+    }
+
+    public void setIsApproved(IsApproved isApproved) {
+        this.isApproved = isApproved;
     }
 }

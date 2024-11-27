@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
+import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
@@ -44,17 +45,35 @@ class StrategyDailyAnalysisServiceTest {
     private StrategyAnalysisService strategyAnalysisService;
 
     private Strategy strategy;
-
+    private DailyAnalysis dailyAnalysis;
+    private TraderDailyAnalysisRequestDto requestDto;
 
     @BeforeEach
     void setUp() {
         User user = TestEntityFactory.createTestUser();
+
         TradeType tradeType = TestEntityFactory.createTestTradeType();
+
         strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+
+        dailyAnalysis = DailyAnalysis.builder()
+                .dailyAnalysisId(1L)
+                .strategy(strategy)
+                .dailyDate(LocalDate.of(2024, 1, 1))
+                .transaction(100000L)
+                .dailyProfitLoss(5000L)
+                .proceed(Proceed.YES)
+                .build();
+
+        requestDto = TraderDailyAnalysisRequestDto.builder()
+                .date(LocalDate.now())
+                .transaction(5000L)
+                .dailyProfitLoss(1000L)
+                .build();
     }
 
     @Test
-    @DisplayName("새로운 DailyAnalysis가 성공적으로 생성되는지 테스트")
+    @DisplayName("전략 일간 분석 등록 - 성공 테스트")
     void 테스트_1() {
         Long strategyId = 1L;
         LocalDate date = LocalDate.now();
@@ -71,7 +90,7 @@ class StrategyDailyAnalysisServiceTest {
     }
 
     @Test
-    @DisplayName("전략이 존재하지 않을 경우 테스트")
+    @DisplayName("전략 일간 분석 등록 - 전략이 존재하지 않을 경우")
     void 테스트_2() {
         Long strategyId = 1L;
         LocalDate date = LocalDate.now();
@@ -93,7 +112,7 @@ class StrategyDailyAnalysisServiceTest {
 
 
     @Test
-    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 성공")
+    @DisplayName("전략 모든 일간 분석 전체 삭제 - 성공 테스트")
     void 테스트_3() {
         Long strategyId = 1L;
 
@@ -107,7 +126,7 @@ class StrategyDailyAnalysisServiceTest {
     }
 
     @Test
-    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 실패 (전략이 존재하지 않음)")
+    @DisplayName("전략 모든 일간 분석 전체 삭제 - 전략이 존재하지 않을 경우")
     void 테스트_4() {
         Long strategyId = 999L;
 
@@ -123,7 +142,7 @@ class StrategyDailyAnalysisServiceTest {
     }
 
     @Test
-    @DisplayName("전략의 모든 일간 분석 데이터 삭제 - 성공 (전략 초기화 확인)")
+    @DisplayName("전략 모든 일간 분석 전체 삭제 - 성공 (전략 초기화 확인)")
     void 테스트_5() {
         Long strategyId = 1L;
 
@@ -137,5 +156,53 @@ class StrategyDailyAnalysisServiceTest {
         assertEquals(0.0, strategy.getKpRatio());
         assertEquals(0.0, strategy.getSmScore());
         assertEquals(0.0, strategy.getZScore());
+    }
+
+
+    @Test
+    @DisplayName("전략 일간 분석 수정 - 성공 테스트")
+    void 테스트_6() {
+        when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
+        when(dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(strategy, LocalDate.now()))
+                .thenReturn(Optional.of(dailyAnalysis));
+
+        strategyAnalysisService.modifyDailyAnalysis(1L, requestDto);
+
+        assertEquals(5000L, dailyAnalysis.getTransaction());
+        assertEquals(1000L, dailyAnalysis.getDailyProfitLoss());
+        verify(strategyRepository).findById(1L);
+        verify(dailyAnalysisRepository).findDailyAnalysisByStrategyAndDate(strategy, LocalDate.now());
+    }
+
+    @Test
+    @DisplayName("전략 일간 분석 수정 - 전략 찾을 수 없을 경우")
+    void 테스트_7() {
+        when(strategyRepository.findById(1L)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyAnalysisService.modifyDailyAnalysis(1L, requestDto)
+        );
+
+        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository).findById(1L);
+        verify(dailyAnalysisRepository, never()).findDailyAnalysisByStrategyAndDate(any(), any());
+    }
+
+    @Test
+    @DisplayName("전략 일간 분석 수정 - 해당 일간 분석이 존재하지 않을 경우")
+    void 테스트_8() {
+        when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
+        when(dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(strategy, LocalDate.now()))
+                .thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyAnalysisService.modifyDailyAnalysis(1L, requestDto)
+        );
+
+        assertEquals(ErrorCode.DAILY_ANALYSIS_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository).findById(1L);
+        verify(dailyAnalysisRepository).findDailyAnalysisByStrategyAndDate(strategy, LocalDate.now());
     }
 }
