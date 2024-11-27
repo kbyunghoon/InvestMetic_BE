@@ -2,6 +2,7 @@ package com.investmetic.global.util;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -11,11 +12,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class JWTUtil {
 
-    private final SecretKey secretKey;
+    @Value("${jwt.secret}")
+    private String secret;
 
-    public JWTUtil(@Value("${jwt.secret}") String secret) {
-        // 전달받은 문자열을 바이트 배열로 변환하여 SecretKeySpec 객체로 생성
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)); // HS256 알고리즘 사용
+    private SecretKey secretKey;
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String getUsername(String token) {
@@ -50,10 +54,10 @@ public class JWTUtil {
     }
 
 
-    public String createJwt(String category,String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long expiredMs) {
 
         return Jwts.builder()
-                .claim("category",category)  // 토큰 종류
+                .claim("category", category)  // 토큰 종류
                 .claim("username", username) // 사용자 이메일 추가
                 .claim("role", role)         // 사용자 역할 추가
                 .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간
