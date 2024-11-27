@@ -4,6 +4,7 @@ import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.service.AdminStrategyService;
 import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,6 @@ public class AdminStrategyController {
     @PatchMapping("/{strategyId}")
     public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId, IsApproved isApproved) {
         adminStrategyService.manageAproveState(strategyId, isApproved);
-        return BaseResponse.success();
+        return BaseResponse.success(SuccessCode.UPDATED);
     }
 }
