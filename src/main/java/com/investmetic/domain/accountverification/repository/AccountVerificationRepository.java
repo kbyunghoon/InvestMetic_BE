@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface AccountVerificationRepository extends JpaRepository<AccountVerification, Long> {
     @Query("SELECT acv FROM AccountVerification acv WHERE acv.strategy.strategyId = :strategyId")
-    Page<AccountVerification> findByStrategy_StrategyId(Long strategyId, Pageable pageable);
+    Page<AccountVerification> findByStrategyId(Long strategyId, Pageable pageable);
 }

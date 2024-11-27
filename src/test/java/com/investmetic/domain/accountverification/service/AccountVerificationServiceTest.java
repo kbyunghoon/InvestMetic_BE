@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -148,7 +147,7 @@ class AccountVerificationServiceTest {
         // Mock 설정
         Page<AccountVerification> mockPage = new PageImpl<>(List.of(accountVerification1, accountVerification2),
                 pageable, 2);
-        when(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)).thenReturn(mockPage);
+        when(accountVerificationRepository.findByStrategyId(strategyId, pageable)).thenReturn(mockPage);
 
         // When
         PageResponseDto<AccountImagesResponseDto> response = accountVerificationService.getAccountImagesByStrategyId(
@@ -175,7 +174,7 @@ class AccountVerificationServiceTest {
 
         // Mock 설정: 빈 페이지 반환
         Page<AccountVerification> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-        when(accountVerificationRepository.findByStrategy_StrategyId(strategyId, pageable)).thenReturn(emptyPage);
+        when(accountVerificationRepository.findByStrategyId(strategyId, pageable)).thenReturn(emptyPage);
 
         // When
         PageResponseDto<AccountImagesResponseDto> response = accountVerificationService.getAccountImagesByStrategyId(

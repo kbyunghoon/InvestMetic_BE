@@ -1,15 +1,16 @@
 package com.investmetic.domain.strategy.controller;
 
+import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.statistic.StrategyStatisticsResponse;
-import com.investmetic.global.util.exceldownload.ExcelUtils;
 import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.util.exceldownload.ExcelUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -86,6 +87,7 @@ public class StrategyDetailController {
         StrategyAnalysisResponse result = strategyDetailService.getStrategyAnalysis(strategyId, option1, option2);
         return BaseResponse.success(result);
     }
+
     @Operation(summary = "전략 일간분석 엑셀다운(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/42416d40378940648f4798070a6ac5ca' target='_blank'>API 명세서</a>")
     @GetMapping("/daily-analysis/download")
@@ -102,6 +104,7 @@ public class StrategyDetailController {
         // 엑셀 파일 다운로드
         excelUtils.download(DAILY_ANALYSIS_EXCEL_NAME);
     }
+
     @Operation(summary = "전략 월간분석 엑셀다운(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/7ba6f427a5594eefb3e9bd103e6ccc31' target='_blank'>API 명세서</a>")
     @GetMapping("/monthly-analysis/download")
@@ -112,10 +115,21 @@ public class StrategyDetailController {
         excelUtils.connect(response);
 
         // 시트 생성 및 데이터 추가
-        List<MonthlyAnalysisResponse> monthlyAnalysisExcelData = strategyDetailService.getMonthlyAnalysisExcelData(strategyId);
+        List<MonthlyAnalysisResponse> monthlyAnalysisExcelData = strategyDetailService.getMonthlyAnalysisExcelData(
+                strategyId);
         excelUtils.draw(MonthlyAnalysisResponse.class, monthlyAnalysisExcelData);
 
         // 엑셀 파일 다운로드
         excelUtils.download(MONTHLY_ANALYSIS_EXCEL_NAME);
+    }
+
+
+    @Operation(summary = "전략 실계좌 이미지 목록조회 (전략 상세페이지) ",
+            description = "<a href='https://www.notion.so/81d16fa5d985466899d4284e8ed04098' target='_blank'>API 명세서</a>")
+    @GetMapping("/account-images")
+    public ResponseEntity<BaseResponse<PageResponseDto<AccountImagesResponseDto>>> getStrategyAccountImages(
+            @PathVariable Long strategyId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        return BaseResponse.success(strategyDetailService.getAccountImages(strategyId, pageable));
     }
 }
