@@ -1,4 +1,4 @@
-package com.investmetic.domain.strategy.dto;
+package com.investmetic.domain.strategy.dto.object;
 
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import lombok.AccessLevel;

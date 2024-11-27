@@ -1,4 +1,4 @@
-package com.investmetic.domain.strategy.dto;
+package com.investmetic.domain.strategy.dto.object;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.List;
