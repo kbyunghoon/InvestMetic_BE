@@ -113,9 +113,6 @@ public class QuestionService {
                                                     Pageable pageable) {
         // 사용자 존재 여부 확인
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
-
         Role role = userRepository.findById(userId)
                 .map(User::getRole)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
@@ -141,6 +138,8 @@ public class QuestionService {
                                                    StateCondition stateCondition, String investorName,
                                                    String strategyName, String traderName, Pageable pageable,
                                                    Role role) {
+        User admin = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
         // 관리자 여부 확인
         if (!Role.isAdmin(role)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 관리자가 아니면 예외 처리
@@ -156,6 +155,7 @@ public class QuestionService {
                 traderName,
                 investorName
         );
+
 
         Page<QuestionsResponse> responsePage = questions.map(QuestionsResponse::from);
         return QuestionsPageResponse.from(new PageResponseDto<>(responsePage));
@@ -189,5 +189,7 @@ public class QuestionService {
 
         return QuestionsDetailResponse.from(question, answer);
     }
+
+
 
 }
