@@ -438,4 +438,34 @@ class QuestionServiceTest {
         verify(questionRepository).findById(questionId);
     }
 
+    @Test
+    @DisplayName("문의 목록 조회 성공 - 빈 결과 반환")
+    void getInvestorQuestions_EmptyResult() {
+        // Given
+        Long userId = 1L;
+        String keyword = "문의 제목";
+        SearchCondition searchCondition = SearchCondition.TITLE;
+        StateCondition stateCondition = StateCondition.ALL;
+        String strategyName = "전략명";
+        String traderName = "트레이더명";
+        Pageable pageable = PageRequest.of(0, 10);
+        Role role = Role.INVESTOR;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mock(User.class)));
+        when(questionRepository.searchQuestions(
+                userId, keyword, searchCondition, stateCondition, role, pageable, strategyName, traderName, null
+        )).thenReturn(Page.empty());
+
+        // When
+        QuestionsPageResponse response = questionService.getInvestorQuestions(
+                userId, keyword, searchCondition, stateCondition, strategyName, traderName, pageable, role
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals(0, response.getPage().getContent().size());
+        verify(questionRepository).searchQuestions(
+                userId, keyword, searchCondition, stateCondition, role, pageable, strategyName, traderName, null
+        );
+    }
 }
