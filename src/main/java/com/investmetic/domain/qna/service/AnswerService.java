@@ -26,10 +26,12 @@ public class AnswerService {
     public void createAnswer(Long questionId, Long traderId, AnswerRequestDto answerRequestDto) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-        if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
+        if (question.getStrategy() == null
+                || question.getStrategy().getUser() == null
+                || !question.getStrategy().getUser().getUserId().equals(traderId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        Answer answer = Answer.createAnswer(question, answerRequestDto.getContent());
+        Answer answer = Answer.from(question, answerRequestDto.getContent());
         answerRepository.save(answer);
 
         question.updateQnaState(QnaState.COMPLETED);

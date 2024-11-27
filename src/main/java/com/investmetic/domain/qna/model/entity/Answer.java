@@ -30,7 +30,7 @@ public class Answer extends BaseEntity {
     @Column(length = 5000)
     private String content; // 답변내용
 
-    public static Answer createAnswer(Question question, String content){
+    public static Answer from(Question question, String content){
         Answer answer = new Answer();
         answer.question = question;
         answer.content = content;

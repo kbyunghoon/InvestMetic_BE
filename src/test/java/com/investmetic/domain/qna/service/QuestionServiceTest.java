@@ -82,6 +82,7 @@ class QuestionServiceTest {
         verify(strategyRepository).findById(strategyId);
         verify(questionRepository).save(any(Question.class));
     }
+
     @Test
     @DisplayName("Question.updateQnaState - 상태 업데이트 성공")
     void updateQnaState_Success() {
@@ -130,7 +131,6 @@ class QuestionServiceTest {
         when(mockUser.getRole()).thenReturn(Role.INVESTOR);
         when(mockUser.getNickname()).thenReturn("TestUser");
 
-
         // 전략(Mock Strategy) 생성 (사용자 설정 필수)
         Strategy mockStrategy = Strategy.builder()
                 .strategyId(strategyId)
@@ -142,7 +142,7 @@ class QuestionServiceTest {
                 .title("문의 제목")
                 .content("내용 ㅋㅋ")
                 .build();
-        Question mockQuestion = Question.from(mockUser, mockStrategy,questionRequestDto);
+        Question mockQuestion = Question.from(mockUser, mockStrategy, questionRequestDto);
 
         // Mock 설정
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
@@ -157,6 +157,44 @@ class QuestionServiceTest {
         verify(strategyRepository).findById(strategyId); // 전략 조회 검증
         verify(questionRepository).findById(questionId); // 문의 조회 검증
         verify(questionRepository).delete(mockQuestion); // 삭제 호출 검증
+    }
+
+    @Test
+    @DisplayName("문의 삭제 실패 - 관리자 권한 없음")
+    void deleteQuestion_NoAdminPermission() {
+        // Given
+        Long strategyId = 1L;
+        Long questionId = 1L;
+        Long userId = 1L;
+
+        User mockUser = mock(User.class);
+        when(mockUser.getUserId()).thenReturn(2L);
+        when(mockUser.getRole()).thenReturn(Role.INVESTOR);
+        when(mockUser.getNickname()).thenReturn("TestUser");
+
+        // 전략 Mock
+        Strategy mockStrategy = mock(Strategy.class);
+        // 문의 Mock
+        User mockQuestionUser = mock(User.class);
+        when(mockQuestionUser.getUserId()).thenReturn(2L); // 문의 작성자 ID
+        Question mockQuestion = mock(Question.class);
+        when(mockQuestion.getUser()).thenReturn(mockQuestionUser); // 문의 작성자는 다른 사용자로 설정
+
+        // Repository Mock 설정
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(mockStrategy));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            questionService.deleteQuestion(strategyId, questionId, userId);
+        });
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
+        verify(strategyRepository).findById(strategyId);
+        verify(userRepository).findById(userId);
+        verify(questionRepository).findById(questionId);
     }
 
     @Test
@@ -194,7 +232,7 @@ class QuestionServiceTest {
                 .content("문의 내용")
                 .build();
 
-        Question mockQuestion = Question.from(mockUser, mockStrategy,questionRequestDto);
+        Question mockQuestion = Question.from(mockUser, mockStrategy, questionRequestDto);
         mockQuestion.updateQnaState(QnaState.WAITING); // qnaState 설정
 
         Page<Question> questionPage = new PageImpl<>(Collections.singletonList(mockQuestion));
@@ -256,7 +294,7 @@ class QuestionServiceTest {
                 .title("문의 제목")
                 .content("문의 내용")
                 .build();
-        Question mockQuestion = Question.from(mockTrader, mockStrategy,questionRequestDto);
+        Question mockQuestion = Question.from(mockTrader, mockStrategy, questionRequestDto);
         Page<Question> mockPage = new PageImpl<>(Collections.singletonList(mockQuestion));
 
         when(userRepository.findById(traderId)).thenReturn(Optional.of(mockTrader));
@@ -320,7 +358,7 @@ class QuestionServiceTest {
                 .title(keyword)
                 .content("문의 내용")
                 .build();
-        Question mockQuestion = Question.from(mockUser1, mockStrategy,questionRequestDto);
+        Question mockQuestion = Question.from(mockUser1, mockStrategy, questionRequestDto);
 
         Page<Question> mockPage = new PageImpl<>(Collections.singletonList(mockQuestion));
 
@@ -333,7 +371,8 @@ class QuestionServiceTest {
 
         // When
         QuestionsPageResponse response = questionService.getAdminQuestions(
-                adminId, keyword, searchCondition, stateCondition, investorName, strategyName, traderName, pageable, Role.SUPER_ADMIN
+                adminId, keyword, searchCondition, stateCondition, investorName, strategyName, traderName, pageable,
+                Role.SUPER_ADMIN
         );
 
         // Then
@@ -345,7 +384,8 @@ class QuestionServiceTest {
         assertEquals("전략1", response.getPage().getContent().get(0).getStrategyName());
         verify(userRepository).findById(adminId);
         verify(questionRepository).searchQuestions(
-                adminId, keyword, searchCondition, stateCondition, Role.SUPER_ADMIN, pageable, strategyName, traderName, investorName
+                adminId, keyword, searchCondition, stateCondition, Role.SUPER_ADMIN, pageable, strategyName, traderName,
+                investorName
         );
     }
 
@@ -378,8 +418,7 @@ class QuestionServiceTest {
                 .title("문의 제목")
                 .content("문의 내용")
                 .build();
-        Question mockQuestion = Question.from(mockAdmin, mockStrategy,questionRequestDto);
-
+        Question mockQuestion = Question.from(mockAdmin, mockStrategy, questionRequestDto);
 
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
 
