@@ -23,7 +23,7 @@ public class StockTypeService {
 
     public String saveStockType(StockTypeRequestDTO stockTypeRequestDTO) {
         StockType stockType = stockTypeRequestDTO.toEntity();
-        String stockTypeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, stockType.getStockTypeIconURL(),
+        String stockTypeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, stockType.getStockTypeIconUrl(),
                 stockTypeRequestDTO.getSize());
         stockType.changeStockTypeIconURL(stockTypeIconURL);
         stockTypeRepository.save(stockType);

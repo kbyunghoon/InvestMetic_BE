@@ -13,10 +13,10 @@ import lombok.Getter;
 public class StrategyDetailResponse {
 
     private String strategyName;                    // 전략명
-    private List<String> stockTypeIconURLs;         // 종목 아이콘 이미지 경로 리스트
+    private List<String> stockTypeIconUrls;         // 종목 아이콘 이미지 경로 리스트
     private List<String> stockTypeNames;            // 종목 이름 리스트
-    private String tradeTypeIconURL;                // 매매 유형 이미지 경로
-    private String tradeTypeName;                   // 투자 종류 (자동, 반자동, 수동)
+    private String tradeTypeIconUrl;                // 매매 유형 이미지 경로
+    private String tradeTypeName;                   // 매매유형 (자동, 반자동, 수동)
     private OperationCycle operationCycle;          // 투자 주기 (데이, 포지션)
     private String strategyDescription;             // 전략 상세 소개
     private double cumulativeProfitRate;            // 누적 수익률
@@ -38,7 +38,7 @@ public class StrategyDetailResponse {
 
 
     @QueryProjection
-    public StrategyDetailResponse(String strategyName, List<String> stockTypeIconURLs, String tradeTypeIconURL,
+    public StrategyDetailResponse(String strategyName, List<String> stockTypeIconUrls, String tradeTypeIconUrl,
                                   List<String> stockTypeNames, String tradeTypeName, OperationCycle operationCycle,
                                   String strategyDescription, double cumulativeProfitRate, double maxDrawdownRate,
                                   double averageProfitLossRate, double profitFactor, double winRate,
@@ -47,8 +47,8 @@ public class StrategyDetailResponse {
                                   double kpRatio,
                                   double smScore, LocalDate finalProfitLossDate, LocalDateTime createdAt) {
         this.strategyName = strategyName;
-        this.stockTypeIconURLs = stockTypeIconURLs;
-        this.tradeTypeIconURL = tradeTypeIconURL;
+        this.stockTypeIconUrls = stockTypeIconUrls;
+        this.tradeTypeIconUrl = tradeTypeIconUrl;
         this.stockTypeNames = stockTypeNames;
         this.tradeTypeName = tradeTypeName;
         this.operationCycle = operationCycle;

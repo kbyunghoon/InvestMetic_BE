@@ -15,21 +15,21 @@ public class TradeTypeResponseDTO {
     private Boolean activateState;
 
     @Column(length = 1000)
-    private String tradeIconURL;
+    private String tradeTypeIconUrl;
 
     @Builder
-    public TradeTypeResponseDTO(Long tradeTypeId, String tradeName, Boolean activateState, String tradeIconURL) {
+    public TradeTypeResponseDTO(Long tradeTypeId, String tradeName, Boolean activateState, String tradeTypeIconUrl) {
         this.tradeTypeId = tradeTypeId;
         this.tradeName = tradeName;
         this.activateState = activateState;
-        this.tradeIconURL = tradeIconURL;
+        this.tradeTypeIconUrl = tradeTypeIconUrl;
     }
 
     public static TradeTypeResponseDTO from(TradeType tradeType) {
         return TradeTypeResponseDTO.builder()
                 .tradeTypeId(tradeType.getTradeTypeId())
                 .tradeName(tradeType.getTradeTypeName())
-                .tradeIconURL(tradeType.getTradeTypeIconURL())
+                .tradeTypeIconUrl(tradeType.getTradeTypeIconUrl())
                 .activateState(tradeType.getActivateState())
                 .build();
     }
