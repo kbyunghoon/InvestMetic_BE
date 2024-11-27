@@ -53,7 +53,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         // 응답 헤더와 JSON 설정
         response.setHeader("access", "Bearer " + access);
-        response.addCookie(createCookie("refresh", refresh));
+        response.addCookie(createCookie("refresh", refresh,refreshExpiration));
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -65,11 +65,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         response.setStatus(HttpStatus.OK.value());
     }
 
-    private Cookie createCookie(String name, String value) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
+    private Cookie createCookie(String key, String value, Long maxAgeMillis) {
+
+        int maxAgeSec = (int) (maxAgeMillis / 1000);
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(maxAgeSec);
         //cookie.setSecure(true);
         //cookie.setPath("/");
+        cookie.setHttpOnly(true);
         return cookie;
     }
 
