@@ -14,6 +14,7 @@ import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.qna.dto.SearchCondition;
 import com.investmetic.domain.qna.dto.StateCondition;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsPageResponse;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.qna.model.entity.Question;
@@ -343,6 +344,50 @@ class QuestionServiceTest {
         verify(questionRepository).searchQuestions(
                 adminId, keyword, searchCondition, stateCondition, Role.SUPER_ADMIN, pageable, strategyName, traderName, investorName
         );
+    }
+
+    @Test
+    @DisplayName("문의 상세 조회 성공 - 관리자")
+    void getQuestionDetail_Admin_Success() {
+        // Given
+        Long questionId = 1L;
+        Long adminId = 1L;
+
+        User mockAdmin = User.builder()
+                .userName("admin")
+                .role(Role.SUPER_ADMIN)
+                .nickname("관리자")
+                .build();
+
+        User mockTrader = User.builder()
+                .userName("trader")
+                .nickname("트레이더")
+                .role(Role.TRADER)
+                .build();
+
+        Strategy mockStrategy = Strategy.builder()
+                .strategyId(1L)
+                .strategyName("전략명")
+                .user(mockTrader)
+                .build();
+
+        QuestionRequestDto questionRequestDto = QuestionRequestDto.builder()
+                .title("문의 제목")
+                .content("문의 내용")
+                .build();
+        Question mockQuestion = Question.from(mockAdmin, mockStrategy,questionRequestDto);
+
+
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
+
+        // When
+        QuestionsDetailResponse response = questionService.getQuestionDetail(questionId, adminId, Role.SUPER_ADMIN);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("문의 제목", response.getTitle());
+        assertEquals("문의 내용", response.getQuestionContent());
+        verify(questionRepository).findById(questionId);
     }
 
 }
