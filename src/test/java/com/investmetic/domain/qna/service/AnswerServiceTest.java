@@ -47,7 +47,7 @@ class AnswerServiceTest {
 
         // 트레이더 생성
         User mockTrader = mock(User.class);
-        when(mockTrader.getUserId()).thenReturn(traderId);
+        when(mockTrader.getUserId()).thenReturn(1L);
         when(mockTrader.getNickname()).thenReturn("트레이더");
 
         // 전략 생성
@@ -79,6 +79,38 @@ class AnswerServiceTest {
     }
 
     @Test
+    @DisplayName("답변 생성 실패 - 권한 없음")
+    void createAnswer_Failure_NoPermission() {
+        // Given
+        Long questionId = 1L;
+        Long userId = 2L; // 권한 없는 사용자 ID
+
+        User mockTrader = mock(User.class);
+        when(mockTrader.getUserId()).thenReturn(3L);
+        when(mockTrader.getNickname()).thenReturn("트레이더");
+
+        Strategy mockStrategy = mock(Strategy.class);
+        when(mockStrategy.getUser()).thenReturn(mock(User.class));
+
+        Question mockQuestion = mock(Question.class);
+        when(mockQuestion.getStrategy()).thenReturn(mockStrategy);
+
+        AnswerRequestDto answerRequestDto = new AnswerRequestDto("답변 내용");
+
+        // Mock 설정
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            answerService.createAnswer(questionId, userId, answerRequestDto);
+        });
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode()); // 에러 코드 확인
+        verify(answerRepository, never()).save(any(Answer.class)); // 답변이 저장되지 않았는지 확인
+    }
+
+
+    @Test
     @DisplayName("답변 삭제 성공 - 관리자")
     void deleteAnswer_Success_Admin() {
         // Given
@@ -87,7 +119,7 @@ class AnswerServiceTest {
         Long adminId = 1L;
 
         User mockAdmin = mock(User.class);
-        when(mockAdmin.getUserId()).thenReturn(adminId);
+        when(mockAdmin.getUserId()).thenReturn(1L);
         when(mockAdmin.getNickname()).thenReturn("관리자");
 
         Question mockQuestion = mock(Question.class);
@@ -105,6 +137,42 @@ class AnswerServiceTest {
         verify(mockQuestion).updateQnaState(QnaState.WAITING); // 문의 상태 업데이트 확인
         verify(questionRepository).save(mockQuestion); // 문의 저장 확인
     }
+
+    @Test
+    @DisplayName("답변 삭제 성공 - 트레이더 권한")
+    void deleteAnswer_Success_Trader() {
+        // Given
+        Long answerId = 1L;
+        Long questionId = 1L;
+        Long traderId = 1L;
+
+        User mockTrader = mock(User.class);
+        when(mockTrader.getUserId()).thenReturn(1L);
+        when(mockTrader.getNickname()).thenReturn("트레이더");
+
+        Strategy mockStrategy = Strategy.builder()
+                .user(mockTrader)
+                .strategyId(1L)
+                .strategyName("테스트 전략")
+                .build();
+
+        Question mockQuestion = mock(Question.class);
+        when(mockQuestion.getStrategy()).thenReturn(mockStrategy);
+
+        Answer mockAnswer = mock(Answer.class);
+
+        // Mock 설정
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mockQuestion));
+        when(answerRepository.findById(answerId)).thenReturn(Optional.of(mockAnswer));
+
+        // When
+        answerService.deleteAnswer(answerId, questionId, Role.TRADER, traderId);
+
+        // Then
+        verify(answerRepository).delete(mockAnswer); // 삭제 검증
+        verify(mockQuestion).updateQnaState(QnaState.WAITING); // 상태 변경 검증
+    }
+
 
     @Test
     @DisplayName("답변 삭제 실패 - 권한 없음")
@@ -140,4 +208,28 @@ class AnswerServiceTest {
         verify(questionRepository).findById(questionId);
 
     }
+
+    @Test
+    @DisplayName("답변 삭제 실패 - 답변 존재하지 않음")
+    void deleteAnswer_Failure_AnswerNotFound() {
+        // Given
+        Long answerId = 1L;
+        Long questionId = 1L;
+        Long userId = 2L;
+
+        // Mock 설정: Answer가 존재하지 않음
+        when(questionRepository.findById(questionId)).thenReturn(Optional.of(mock(Question.class)));
+        when(answerRepository.findById(answerId)).thenReturn(Optional.empty());
+
+        // When & Then
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
+            answerService.deleteAnswer(answerId, questionId, Role.TRADER, userId);
+        });
+
+        assertEquals(ErrorCode.ANSWER_NOT_FOUND, exception.getErrorCode()); // 에러 코드 확인
+        verify(answerRepository, never()).delete(any(Answer.class)); // 삭제되지 않았는지 확인
+    }
+
+
+
 }
