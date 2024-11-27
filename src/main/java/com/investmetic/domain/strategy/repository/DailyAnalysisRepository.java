@@ -22,6 +22,10 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
             @Param("strategy") Strategy strategy,
             @Param("dailyDate") LocalDate dailyDate);
 
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate " +
+            "ORDER BY CASE WHEN d.proceed = 'NO' THEN 1 ELSE 2 END LIMIT 1")
+    Optional<DailyAnalysis> findDailyAnalysisByStrategyAndDate(@Param("strategy") Strategy strategy,
+                                                               @Param("dailyDate") LocalDate dailyDate);
 
     // 특정 전략의 해당 날짜의 이전 데이터들 가져오기
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate <= :startDate ORDER BY d.dailyDate ASC")
