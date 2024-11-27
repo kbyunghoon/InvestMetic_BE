@@ -68,7 +68,8 @@ public class Strategy extends BaseEntity {
     private IsPublic isPublic = IsPublic.PRIVATE; // 공개여부 (default : 비공개)
 
     @Enumerated(EnumType.STRING)
-    private IsApproved isApproved; // 승인여부
+    @Builder.Default
+    private IsApproved isApproved = IsApproved.PENDING; // 승인여부
 
     @ColumnDefault("0")
     @Builder.Default
@@ -149,5 +150,9 @@ public class Strategy extends BaseEntity {
 
     public void minusSubscriptionCount() {
         this.subscriptionCount -= 1;
+    }
+
+    public void setIsApproved(IsApproved isApproved) {
+        this.isApproved = isApproved;
     }
 }

@@ -38,9 +38,6 @@ public class SubscribtionServiceTest {
 
     @BeforeEach
     public void setUp() {
-        subscriptionRepository.deleteAll();
-        strategyRepository.deleteAll();
-        userRepository.deleteAll();
         User user = User.builder()
                 .userName("testUser")
                 .nickname("testNickname")
