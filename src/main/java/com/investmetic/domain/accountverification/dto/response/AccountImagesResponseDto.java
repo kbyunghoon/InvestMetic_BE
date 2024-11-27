@@ -33,7 +33,6 @@ public class AccountImagesResponseDto {
 
     public static AccountImagesResponseDto createAccountImages(AccountVerification accountVerification) {
         return AccountImagesResponseDto.builder()
-                .id(null)
                 .title(accountVerification.getTitle())
                 .imageUrl(accountVerification.getAccountVerificationUrl())
                 .build();
