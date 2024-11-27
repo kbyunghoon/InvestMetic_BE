@@ -1,6 +1,7 @@
 package com.investmetic.domain.user.service;
 
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
@@ -46,31 +47,40 @@ public class UserService {
 
     }
 
-    public boolean checkNicknameDuplicate(String nickname) {
+    public AvaliableDto checkNicknameDuplicate(String nickname) {
 
-        if (!userRepository.existsByNickname(nickname)) {
-            throw new BusinessException(ErrorCode.INVALID_NICKNAME);
+        boolean isDuplicate = userRepository.existsByNickname(nickname);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
         }
-
-        return userRepository.existsByNickname(nickname);
     }
 
-    public boolean checkEmailDuplicate(String email) {
+    public AvaliableDto checkEmailDuplicate(String email) {
 
-        if (!userRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.INVALID_EMAIL);
+        boolean isDuplicate = userRepository.existsByEmail(email);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
         }
-
-        return userRepository.existsByEmail(email);
     }
 
-    public boolean checkPhoneDuplicate(String phone) {
+    public AvaliableDto checkPhoneDuplicate(String phone) {
 
-        if (!userRepository.existsByPhone(phone)) {
-            throw new BusinessException(ErrorCode.INVALID_PHONE);
+        boolean isDuplicate = userRepository.existsByPhone(phone);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
         }
-
-        return userRepository.existsByPhone(phone);
     }
 
     /**
