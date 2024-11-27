@@ -65,6 +65,17 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
+    // 이메일 찾기 시 인증코드 발송.
+    public void sendAuthenticationCode(String email) {
+        // 인증 코드 생성.
+        String code = createdCode();
+
+        // 해당 이메일로 인증코드 발송.
+        emailService.sendAuthenticationCode(email, code);
+
+        // code를 redis에 저장(30 minute)
+        redisUtil.setDataExpire(email, code, 60 * 30L);
+    }
 
     public AvaliableDto checkNicknameDuplicate(String nickname) {
 
