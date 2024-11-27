@@ -3,12 +3,14 @@ package com.investmetic.domain.user.dto.response;
 import com.investmetic.domain.user.model.entity.User;
 import java.util.Collection;
 import java.util.Collections;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @RequiredArgsConstructor
+@Getter
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
