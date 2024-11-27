@@ -41,8 +41,7 @@ public class QuestionService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        Question question = Question.createQuestion(user, strategy, questionRequestDto.getTitle(),
-                questionRequestDto.getContent());
+        Question question = Question.from(user, strategy, questionRequestDto);
         questionRepository.save(question);
     }
 
@@ -59,7 +58,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-        if (!Role.isAdmin(user.getRole())) { // 수정된 부분
+        if (!Role.isAdmin(user.getRole())) {
             if (user.getRole() == Role.INVESTOR) {
                 if (!question.getUser().getUserId().equals(userId)) {
                     throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);

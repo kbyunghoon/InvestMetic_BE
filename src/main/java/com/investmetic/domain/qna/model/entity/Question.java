@@ -1,5 +1,6 @@
 package com.investmetic.domain.qna.model.entity;
 
+import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.user.model.entity.User;
@@ -52,14 +53,14 @@ public class Question extends BaseEntity {
     @Column(nullable = false)
     private QnaState qnaState; // 답변 상태
 
-    public static Question createQuestion(User user, Strategy strategy, String title, String content) {
+    public static Question from(User user, Strategy strategy, QuestionRequestDto request) {
         Question question = new Question();
         question.user = user;
         question.strategy = strategy;
         question.targetName = strategy.getUser().getNickname();
-        question.title = title;
+        question.title = request.getTitle();
         question.qnaState = QnaState.WAITING;
-        question.content = content;
+        question.content = request.getContent();
         return question;
     }
 
