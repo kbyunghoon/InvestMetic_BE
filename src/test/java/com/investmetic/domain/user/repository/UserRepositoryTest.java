@@ -19,10 +19,7 @@ class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-    }
+
     private User createOneUser() {
         User user = User.builder()
                 .userName("testUser")
