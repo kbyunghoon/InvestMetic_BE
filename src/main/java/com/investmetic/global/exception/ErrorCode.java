@@ -40,6 +40,9 @@ public enum ErrorCode {
     USER_STATISTICS_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, 2301, "사용자 통계 데이터를 조회할 수 없습니다."),
     TRADER_LIST_RETRIEVAL_FAILED(HttpStatus.NOT_FOUND, 2302, "트레이더 목록 조회에 실패하였습니다."),
     EMAIL_SEND_FAILED(HttpStatus.BAD_REQUEST, 2401, "이메일 전송이 실패하였습니다."),
+    REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2501, "Refresh token is missing."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2502, "Refresh token has expired."),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
 
 
     // 전략 관련 오류
