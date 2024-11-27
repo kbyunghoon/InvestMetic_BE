@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/api/admin/strategies/")
+@RequestMapping("/api/admin/strategies")
 @RequiredArgsConstructor
 public class AdminStrategyController {
     private final AdminStrategyService adminStrategyService;
-    @PatchMapping("{strategyId}")
+    @PatchMapping("/{strategyId}")
     public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId, IsApproved isApproved) {
         adminStrategyService.manageAproveState(strategyId, isApproved);
         return BaseResponse.success();
