@@ -142,7 +142,7 @@ public class UserService {
 
     // 중복 검증 공통 로직
     private void validateDuplicate(ColumnCondition columnName, String value, ValidationFunction validationFunction) {
-        if (!validationFunction.exists(value)) {
+        if (validationFunction.exists(value)) {
             throw new BusinessException(getErrorCodeForField(columnName));
         }
     }
