@@ -2,8 +2,8 @@ package com.investmetic.domain.strategy.service;
 
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
-import com.investmetic.domain.strategy.dto.object.ProfitRateChartDto;
-import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
+import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.SearchInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.BaseStrategyResponse;

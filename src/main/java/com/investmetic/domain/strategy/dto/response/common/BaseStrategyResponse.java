@@ -1,7 +1,7 @@
 package com.investmetic.domain.strategy.dto.response.common;
 
-import com.investmetic.domain.strategy.dto.object.ProfitRateChartDto;
-import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
+import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import lombok.Getter;
 
 @Getter

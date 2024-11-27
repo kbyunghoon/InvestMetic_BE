@@ -1,6 +1,6 @@
 package com.investmetic.domain.strategy.dto.request;
 
-import com.investmetic.domain.strategy.dto.object.RangeDto;
+import com.investmetic.domain.strategy.dto.RangeDto;
 import com.investmetic.domain.strategy.model.DurationRange;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.strategy.model.ProfitRange;

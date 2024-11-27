@@ -1,6 +1,6 @@
 package com.investmetic.domain.strategy.repository;
 
-import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;

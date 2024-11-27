@@ -1,7 +1,7 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;

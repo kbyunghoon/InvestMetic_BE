@@ -10,8 +10,8 @@ import static com.investmetic.domain.strategy.model.entity.QTradeType.tradeType;
 import static com.investmetic.domain.subscription.model.entity.QSubscription.subscription;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
-import com.investmetic.domain.strategy.dto.object.RangeDto;
-import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
+import com.investmetic.domain.strategy.dto.RangeDto;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QMyStrategyDetailResponse;

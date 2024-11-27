@@ -1,4 +1,4 @@
-package com.investmetic.domain.strategy.dto.object;
+package com.investmetic.domain.strategy.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

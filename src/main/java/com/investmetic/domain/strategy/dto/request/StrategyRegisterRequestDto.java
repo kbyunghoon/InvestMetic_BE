@@ -1,4 +1,4 @@
-package com.investmetic.domain.strategy.dto.object;
+package com.investmetic.domain.strategy.dto.request;
 
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;

@@ -1,6 +1,6 @@
 package com.investmetic.domain.strategy.controller;
 
-import com.investmetic.domain.strategy.dto.object.StrategyRegisterRequestDto;
+import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;

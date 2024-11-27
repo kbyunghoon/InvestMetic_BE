@@ -1,4 +1,4 @@
-package com.investmetic.domain.strategy.dto.object;
+package com.investmetic.domain.strategy.dto;
 
 import com.investmetic.domain.strategy.model.entity.StockType;
 import lombok.Builder;
