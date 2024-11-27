@@ -9,8 +9,10 @@ import lombok.Getter;
 public class QuestionsResponse {
     private Long questionId;
     private String title;
-    private String qusetionContent;
+    private String questionContent;
     private String strategyName;
+    private String traderImageUrl;
+    private String investorImageUrl;
     private String traderName;
     private String investorName;
     private String stateCondition;
@@ -20,12 +22,14 @@ public class QuestionsResponse {
         return QuestionsResponse.builder()
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
-                .qusetionContent(question.getContent())
+                .questionContent(question.getContent())
                 .strategyName(question.getStrategy().getStrategyName())
+                .traderImageUrl(question.getStrategy().getUser().getImageUrl())
+                .investorImageUrl(question.getUser().getImageUrl())
                 .traderName(question.getStrategy().getUser().getNickname())
-                .investorName(question.getUser().getUserName())
+                .investorName(question.getUser().getNickname())
                 .stateCondition(question.getQnaState().name())
-                .createdAt(question.getCreatedAt().toString())
+                .createdAt(question.getCreatedAt() != null ? question.getCreatedAt().toString() : "N/A")
                 .build();
     }
 }

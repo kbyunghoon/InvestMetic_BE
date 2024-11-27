@@ -33,9 +33,8 @@ public class QuestionsDetailResponse {
                 .traderImageUrl(question.getStrategy().getUser().getImageUrl())
                 .traderName(question.getStrategy().getUser().getNickname())
                 .state(question.getQnaState().name())
-                .questionCreatedAt(question.getCreatedAt().toString())
-                .answerCreatedAt(
-                        answer != null && answer.getCreatedAt() != null ? answer.getCreatedAt().toString() : null)
+                .questionCreatedAt(question.getCreatedAt() != null ? question.getCreatedAt().toString() : "N/A")
+                .answerCreatedAt(answer != null && answer.getCreatedAt() != null ? answer.getCreatedAt().toString() : null)
                 .build();
     }
 }
