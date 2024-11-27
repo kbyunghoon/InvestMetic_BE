@@ -34,7 +34,7 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        accessToken = accessToken.split(" ")[1];
+        accessToken = accessToken.replace("Bearer ", "");
 
         // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
         try {
@@ -68,6 +68,7 @@ public class JWTFilter extends OncePerRequestFilter {
                 .userName(username)
                 .password("tempassword")
                 .role(Role.valueOf(role))
+                // .role(Role.valueOf(role.replace("ROLE_", "")))
                 .build();
 
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
