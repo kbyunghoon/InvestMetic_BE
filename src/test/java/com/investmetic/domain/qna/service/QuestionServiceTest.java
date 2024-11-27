@@ -1,5 +1,6 @@
 package com.investmetic.domain.qna.service;
 
+import static com.investmetic.domain.user.model.Role.TRADER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
@@ -76,6 +77,39 @@ class QuestionServiceTest {
         verify(userRepository).findById(userId);
         verify(strategyRepository).findById(strategyId);
         verify(questionRepository).save(any(Question.class));
+    }
+    @Test
+    @DisplayName("Question.updateQnaState - 상태 업데이트 성공")
+    void updateQnaState_Success() {
+        // Given
+        User mockUser = User.builder()
+                .nickname("투자자")
+                .role(Role.INVESTOR)
+                .build();
+
+        User trader = User.builder()
+                .nickname("트레이더")
+                .role(Role.TRADER)
+                .build();
+
+        Strategy mockStrategy = Strategy.builder()
+                .strategyId(1L)
+                .strategyName("테스트 전략")
+                .user(trader) // 전략 작성자(트레이더)
+                .build();
+
+        QuestionRequestDto request = QuestionRequestDto.builder()
+                .title("테스트 문의")
+                .content("테스트 내용")
+                .build();
+
+        Question question = Question.from(mockUser, mockStrategy, request);
+
+        // When
+        question.updateQnaState(QnaState.COMPLETED); // 상태 업데이트
+
+        // Then
+        assertEquals(QnaState.COMPLETED, question.getQnaState()); // 상태가 변경되었는지 확인
     }
 
     @Test
@@ -188,5 +222,127 @@ class QuestionServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("트레이더 문의 목록 조회 성공")
+    void getTraderQuestions_Success() {
+        // Given
+        Long traderId = 1L;
+        String keyword = "문의 제목";
+        SearchCondition searchCondition = SearchCondition.TITLE;
+        StateCondition stateCondition = StateCondition.ALL;
+        String investorName = "투자자1";
+        String strategyName = "전략1";
+        PageRequest pageable = PageRequest.of(0, 10);
+
+        // Mock User (트레이더)
+        User mockTrader = User.builder()
+                .role(TRADER)
+                .nickname("트레이더1")
+                .build();
+
+        // Mock Strategy
+        Strategy mockStrategy = Strategy.builder()
+                .strategyId(1L)
+                .strategyName(strategyName)
+                .user(mockTrader)
+                .build();
+
+        // Mock Question
+        QuestionRequestDto questionRequestDto = QuestionRequestDto.builder()
+                .title("문의 제목")
+                .content("문의 내용")
+                .build();
+        Question mockQuestion = Question.from(mockTrader, mockStrategy,questionRequestDto);
+        Page<Question> mockPage = new PageImpl<>(Collections.singletonList(mockQuestion));
+
+        when(userRepository.findById(traderId)).thenReturn(Optional.of(mockTrader));
+        when(questionRepository.searchQuestions(
+                traderId, keyword, searchCondition, stateCondition, TRADER, pageable, strategyName, null, investorName
+        )).thenReturn(mockPage);
+
+        // When
+        QuestionsPageResponse response = questionService.getTraderQuestions(
+                traderId, keyword, searchCondition, stateCondition, investorName, strategyName, pageable
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals(1, response.getPage().getContent().size());
+        assertEquals("문의 제목", response.getPage().getContent().get(0).getTitle());
+        verify(userRepository).findById(traderId);
+        verify(questionRepository).searchQuestions(
+                traderId, keyword, searchCondition, stateCondition, TRADER, pageable, strategyName, null, investorName
+        );
+    }
+
+    @Test
+    @DisplayName("관리자 문의 목록 조회 성공 - 검색 조건 포함")
+    void getAdminQuestions_Success() {
+        // Given
+        Long adminId = 1L;
+        String keyword = "문의 제목";
+        SearchCondition searchCondition = SearchCondition.TITLE; // 제목 검색
+        StateCondition stateCondition = StateCondition.WAITING; // WAITING 상태
+        String investorName = "투자자1";
+        String strategyName = "전략1";
+        String traderName = "트레이더1";
+        PageRequest pageable = PageRequest.of(0, 10);
+
+        User mockAdmin = User.builder()
+                .userName("admin")
+                .role(Role.SUPER_ADMIN) // 관리자 역할
+                .nickname("관리자")
+                .build();
+
+        User mockUser1 = User.builder()
+                .userName("investor")
+                .role(Role.INVESTOR)
+                .nickname(investorName)
+                .build();
+
+        User mockUser2 = User.builder()
+                .userName("trader")
+                .role(Role.TRADER)
+                .nickname(traderName)
+                .build();
+
+        Strategy mockStrategy = Strategy.builder()
+                .strategyId(1L)
+                .strategyName(strategyName)
+                .user(mockUser2)
+                .build();
+
+        QuestionRequestDto questionRequestDto = QuestionRequestDto.builder()
+                .title(keyword)
+                .content("문의 내용")
+                .build();
+        Question mockQuestion = Question.from(mockUser1, mockStrategy,questionRequestDto);
+
+        Page<Question> mockPage = new PageImpl<>(Collections.singletonList(mockQuestion));
+
+        // Mockito 설정
+        when(userRepository.findById(adminId)).thenReturn(Optional.of(mockAdmin)); // 관리자 확인
+        when(questionRepository.searchQuestions(
+                eq(adminId), eq(keyword), eq(searchCondition), eq(stateCondition), eq(Role.SUPER_ADMIN),
+                eq(pageable), eq(strategyName), eq(traderName), eq(investorName)
+        )).thenReturn(mockPage);
+
+        // When
+        QuestionsPageResponse response = questionService.getAdminQuestions(
+                adminId, keyword, searchCondition, stateCondition, investorName, strategyName, traderName, pageable, Role.SUPER_ADMIN
+        );
+
+        // Then
+        assertNotNull(response);
+        assertEquals(1, response.getPage().getContent().size());
+        assertEquals("문의 제목", response.getPage().getContent().get(0).getTitle());
+        assertEquals("투자자1", response.getPage().getContent().get(0).getInvestorName());
+        assertEquals("트레이더1", response.getPage().getContent().get(0).getTraderName());
+        assertEquals("전략1", response.getPage().getContent().get(0).getStrategyName());
+        verify(userRepository).findById(adminId);
+        verify(questionRepository).searchQuestions(
+                adminId, keyword, searchCondition, stateCondition, Role.SUPER_ADMIN, pageable, strategyName, traderName, investorName
+        );
+    }
 
 }
