@@ -11,11 +11,12 @@ public class MyStrategySimpleResponse extends BaseStrategyResponse {
 
     @QueryProjection
     public MyStrategySimpleResponse(Long strategyId, String strategyName, String traderImgUrl, String nickname,
-                                    String tradeTypeIconUrl, long mdd, double smScore,
+                                    String tradeTypeIconUrl, String tradeTypeName, long mdd, double smScore,
                                     double cumulativeProfitRate, double recentYearProfitLossRate, int subscriptionCount,
                                     double averageRating, int totalReviews, IsPublic isPublic) {
-        super(strategyId, strategyName, traderImgUrl, nickname, tradeTypeIconUrl, mdd, smScore, cumulativeProfitRate,
-                recentYearProfitLossRate, subscriptionCount, averageRating, totalReviews);
+        super(strategyId, strategyName, traderImgUrl, nickname, tradeTypeIconUrl, tradeTypeName, mdd,
+                smScore, cumulativeProfitRate, recentYearProfitLossRate, subscriptionCount, averageRating,
+                totalReviews);
         this.isPublic = isPublic;
     }
 }

@@ -1,6 +1,7 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.investmetic.domain.strategy.dto.object.StockTypeInfo;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
@@ -8,15 +9,13 @@ import com.investmetic.domain.strategy.model.OperationCycle;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 
 @Getter
 public class MyStrategyDetailResponse {
 
     private String strategyName;                    // 전략명
-    private List<String> stockTypeIconURLs;         // 종목 아이콘 이미지 경로 리스트
-    private List<String> stockTypeNames;            // 종목 이름 리스트
+    private StockTypeInfo stockTypeInfo;            // 종목 이름, 아이콘 목록
     private String tradeTypeIconURL;                // 매매 유형 이미지 경로
     private String tradeTypeName;                   // 투자 종류 (자동, 반자동, 수동)
     private OperationCycle operationCycle;          // 투자 주기 (데이, 포지션)
@@ -36,17 +35,16 @@ public class MyStrategyDetailResponse {
 
 
     @QueryProjection
-    public MyStrategyDetailResponse(String strategyName, List<String> stockTypeIconURLs, String tradeTypeIconURL,
-                                    List<String> stockTypeNames, String tradeTypeName, OperationCycle operationCycle,
+    public MyStrategyDetailResponse(String strategyName, String tradeTypeIconURL, StockTypeInfo stockTypeInfo,
+                                    String tradeTypeName, OperationCycle operationCycle,
                                     String strategyDescription, int subscriptionCount, String traderImgUrl,
                                     String nickname, MinimumInvestmentAmount minimumInvestmentAmount,
                                     long initialInvestment, double kpRatio, double smScore,
                                     LocalDate finalProfitLossDate, LocalDateTime createdAt, IsPublic isPublic,
                                     IsApproved isApproved) {
         this.strategyName = strategyName;
-        this.stockTypeIconURLs = stockTypeIconURLs;
+        this.stockTypeInfo = stockTypeInfo;
         this.tradeTypeIconURL = tradeTypeIconURL;
-        this.stockTypeNames = stockTypeNames;
         this.tradeTypeName = tradeTypeName;
         this.operationCycle = operationCycle;
         this.strategyDescription = strategyDescription;
