@@ -1,90 +1,29 @@
 package com.investmetic.domain.user.controller;
 
 
-import com.investmetic.global.util.JWTUtil;
-import com.investmetic.global.util.RedisUtil;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
+import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
+import com.investmetic.global.security.service.ReIssueService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
+@RequestMapping("/api/users/reissue")
 public class ReIssueController {
 
-    private final JWTUtil jwtUtil;
-    private final RedisUtil redisUtil;
+    private final ReIssueService reIssueService;
 
-    @Value("${jwt.expiration.access}")
-    private Long accessExpiration;
-
-    @Value("${jwt.expiration.refresh}")
-    private Long refreshExpiration;
-
-    @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
-
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
-                refresh = cookie.getValue();
-            }
-        }
-
-        if (refresh == null) {
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
-        }
-
-        // refresh 토큰인지 확인
-        String category = jwtUtil.getCategory(refresh);
-
-        if (!category.equals("refresh")) {
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
-        }
-
-        String username = jwtUtil.getUsername(refresh); //이메일
-        String role = jwtUtil.getRole(refresh);
-
-        //새 토큰 발급
-        String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration); //30분
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration); //7일
-
-        response.setHeader("access", "Bearer " + newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
-
-        //기존 refresh token 삭제
-        redisUtil.deleteRefreshToken(username);
-        redisUtil.saveRefreshToken(username, newRefresh, refreshExpiration);
-
-        return ResponseEntity.ok(Map.of(
-                "accessToken", "Bearer " + newAccess,
-                "message", "Token refreshed successfully"
-        ));
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        //cookie.setSecure(true);
-        //cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<BaseResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
+        reIssueService.reissueToken(request, response);
+        return BaseResponse.success(SuccessCode.OK);
     }
 }
