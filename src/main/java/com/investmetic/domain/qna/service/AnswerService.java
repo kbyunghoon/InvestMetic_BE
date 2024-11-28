@@ -23,9 +23,9 @@ public class AnswerService {
     /**
      * 문의 답변 등록
      *
-     * @param questionId        문의 ID
-     * @param traderId          트레이더 ID
-     * @param answerRequestDto  답변 요청 DTO
+     * @param questionId       문의 ID
+     * @param traderId         트레이더 ID
+     * @param answerRequestDto 답변 요청 DTO
      */
     public void createAnswer(Long questionId, Long traderId, AnswerRequestDto answerRequestDto) {
         // 문의 조회

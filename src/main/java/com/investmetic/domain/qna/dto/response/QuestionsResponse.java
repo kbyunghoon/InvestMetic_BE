@@ -27,7 +27,8 @@ public class QuestionsResponse {
                 question.getQuestionId(),
                 getOrDefault(question.getTitle(), "제목 없음"),
                 getOrDefault(question.getContent(), "내용 없음"),
-                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음") : "정보 없음",
+                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음")
+                        : "정보 없음",
                 question.getStrategy() != null && question.getStrategy().getUser() != null
                         ? getOrDefault(question.getStrategy().getUser().getImageUrl(), "이미지 없음")
                         : "이미지 없음",

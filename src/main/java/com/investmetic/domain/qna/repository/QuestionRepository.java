@@ -18,7 +18,8 @@ import org.springframework.stereotype.Repository;
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     // 사용자 정의 메서드 추가
-    default Page<Question> searchByConditions(List<BooleanExpression> conditions, Pageable pageable, JPAQueryFactory queryFactory) {
+    default Page<Question> searchByConditions(List<BooleanExpression> conditions, Pageable pageable,
+                                              JPAQueryFactory queryFactory) {
         // 데이터 조회 쿼리
         List<Question> content = queryFactory.selectFrom(question)
                 .leftJoin(question.strategy, strategy).fetchJoin()

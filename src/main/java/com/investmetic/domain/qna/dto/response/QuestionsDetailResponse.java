@@ -32,7 +32,8 @@ public class QuestionsDetailResponse {
                 getOrDefault(question.getTitle(), "제목 없음"),
                 getOrDefault(question.getContent(), "내용 없음"),
                 answer != null ? getOrDefault(answer.getContent(), "답변 없음") : "답변 없음",
-                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음") : "정보 없음",
+                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음")
+                        : "정보 없음",
                 question.getUser() != null ? getOrDefault(question.getUser().getImageUrl(), "이미지 없음") : "이미지 없음",
                 question.getUser() != null ? getOrDefault(question.getUser().getNickname(), "이름 없음") : "이름 없음",
                 question.getStrategy() != null && question.getStrategy().getUser() != null

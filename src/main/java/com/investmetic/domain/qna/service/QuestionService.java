@@ -116,8 +116,7 @@ public class QuestionService {
     // ================== Private Methods ==================
 
     /**
-     * 사용자 조회 및 예외 처리
-     * userId가 null인 경우 USERS_NOT_FOUND 예외를 던짐
+     * 사용자 조회 및 예외 처리 userId가 null인 경우 USERS_NOT_FOUND 예외를 던짐
      */
     private User findUserById(Long userId) {
         if (userId == null) {
@@ -166,7 +165,9 @@ public class QuestionService {
      * 접근 권한 검증
      */
     private void validateAccess(User user, Question question, Long userId) {
-        if (Role.isAdmin(user.getRole())) return;
+        if (Role.isAdmin(user.getRole())) {
+            return;
+        }
 
         if (user.getRole() == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
@@ -182,14 +183,16 @@ public class QuestionService {
     /**
      * 문의 검색 및 반환
      */
-    private Page<QuestionsResponse> searchQuestions(Long userId, QuestionRequestDto request, Pageable pageable, Role role) {
+    private Page<QuestionsResponse> searchQuestions(Long userId, QuestionRequestDto request, Pageable pageable,
+                                                    Role role) {
         List<BooleanExpression> conditions = buildConditions(
                 userId,
                 request.getKeyword(),
                 request.getSearchCondition(),
                 request.getStateCondition(),
                 role,
-                request instanceof InvestorQuestionsRequest ? ((InvestorQuestionsRequest) request).getStrategyName() : null,
+                request instanceof InvestorQuestionsRequest ? ((InvestorQuestionsRequest) request).getStrategyName()
+                        : null,
                 request instanceof AdminQuestionsRequest ? ((AdminQuestionsRequest) request).getTraderName() : null,
                 request instanceof TraderQuestionsRequest ? ((TraderQuestionsRequest) request).getInvestorName() : null
         );

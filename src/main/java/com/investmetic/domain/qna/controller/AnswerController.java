@@ -42,6 +42,7 @@ public class AnswerController {
         answerService.deleteTraderAnswer(answerId, questionId, userId);
         return BaseResponse.success(SuccessCode.DELETED);
     }
+
     //문의 답변 삭제 (관리자)
     @DeleteMapping("/admin/questions/{questionId}/answers/{answerId}")
     public ResponseEntity<BaseResponse<Void>> deleteAdminAnswer(
