@@ -46,7 +46,6 @@ public class Question extends BaseEntity {
     private String strategyName; //전략명    ..?
 
     @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
-    @Getter
     private Answer answer;
 
     @Enumerated(EnumType.STRING)
