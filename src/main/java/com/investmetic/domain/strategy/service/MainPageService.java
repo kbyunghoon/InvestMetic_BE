@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class MainService {
+public class MainPageService {
 
     private final StrategyService strategyService;
     private final StrategyRepository strategyRepository;

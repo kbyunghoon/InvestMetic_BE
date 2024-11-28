@@ -1,8 +1,7 @@
 package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
-import com.investmetic.domain.strategy.service.MainService;
-import com.investmetic.global.common.BaseEntity;
+import com.investmetic.domain.strategy.service.MainPageService;
 import com.investmetic.global.exception.BaseResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/strategies/")
-public class MainController {
-    private final MainService mainService;
+public class MainPageController {
+    private final MainPageService mainPageService;
 
     @GetMapping("/top-ranking")
     public ResponseEntity<BaseResponse<List<TopRankingStrategyResponseDto>>> getTopSubscribe(){
 
-        return BaseResponse.success(mainService.getTopSubscriberStrategy());
+        return BaseResponse.success(mainPageService.getTopSubscriberStrategy());
     }
     @GetMapping("/top-ranking-smscore")
     public ResponseEntity<BaseResponse<List<TopRankingStrategyResponseDto>>> getTopSmScore(){
 
-        return BaseResponse.success(mainService.getTopSmscoreStrategy());
+        return BaseResponse.success(mainPageService.getTopSmscoreStrategy());
     }
 }
