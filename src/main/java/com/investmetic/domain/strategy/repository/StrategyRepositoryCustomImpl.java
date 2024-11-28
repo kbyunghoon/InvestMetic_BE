@@ -11,6 +11,7 @@ import static com.investmetic.domain.subscription.model.entity.QSubscription.sub
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.strategy.dto.RangeDto;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QMyStrategyDetailResponse;
@@ -31,7 +32,6 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -56,25 +56,22 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     @Override
     public Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId) {
 
+        // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
-                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
+                .select(stockType.stockTypeIconUrl, stockType.stockTypeName)
                 .from(stockTypeGroup)
                 .join(stockTypeGroup.stockType, stockType)
                 .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
                 .fetch();
 
-        // 종목 아이콘 목록
-        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypes, stockType.stockTypeIconURL);
-
-        // 종목 이름목록
-        List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
+        // StockTypeInfo로 변환
+        StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
         StrategyDetailResponse response = queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
-                        Expressions.constant(stockTypeIconURLs), // List를 Expression으로 변환
-                        tradeType.tradeTypeIconURL,
-                        Expressions.constant(stockTypeNames), // List를 Expression으로 변환
+                        Expressions.constant(stockTypeInfo),
+                        tradeType.tradeTypeIconUrl,
                         tradeType.tradeTypeName,
                         strategy.operationCycle,
                         strategy.strategyDescription,
@@ -105,25 +102,22 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     @Override
     public Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId) {
 
+        // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
-                .select(stockType.stockTypeIconURL, stockType.stockTypeName)
+                .select(stockType.stockTypeIconUrl, stockType.stockTypeName)
                 .from(stockTypeGroup)
                 .join(stockTypeGroup.stockType, stockType)
                 .where(stockTypeGroup.strategy.strategyId.eq(strategyId))
                 .fetch();
 
-        // 종목 아이콘 목록
-        List<String> stockTypeIconURLs = getStockTypeIconURLs(stockTypes, stockType.stockTypeIconURL);
-
-        // 종목 이름목록
-        List<String> stockTypeNames = getStockTypeIconURLs(stockTypes, stockType.stockTypeName);
+        // StockTypeInfo로 변환
+        StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
         MyStrategyDetailResponse response = queryFactory
                 .select(new QMyStrategyDetailResponse(
                         strategy.strategyName,
-                        Expressions.constant(stockTypeIconURLs),
-                        tradeType.tradeTypeIconURL,
-                        Expressions.constant(stockTypeNames),
+                        tradeType.tradeTypeIconUrl,
+                        Expressions.constant(stockTypeInfo),
                         tradeType.tradeTypeName,
                         strategy.operationCycle,
                         strategy.strategyDescription,
@@ -148,10 +142,16 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         return Optional.ofNullable(response);
     }
 
-    private @NotNull List<String> getStockTypeIconURLs(List<Tuple> stockTypes, StringPath stockType) {
-        return stockTypes.stream()
-                .map(tuple -> tuple.get(stockType))
+    private @NotNull StockTypeInfo getStockTypeInfo(List<Tuple> stockTypes) {
+        List<String> stockTypeIconUrls = stockTypes.stream()
+                .map(tuple -> tuple.get(stockType.stockTypeIconUrl))
                 .toList();
+
+        List<String> stockTypeNames = stockTypes.stream()
+                .map(tuple -> tuple.get(stockType.stockTypeName))
+                .toList();
+
+        return new StockTypeInfo(stockTypeIconUrls, stockTypeNames);
     }
 
     /***
@@ -169,7 +169,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.strategyName,
                         user.imageUrl,
                         user.nickname,
-                        tradeType.tradeTypeIconURL,
+                        tradeType.tradeTypeIconUrl,
+                        tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
@@ -213,7 +214,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.strategyName,
                         user.imageUrl,
                         user.nickname,
-                        tradeType.tradeTypeIconURL,
+                        tradeType.tradeTypeIconUrl,
+                        tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
@@ -254,7 +256,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.strategyName,
                         user.imageUrl,
                         user.nickname,
-                        tradeType.tradeTypeIconURL,
+                        tradeType.tradeTypeIconUrl,
+                        tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
                         strategyStatistics.smScore,
                         strategyStatistics.cumulativeProfitRate,
@@ -309,25 +312,30 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
     // 종목 아이콘목록 조회 배치 쿼리
     @Override
-    public Map<Long, List<String>> findStockTypeIconsMap(List<Long> strategyIds) {
+    public Map<Long, StockTypeInfo> findStockTypeInfoMap(List<Long> strategyIds) {
         // 종목 아이콘 조회
-        List<Tuple> stockTypeIcons = queryFactory
-                .select(stockTypeGroup.strategy.strategyId, stockType.stockTypeIconURL)
+        List<Tuple> stockTypeInfos = queryFactory
+                .select(stockTypeGroup.strategy.strategyId, stockType.stockTypeIconUrl, stockType.stockTypeName)
                 .from(stockTypeGroup)
                 .join(stockTypeGroup.stockType, stockType)
-                .where(stockTypeGroup.stockType.stockTypeId.in(strategyIds))
+                .where(stockTypeGroup.strategy.strategyId.in(strategyIds))
                 .fetch();
 
-        Map<Long, List<String>> stockTypeIconUrlsMap = new HashMap<>();
+        // Map 생성
+        Map<Long, StockTypeInfo> stockTypeInfoMap = new HashMap<>();
 
-        for (Tuple stockTypeIcon : stockTypeIcons) {
-            Long strategyId = stockTypeIcon.get(stockTypeGroup.strategy.strategyId);
-            String iconUrl = stockTypeIcon.get(stockType.stockTypeIconURL);
-            stockTypeIconUrlsMap
-                    .computeIfAbsent(strategyId, key -> new ArrayList<>()) // 전략 id가 없으면 빈 리스트 생성
-                    .add(iconUrl);
+        for (Tuple stockTypeInfo : stockTypeInfos) {
+            Long strategyId = stockTypeInfo.get(stockTypeGroup.strategy.strategyId);
+            String iconUrl = stockTypeInfo.get(stockType.stockTypeIconUrl);
+            String name = stockTypeInfo.get(stockType.stockTypeName);
+
+            // StockTypeInfo 생성 및 누적
+            stockTypeInfoMap.computeIfAbsent(strategyId, key -> new StockTypeInfo(new ArrayList<>(), new ArrayList<>()))
+                    .getStockTypeIconUrls().add(iconUrl); // 아이콘 추가
+            stockTypeInfoMap.get(strategyId).getStockTypeNames().add(name); // 이름 추가
         }
-        return stockTypeIconUrlsMap;
+
+        return stockTypeInfoMap;
     }
 
     // 구독여부 조회 배치 쿼리

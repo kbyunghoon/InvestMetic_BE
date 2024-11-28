@@ -1,22 +1,21 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 
 @Getter
 public class StrategyDetailResponse {
 
     private String strategyName;                    // 전략명
-    private List<String> stockTypeIconURLs;         // 종목 아이콘 이미지 경로 리스트
-    private List<String> stockTypeNames;            // 종목 이름 리스트
-    private String tradeTypeIconURL;                // 매매 유형 이미지 경로
-    private String tradeTypeName;                   // 투자 종류 (자동, 반자동, 수동)
+    private StockTypeInfo stockTypeInfo;            // 종목 이름, 아이콘 목록
+    private String tradeTypeIconUrl;                // 매매 유형 이미지 경로
+    private String tradeTypeName;                   // 매매유형 (자동, 반자동, 수동)
     private OperationCycle operationCycle;          // 투자 주기 (데이, 포지션)
     private String strategyDescription;             // 전략 상세 소개
     private double cumulativeProfitRate;            // 누적 수익률
@@ -38,8 +37,8 @@ public class StrategyDetailResponse {
 
 
     @QueryProjection
-    public StrategyDetailResponse(String strategyName, List<String> stockTypeIconURLs, String tradeTypeIconURL,
-                                  List<String> stockTypeNames, String tradeTypeName, OperationCycle operationCycle,
+    public StrategyDetailResponse(String strategyName, StockTypeInfo stockTypeInfo, String tradeTypeIconUrl,
+                                  String tradeTypeName, OperationCycle operationCycle,
                                   String strategyDescription, double cumulativeProfitRate, double maxDrawdownRate,
                                   double averageProfitLossRate, double profitFactor, double winRate,
                                   int subscriptionCount, String traderImgUrl, String nickname,
@@ -47,9 +46,8 @@ public class StrategyDetailResponse {
                                   double kpRatio,
                                   double smScore, LocalDate finalProfitLossDate, LocalDateTime createdAt) {
         this.strategyName = strategyName;
-        this.stockTypeIconURLs = stockTypeIconURLs;
-        this.tradeTypeIconURL = tradeTypeIconURL;
-        this.stockTypeNames = stockTypeNames;
+        this.stockTypeInfo = stockTypeInfo;
+        this.tradeTypeIconUrl = tradeTypeIconUrl;
         this.tradeTypeName = tradeTypeName;
         this.operationCycle = operationCycle;
         this.strategyDescription = strategyDescription;

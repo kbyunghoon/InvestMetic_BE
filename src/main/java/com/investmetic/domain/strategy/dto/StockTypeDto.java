@@ -23,7 +23,7 @@ public class StockTypeDto {
         return StockTypeDto.builder()
                 .stockTypeId(stockType.getStockTypeId())
                 .stockTypeName(stockType.getStockTypeName())
-                .stockIconUrl(stockType.getStockTypeIconURL())
+                .stockIconUrl(stockType.getStockTypeIconUrl())
                 .build();
     }
 }

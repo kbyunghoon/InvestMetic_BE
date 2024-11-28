@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.service;
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
 import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.SearchInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.BaseStrategyResponse;
@@ -90,11 +91,11 @@ public class StrategyListingService {
         List<Long> strategyIds = getStrategyIds(content);
 
         // 각 전략 ID에 대한 배치 쿼리 조회 (성능개선)
-        Map<Long, List<String>> stockTypeIconsMap = strategyRepository.findStockTypeIconsMap(strategyIds);
+        Map<Long, StockTypeInfo> stockTypeInfoMap = strategyRepository.findStockTypeInfoMap(strategyIds);
         Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds);
 
         // 응답 데이터 업데이트
-        updateContent(content, stockTypeIconsMap, subscriptionMap, profitRateDataMap);
+        updateContent(content, stockTypeInfoMap, subscriptionMap, profitRateDataMap);
 
         return new PageResponseDto<>(content);
     }
@@ -133,12 +134,12 @@ public class StrategyListingService {
      * 응답 데이터 업데이트 <br> 각 전략 응답에 대해 종목 아이콘, 구독 여부, 수익률 그래프 데이터를 설정
      *
      * @param content           전략 응답 데이터
-     * @param stockTypeIconsMap 종목 아이콘 데이터 맵
+     * @param stockTypeInfoMap  종목 아이콘,이름 데이터 맵
      * @param subscriptionMap   구독 여부 데이터 맵
      * @param profitRateDataMap 수익률 그래프 데이터 맵
      */
     private <T extends BaseStrategyResponse> void updateContent(Page<T> content,
-                                                                Map<Long, List<String>> stockTypeIconsMap,
+                                                                Map<Long, StockTypeInfo> stockTypeInfoMap,
                                                                 Map<Long, Boolean> subscriptionMap,
                                                                 Map<Long, List<Tuple>> profitRateDataMap) {
 
@@ -146,7 +147,8 @@ public class StrategyListingService {
             Long strategyId = response.getStrategyId();
 
             // 종목 아이콘 업데이트
-            response.updateStockTypeIconUrls(stockTypeIconsMap.getOrDefault(strategyId, List.of()));
+            StockTypeInfo stockTypeInfo = stockTypeInfoMap.get(strategyId);
+            response.updateStockTypeInfo(stockTypeInfo);
 
             // 구독 여부 업데이트
             if (subscriptionMap != null) {

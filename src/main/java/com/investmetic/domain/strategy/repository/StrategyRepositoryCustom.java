@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.repository;
 
+import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
@@ -17,7 +18,7 @@ public interface StrategyRepositoryCustom {
 
     Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId);
 
-    Map<Long, List<String>> findStockTypeIconsMap(List<Long> strategyIdS);
+    Map<Long, StockTypeInfo> findStockTypeInfoMap(List<Long> strategyIdS);
 
     Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIdS);
 

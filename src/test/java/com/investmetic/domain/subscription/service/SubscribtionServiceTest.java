@@ -2,7 +2,6 @@ package com.investmetic.domain.subscription.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.investmetic.domain.strategy.dto.request.TradeTypeRequestDTO;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
@@ -13,7 +12,6 @@ import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
-import com.investmetic.domain.user.service.UserService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +51,7 @@ public class SubscribtionServiceTest {
 
         TradeType tradetype = TradeType.builder()
                 .tradeTypeName("Sample_Trade1")
-                .tradeTypeIconURL("/icons/sample-icon1.png")
+                .tradeTypeIconUrl("/icons/sample-icon1.png")
                 .build();
         tradeTypeRepository.save(tradetype);
         Strategy strategy = Strategy.builder()

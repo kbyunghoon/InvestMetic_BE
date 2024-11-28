@@ -67,7 +67,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
-    @Operation(summary = "전략 분석그래프 데이터 조회(전략 상세페이지) ",
+    @Operation(summary = "전략 상세 정보 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/6affc64db91b4ee6b8d882fa288205bb' target='_blank'>API 명세서</a>")
     @GetMapping("/detail")
     public ResponseEntity<BaseResponse<StrategyDetailResponse>> getStrategyDetail(
@@ -77,7 +77,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
-    @Operation(summary = "전략 통계 조회(전략 상세페이지) ",
+    @Operation(summary = "전략 분석 그래프 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/50c978f6e5a944f2842ad1c48b8f7256' target='_blank'>API 명세서</a>")
     @GetMapping("/analysis")
     public ResponseEntity<BaseResponse<StrategyAnalysisResponse>> getStrategyAnalyisis(
