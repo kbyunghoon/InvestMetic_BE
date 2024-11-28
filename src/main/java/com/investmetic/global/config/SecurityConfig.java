@@ -14,6 +14,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -47,11 +49,11 @@ public class SecurityConfig {
     @Bean
     public static RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy("""
-                ROLE_SUPER_ADMIN > ROLE_TRADER_ADMIN
-                ROLE_SUPER_ADMIN > ROLE_INVESTOR_ADMIN
-                ROLE_TRADER_ADMIN > ROLE_TRADER
-                ROLE_INVESTOR_ADMIN > ROLE_INVESTOR
-        """);
+                        ROLE_SUPER_ADMIN > ROLE_TRADER_ADMIN
+                        ROLE_SUPER_ADMIN > ROLE_INVESTOR_ADMIN
+                        ROLE_TRADER_ADMIN > ROLE_TRADER
+                        ROLE_INVESTOR_ADMIN > ROLE_INVESTOR
+                """);
     }
 
     @Bean
@@ -60,7 +62,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:3000"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
                     config.setAllowCredentials(true);
                     config.addAllowedHeader("*");
                     return config;
@@ -87,9 +89,6 @@ public class SecurityConfig {
         http
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
     }
 }

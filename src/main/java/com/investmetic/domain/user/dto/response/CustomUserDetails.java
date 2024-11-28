@@ -19,10 +19,9 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // User 객체에서 Role을 가져와 GrantedAuthority로 변환
         return Collections.singletonList(
-                new SimpleGrantedAuthority(user.getRole().name())
+                new SimpleGrantedAuthority(user.getRole().getRole())
         );
     }
-
 
 
     @Override

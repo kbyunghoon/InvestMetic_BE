@@ -1,5 +1,8 @@
 package com.investmetic.domain.user.model;
 
+import lombok.Getter;
+
+@Getter
 public enum Role {
     TRADER("ROLE_TRADER"),         // 트레이더
     INVESTOR("ROLE_INVESTOR"),     // 투자자
@@ -12,6 +15,7 @@ public enum Role {
     Role(String role) {
         this.role = role;
     }
+
     // admin일 경우 true;
     public static boolean isAdmin(Role role) {
         return switch (role) {
@@ -31,7 +35,7 @@ public enum Role {
     // 일반 투자자일 경우
     public static boolean isInvestor(Role role) {
         return switch (role) {
-            case INVESTOR , INVESTOR_ADMIN -> true;
+            case INVESTOR, INVESTOR_ADMIN -> true;
             default -> false;
         };
     }
