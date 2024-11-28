@@ -4,10 +4,7 @@ import com.investmetic.global.security.filter.JWTFilter;
 import com.investmetic.global.security.filter.LoginFilter;
 import com.investmetic.global.security.handler.CustomAuthenticationFailureHandler;
 import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
-import com.investmetic.global.security.filter.CustomLogoutFilter;
-import com.investmetic.global.security.filter.JWTFilter;
 import com.investmetic.global.util.JWTUtil;
-import com.investmetic.global.security.filter.LoginFilter;
 import com.investmetic.global.util.RedisUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -51,10 +47,10 @@ public class SecurityConfig {
     @Bean
     public static RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy("""
-            SUPER_ADMIN > TRADER_ADMIN
-            SUPER_ADMIN > INVESTOR_ADMIN
-            TRADER_ADMIN > TRADER
-            INVESTOR_ADMIN > INVESTOR
+                ROLE_SUPER_ADMIN > ROLE_TRADER_ADMIN
+                ROLE_SUPER_ADMIN > ROLE_INVESTOR_ADMIN
+                ROLE_TRADER_ADMIN > ROLE_TRADER
+                ROLE_INVESTOR_ADMIN > ROLE_INVESTOR
         """);
     }
 
