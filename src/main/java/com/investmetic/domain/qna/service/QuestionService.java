@@ -1,11 +1,16 @@
 package com.investmetic.domain.qna.service;
 
+import static com.investmetic.domain.qna.model.entity.QQuestion.question;
+
+import com.investmetic.domain.qna.dto.SearchCondition;
+import com.investmetic.domain.qna.dto.StateCondition;
 import com.investmetic.domain.qna.dto.request.AdminQuestionsRequest;
 import com.investmetic.domain.qna.dto.request.InvestorQuestionsRequest;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.dto.request.TraderQuestionsRequest;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsResponse;
+import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.qna.model.entity.Question;
 import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.strategy.model.entity.Strategy;
@@ -15,6 +20,10 @@ import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,178 +38,123 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final StrategyRepository strategyRepository;
+    private final JPAQueryFactory queryFactory;
 
     /**
      * 문의 등록
-     *
-     * @param userId             사용자 ID
-     * @param strategyId         전략 ID
-     * @param questionRequestDto 문의 등록 요청 DTO
      */
     @Transactional
     public void createQuestion(Long userId, Long strategyId, QuestionRequestDto questionRequestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND)); // 사용자 존재 여부 확인
-
-        Strategy strategy = strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND)); // 전략 존재 여부 확인
-
-        Question question = Question.from(user, strategy, questionRequestDto); // 새로운 문의 생성
-        questionRepository.save(question); // 문의 저장
+        User user = findUserById(userId);
+        Strategy strategy = findStrategyById(strategyId);
+        Question question = Question.from(user, strategy, questionRequestDto);
+        questionRepository.save(question);
     }
 
     /**
      * 문의 삭제
-     *
-     * @param strategyId 전략 ID
-     * @param questionId 문의 ID
-     * @param userId     사용자 ID
      */
     @Transactional
     public void deleteQuestion(Long strategyId, Long questionId, Long userId) {
-        strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND)); // 전략 존재 여부 확인
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND)); // 사용자 존재 여부 확인
-
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND)); // 문의 존재 여부 확인
-
-        // 권한 검증 분리
-        validateAdminOrOwnership(user, question, userId);
-
-        questionRepository.delete(question); // 문의 삭제
+        Strategy strategy = findStrategyById(strategyId);
+        User user = findUserById(userId);
+        Question question = findQuestionById(questionId);
+        validateAccess(user, question, userId);
+        questionRepository.delete(question);
     }
 
     /**
      * 투자자 문의 목록 조회
-     *
-     * @param userId   사용자 ID
-     * @param userRole 사용자 역할
-     * @param request  투자자 요청 DTO
-     * @param pageable 페이징 정보
-     * @return 문의 목록 (투자자 기준)
      */
+    @Transactional(readOnly = true)
     public Page<QuestionsResponse> getInvestorQuestions(Long userId, Role userRole, InvestorQuestionsRequest request,
                                                         Pageable pageable) {
-        validateUser(userId, userRole, Role.INVESTOR); // 사용자 검증
-
-        Page<Question> questions = questionRepository.searchQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                userRole,
-                pageable,
-                request.getStrategyName(),
-                request.getTraderName(),
-                null
-        );
-
-        return questions.map(QuestionsResponse::from); // DTO 변환 후 반환
+        validateRole(userId, userRole, Role.INVESTOR);
+        return searchQuestions(userId, request, pageable, Role.INVESTOR);
     }
 
     /**
      * 트레이더 문의 목록 조회
-     *
-     * @param userId   사용자 ID
-     * @param userRole 사용자 역할
-     * @param request  트레이더 요청 DTO
-     * @param pageable 페이징 정보
-     * @return 문의 목록 (트레이더 기준)
      */
+    @Transactional(readOnly = true)
     public Page<QuestionsResponse> getTraderQuestions(Long userId, Role userRole, TraderQuestionsRequest request,
                                                       Pageable pageable) {
-        validateUser(userId, userRole, Role.TRADER); // 사용자 검증
-
-        Page<Question> questions = questionRepository.searchQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                userRole,
-                pageable,
-                request.getStrategyName(),
-                null,
-                request.getInvestorName()
-        );
-
-        return questions.map(QuestionsResponse::from); // DTO 변환 후 반환
+        validateRole(userId, userRole, Role.TRADER);
+        return searchQuestions(userId, request, pageable, Role.TRADER);
     }
 
     /**
      * 관리자 문의 목록 조회
-     *
-     * @param userId   사용자 ID
-     * @param userRole 사용자 역할
-     * @param request  관리자 요청 DTO
-     * @param pageable 페이징 정보
-     * @return 문의 목록 (관리자 기준)
      */
+    @Transactional(readOnly = true)
     public Page<QuestionsResponse> getAdminQuestions(Long userId, Role userRole, AdminQuestionsRequest request,
                                                      Pageable pageable) {
-        validateAdmin(userRole); // 관리자 여부 검증
-
-        Page<Question> questions = questionRepository.searchQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                userRole,
-                pageable,
-                request.getStrategyName(),
-                request.getTraderName(),
-                request.getInvestorName()
-        );
-
-        return questions.map(QuestionsResponse::from); // DTO 변환 후 반환
+        validateAdmin(userRole);
+        return searchQuestions(null, request, pageable, Role.SUPER_ADMIN);
     }
 
     /**
-     * 문의 상세 조회 (투자자 및 트레이더)
-     *
-     * @param questionId 문의 ID
-     * @param userId     사용자 ID
-     * @param role       사용자 역할
-     * @return 문의 상세 정보
+     * 문의 상세 조회 (투자자/트레이더)
      */
+    @Transactional(readOnly = true)
     public QuestionsDetailResponse getQuestionDetail(Long questionId, Long userId, Role role) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND)); // 문의 존재 여부 확인
-
-        validateOwnership(question, userId, role);
-
-        return QuestionsDetailResponse.from(question, question.getAnswer()); // DTO 변환 후 반환
+        Question question = findQuestionById(questionId);
+        validateAccess(findUserById(userId), question, userId);
+        return QuestionsDetailResponse.from(question, question.getAnswer());
     }
 
     /**
      * 관리자 전용 문의 상세 조회
-     *
-     * @param questionId 문의 ID
-     * @return 문의 상세 정보
      */
-    public QuestionsDetailResponse getAdminQuestionDetail(Long questionId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND)); // 문의 존재 여부 확인
+    @Transactional(readOnly = true)
+    public QuestionsDetailResponse getAdminQuestionDetail(Long questionId, Role userRole) {
+        validateAdmin(userRole);
+        Question question = findQuestionById(questionId);
+        return QuestionsDetailResponse.from(question, question.getAnswer());
+    }
 
-        return QuestionsDetailResponse.from(question, question.getAnswer()); // DTO 변환 후 반환
+    // ================== Private Methods ==================
+
+    /**
+     * 사용자 조회 및 예외 처리
+     * userId가 null인 경우 USERS_NOT_FOUND 예외를 던짐
+     */
+    private User findUserById(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.USERS_NOT_FOUND);
+        }
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
     }
 
     /**
-     * 사용자 검증 메서드
+     * 전략 조회 및 예외 처리
      */
-    private void validateUser(Long userId, Role userRole, Role requiredRole) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND)); // 사용자 존재 여부 확인
+    private Strategy findStrategyById(Long strategyId) {
+        return strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+    }
 
-        if (!Role.isAdmin(userRole) && userRole != requiredRole) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 권한 확인
+    /**
+     * 질문 조회 및 예외 처리
+     */
+    private Question findQuestionById(Long questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+    }
+
+    /**
+     * 역할 검증
+     */
+    private void validateRole(Long userId, Role userRole, Role requiredRole) {
+        User user = findUserById(userId);
+        if (!userRole.equals(requiredRole) && !Role.isAdmin(userRole)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 
     /**
-     * 관리자 여부 검증 메서드
+     * 관리자 역할 검증
      */
     private void validateAdmin(Role role) {
         if (!Role.isAdmin(role)) {
@@ -209,28 +163,99 @@ public class QuestionService {
     }
 
     /**
-     * 관리자 또는 본인 여부 확인
+     * 접근 권한 검증
      */
-    private void validateAdminOrOwnership(User user, Question question, Long userId) {
-        if (!Role.isAdmin(user.getRole())) {
-            if (user.getRole() == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-            if (user.getRole() == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
+    private void validateAccess(User user, Question question, Long userId) {
+        if (Role.isAdmin(user.getRole())) return;
+
+        if (user.getRole() == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
+
+        if (user.getRole() == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
     }
 
     /**
-     * 본인 소유 확인
+     * 문의 검색 및 반환
      */
-    private void validateOwnership(Question question, Long userId, Role role) {
-        if (role == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+    private Page<QuestionsResponse> searchQuestions(Long userId, QuestionRequestDto request, Pageable pageable, Role role) {
+        List<BooleanExpression> conditions = buildConditions(
+                userId,
+                request.getKeyword(),
+                request.getSearchCondition(),
+                request.getStateCondition(),
+                role,
+                request instanceof InvestorQuestionsRequest ? ((InvestorQuestionsRequest) request).getStrategyName() : null,
+                request instanceof AdminQuestionsRequest ? ((AdminQuestionsRequest) request).getTraderName() : null,
+                request instanceof TraderQuestionsRequest ? ((TraderQuestionsRequest) request).getInvestorName() : null
+        );
+
+        Page<Question> questions = questionRepository.searchByConditions(conditions, pageable, queryFactory);
+        return questions.map(QuestionsResponse::from);
+    }
+
+    /**
+     * 검색 조건 빌드
+     */
+    private List<BooleanExpression> buildConditions(Long userId, String keyword, SearchCondition searchCondition,
+                                                    StateCondition stateCondition, Role role, String strategyName,
+                                                    String traderName, String investorName) {
+        List<BooleanExpression> conditions = new ArrayList<>();
+
+        if (role == Role.INVESTOR && userId != null) {
+            conditions.add(question.user.userId.eq(userId));
+        } else if (role == Role.TRADER && userId != null) {
+            conditions.add(question.strategy.user.userId.eq(userId));
+        } else if (role == Role.SUPER_ADMIN && userId != null) { // 관리자일 경우
+            conditions.add(question.user.userId.eq(userId).or(question.strategy.user.userId.eq(userId)));
         }
-        if (role == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+
+        if (keyword != null && !keyword.isBlank()) {
+            switch (searchCondition) {
+                case TITLE:
+                    conditions.add(question.title.containsIgnoreCase(keyword));
+                    break;
+                case CONTENT:
+                    conditions.add(question.content.containsIgnoreCase(keyword));
+                    break;
+                case TITLE_OR_CONTENT:
+                    conditions.add(
+                            question.title.containsIgnoreCase(keyword)
+                                    .or(question.content.containsIgnoreCase(keyword))
+                    );
+                    break;
+                default:
+                    break;
+            }
         }
+
+        if (stateCondition != null) {
+            switch (stateCondition) {
+                case WAITING:
+                    conditions.add(question.qnaState.eq(QnaState.WAITING));
+                    break;
+                case COMPLETED:
+                    conditions.add(question.qnaState.eq(QnaState.COMPLETED));
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (strategyName != null && !strategyName.isBlank()) {
+            conditions.add(question.strategy.strategyName.containsIgnoreCase(strategyName));
+        }
+        if (traderName != null && !traderName.isBlank()) {
+            conditions.add(question.strategy.user.nickname.containsIgnoreCase(traderName));
+        }
+        if (investorName != null && !investorName.isBlank()) {
+            conditions.add(question.user.nickname.containsIgnoreCase(investorName));
+        }
+
+        return conditions;
     }
 }
