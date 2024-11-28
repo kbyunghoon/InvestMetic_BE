@@ -82,10 +82,11 @@ public class QuestionController {
     @PostMapping("/investor/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getInvestorQuestions(
             @PathVariable Long userId,
-            @RequestParam Role userRole,
+            @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid InvestorQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
+        // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
         QuestionsPageResponse response = questionService.getInvestorQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
@@ -102,10 +103,11 @@ public class QuestionController {
     @PostMapping("/trader/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getTraderQuestions(
             @PathVariable Long userId,
-            @RequestParam Role userRole,
+            @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid TraderQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
+        // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
         QuestionsPageResponse response = questionService.getTraderQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
@@ -122,10 +124,11 @@ public class QuestionController {
     @PostMapping("/admin/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getAdminQuestions(
             @PathVariable Long userId,
-            @RequestParam Role userRole,
+            @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid AdminQuestionsRequest request,
             @PageableDefault(size = 8, sort = "createdAt") Pageable pageable) {
 
+        // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
         QuestionsPageResponse response = questionService.getAdminQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
@@ -165,8 +168,9 @@ public class QuestionController {
     @GetMapping("/admin/questions/{questionId}")
     public ResponseEntity<BaseResponse<QuestionsDetailResponse>> getAdminQuestionDetail(
             @PathVariable Long questionId,
-            @RequestParam Role userRole) {
+            @RequestParam Role userRole) {// 추후 Security 적용 시 제거 예정
 
+        // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
         if (userRole == null || !Role.isAdmin(userRole)) { // 유효성 검사 추가
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 관리자가 아니면 접근 불가
         }
