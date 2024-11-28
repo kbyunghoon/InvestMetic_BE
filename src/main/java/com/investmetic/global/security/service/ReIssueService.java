@@ -66,7 +66,7 @@ public class ReIssueService {
         String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration); // 7일
 
         // 새로운 리프레시 토큰을 쿠키에 추가
-        Cookie newRefreshCookie = createCookie("refresh_tokne", newRefresh, refreshExpiration);
+        Cookie newRefreshCookie = createCookie("refresh_token", newRefresh, refreshExpiration);
         response.addCookie(newRefreshCookie);
 
         redisUtil.deleteRefreshToken(username);
