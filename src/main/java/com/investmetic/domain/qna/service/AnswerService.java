@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AnswerService {
 
     private final AnswerRepository answerRepository;
@@ -31,11 +31,18 @@ public class AnswerService {
                 || !question.getStrategy().getUser().getUserId().equals(traderId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
-        Answer answer = Answer.from(question, answerRequestDto.getContent());
+        Answer answer = Answer.builder()
+                .question(question)
+                .content(answerRequestDto.getContent())
+                .build();
+
         answerRepository.save(answer);
 
+        // 문의 상태를 COMPLETED로 업데이트
         question.updateQnaState(QnaState.COMPLETED);
+        questionRepository.save(question);
     }
+
 
     //문의 답변 삭제
     @Transactional
@@ -56,6 +63,7 @@ public class AnswerService {
 
         answerRepository.delete(answer);
 
+        // 문의 상태를 WAITING으로 업데이트
         question.updateQnaState(QnaState.WAITING);
         questionRepository.save(question);
     }
