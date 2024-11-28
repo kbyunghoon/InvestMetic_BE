@@ -48,7 +48,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("회원가입")
-    void signUpTest1(){
+    void signUpTest1() {
 
         // given
         UserSignUpDto userSignUpDto = UserSignUpDto.builder()
@@ -90,7 +90,7 @@ class UserServiceTest {
                 .email("test@example.com")
                 .role(Role.INVESTOR)
                 .infoAgreement(true)
-                .imageMetadata(new ImageMetadata("test.jpg", "image/jpg", 10000))
+                .imageMetadata(new ImageMetadata("test.jpg", 10000))
                 .build();
 
         // when

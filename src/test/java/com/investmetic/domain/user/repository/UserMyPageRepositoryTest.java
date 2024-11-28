@@ -46,7 +46,7 @@ class UserMyPageRepositoryTest {
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email이 있을 경우.")
-    void testProfile(){
+    void testProfile() {
 
         //유저 생성.
         User user = createOneUser();
@@ -96,7 +96,7 @@ class UserMyPageRepositoryTest {
 
                     Arguments.arguments("이미지만 변경",
                             UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
-                                    .imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000)).build()),
+                                    .imageDto(new ImageMetadata("testImage.jpg", 5000)).build()),
 
                     Arguments.arguments("닉네임만 변경",
                             UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
@@ -134,7 +134,7 @@ class UserMyPageRepositoryTest {
 
             UserModifyDto userModifyDto = UserModifyDto.builder().nickname("테스트").infoAgreement(Boolean.TRUE)
                     .password("dirtyCheck!!").phone("01099999999")
-                    .imageDto(new ImageMetadata("TestImage.jpa", "image/jpg", 5000)).imageChange(Boolean.TRUE).build();
+                    .imageDto(new ImageMetadata("TestImage.jpa", 5000)).imageChange(Boolean.TRUE).build();
 
             //영속성에 있는 exixtUser의 값을 바꾸고 flush -> dirty checking
             existUser.get().updateUser(userModifyDto, testS3UrlCreate(userModifyDto.getImageDto().getImageName()));
