@@ -168,15 +168,12 @@ public class QuestionService {
 
 
     //문의 상세 조회
+    // 투자자와 트레이더를 위한 문의 상세 조회
     public QuestionsDetailResponse getQuestionDetail(Long questionId, Long userId, Role role) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
         Answer answer = question.getAnswer();
-        // 관리자 권한이면 모든 상세 정보를 볼 수 있음
-        if (Role.isAdmin(role)) {
-            return QuestionsDetailResponse.from(question, answer);
-        }
 
         // 투자자 권한 확인
         if (role == Role.INVESTOR && userId != null) {
@@ -192,6 +189,15 @@ public class QuestionService {
             }
         }
 
+        return QuestionsDetailResponse.from(question, answer);
+    }
+
+    // 관리자 전용 문의 상세 조회
+    public QuestionsDetailResponse getAdminQuestionDetail(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        Answer answer = question.getAnswer(); // 답변 정보 포함
         return QuestionsDetailResponse.from(question, answer);
     }
 

@@ -165,6 +165,14 @@ public class QuestionController {
         return BaseResponse.success(response);
     }
 
+    /**
+     * 문의 상세 조회 (관리자)
+     *
+     * @param questionId 문의 ID
+     * @param userRole   사용자 역할 (관리자 여부 확인용, 추후 Security 적용 시 제거 예정)
+     * @return 문의 상세 정보 응답
+     * @throws BusinessException 관리자가 아닌 경우 접근 권한 없음 예외 발생
+     */
     @GetMapping("/admin/questions/{questionId}")
     public ResponseEntity<BaseResponse<QuestionsDetailResponse>> getAdminQuestionDetail(
             @PathVariable Long questionId,
@@ -175,7 +183,7 @@ public class QuestionController {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 관리자가 아니면 접근 불가
         }
 
-        QuestionsDetailResponse response = questionService.getQuestionDetail(questionId, null, userRole);
+        QuestionsDetailResponse response = questionService.getAdminQuestionDetail(questionId);
         return BaseResponse.success(response);
     }
 }
