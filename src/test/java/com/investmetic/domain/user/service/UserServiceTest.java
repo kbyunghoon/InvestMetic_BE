@@ -1,12 +1,13 @@
 package com.investmetic.domain.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.investmetic.domain.user.dto.object.ImageMetadata;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
@@ -29,7 +30,6 @@ class UserServiceTest {
     @Autowired
     private UserRepository userRepository;
 
-
     private User createOneUser() {
         User user = User.builder()
                 .userName("testUser")
@@ -48,7 +48,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("회원가입")
-    void signUpTest1(){
+    void signUpTest1() {
 
         // given
         UserSignUpDto userSignUpDto = UserSignUpDto.builder()
@@ -110,75 +110,69 @@ class UserServiceTest {
 
 
     @Test
-    @DisplayName("닉네임 중복 있을때")
-    void checkNicknameDuplicateTest1() {
+    @DisplayName("닉네임 중복이 있을 때")
+    void checkNicknameDuplicate_Duplicate() {
 
-        //given
         User user = createOneUser();
 
-        // when, then
-        assertThatThrownBy(() -> userService.checkNicknameDuplicate(user.getNickname()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.INVALID_NICKNAME.getMessage());
+        AvaliableDto result = userService.checkNicknameDuplicate(user.getNickname());
+
+        // then
+        assertFalse(result.getIsAvailable()); // 사용 불가능해야함
     }
 
     @Test
-    @DisplayName("닉네임 중복 없을때")
-    void checkNicknameDuplicateTest2() {
+    @DisplayName("닉네임 중복이 없을 때")
+    void checkNicknameDuplicate_NoDuplicate() {
 
-        //given
-        String nickname = "없는닉넴";
+        String nickname = "newNickname"; // 존재하지 않는 닉네임
+        // when
+        AvaliableDto result = userService.checkNicknameDuplicate(nickname);
 
-        // when, then
-        assertThatCode(() -> userService.checkNicknameDuplicate(nickname))
-                .doesNotThrowAnyException();
+        // then
+        assertTrue(result.getIsAvailable()); // 사용 가능해야 함
     }
 
     @Test
     @DisplayName("핸드폰 번호 중복 있을때")
     void checkPheonDuplicateTest1() {
-
-        //given
         User user = createOneUser();
 
-        // when, then
-        assertThatThrownBy(() -> userService.checkPhoneDuplicate(user.getPhone()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.INVALID_PHONE.getMessage());
+        AvaliableDto result = userService.checkPhoneDuplicate(user.getPhone());
+
+        assertFalse(result.getIsAvailable()); // 사용 불가능해야함
     }
 
     @Test
     @DisplayName("핸드폰 번호 중복 없을때")
     void checkPhoneDuplicateTest2() {
 
-        //given
-        String nickname = "01030913501";
+        String phone = "01030913501";
 
-        // when, then
-        assertThatCode(() -> userService.checkPhoneDuplicate(nickname))
-                .doesNotThrowAnyException();
+        AvaliableDto result = userService.checkPhoneDuplicate(phone);
+
+        assertTrue(result.getIsAvailable());
     }
 
     @Test
     @DisplayName("이메일 중복이다")
     void checkEmailDuplicateTest1() {
-        //given
+
         User user = createOneUser();
 
-        // when, then
-        assertThatThrownBy(() -> userService.checkEmailDuplicate(user.getEmail()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.INVALID_EMAIL.getMessage());
+        AvaliableDto result = userService.checkEmailDuplicate(user.getEmail());
+
+        assertFalse(result.getIsAvailable());
     }
 
     @Test
     @DisplayName("이메일 중복 아니에요")
     void checkEmailDuplicateTest2() {
-        //given
+
         String email = "없는 이메일";
 
-        // when, then
-        assertThatCode(() -> userService.checkEmailDuplicate(email))
-                .doesNotThrowAnyException();
+        AvaliableDto result = userService.checkEmailDuplicate(email);
+
+        assertTrue(result.getIsAvailable());
     }
 }

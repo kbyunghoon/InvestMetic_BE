@@ -6,7 +6,6 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -68,6 +67,7 @@ class UserRepositoryTest {
 
     @Test
     void existsByEmail_성공() {
+        createOneUser();
 
         boolean exists = userRepository.existsByEmail("test@example.com");
 
@@ -76,7 +76,7 @@ class UserRepositoryTest {
 
     @Test
     void existsByNickname_성공() {
-
+        createOneUser();
         boolean exists = userRepository.existsByNickname("testNickname");
 
         assertThat(exists).isTrue();
@@ -84,7 +84,7 @@ class UserRepositoryTest {
 
     @Test
     void existsByPhone_성공() {
-
+        createOneUser();
         boolean exists = userRepository.existsByPhone("01012345678");
 
         assertThat(exists).isTrue();
