@@ -57,12 +57,12 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtUtil.getUsername(accessToken);
+        String email = jwtUtil.getEmail(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
 
         User user = User.builder()
-                .userName(username)
+                .email(email)
                 .password("tempassword")
                 .role(Role.valueOf(role.replace("ROLE_", "")))
                 .build();

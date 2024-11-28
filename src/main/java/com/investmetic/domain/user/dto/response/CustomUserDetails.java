@@ -33,4 +33,9 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
         return user.getEmail();     //이메일을 고유식별자로 사용
     }
+
+
+    public String getEmail(){
+        return user.getEmail();
+    }
 }
