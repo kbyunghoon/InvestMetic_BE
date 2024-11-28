@@ -211,28 +211,26 @@ class StrategyDailyAnalysisServiceTest {
     @DisplayName("전략 일간 분석 삭제 - 성공 테스트")
     void 테스트_9() {
         Long strategyId = 1L;
-        String analysisId = "123";
-        Long analysisIdAsLong = Long.parseLong(analysisId);
+        Long analysisId = 123L;
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong))
+        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
                 .thenReturn(true);
 
         strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId);
 
         verify(dailyAnalysisRepository, times(1))
-                .deleteByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
+                .deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
     }
 
     @Test
     @DisplayName("전략 일간 분석 삭제 - 해당 일간 분석이 존재하지 않을 경우 예외 발생")
     void 테스트_10() {
         Long strategyId = 1L;
-        String analysisId = "123";
-        Long analysisIdAsLong = Long.parseLong(analysisId);
+        Long analysisId = 123L;
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong))
+        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
                 .thenReturn(false);
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
@@ -241,23 +239,6 @@ class StrategyDailyAnalysisServiceTest {
 
         assertEquals(ErrorCode.INVALID_TYPE_VALUE, exception.getErrorCode());
         verify(dailyAnalysisRepository, never())
-                .deleteByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
-    }
-
-    @Test
-    @DisplayName("전략 일간 분석 삭제 - 전략 분석 아이디가 숫자가 아닐 경우 예외 발생")
-    void 테스트_11() {
-        Long strategyId = 1L;
-        String invalidAnalysisId = "abc"; // 숫자가 아닌 값
-
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-
-        BusinessException exception = assertThrows(BusinessException.class, () ->
-                strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, invalidAnalysisId)
-        );
-
-        assertEquals(ErrorCode.INVALID_TYPE_VALUE, exception.getErrorCode());
-        verify(dailyAnalysisRepository, never())
-                .deleteByStrategyAndDailyAnalysisId(any(), any());
+                .deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
     }
 }

@@ -82,22 +82,19 @@ public class StrategyAnalysisService {
     }
 
     @Transactional
-    public void deleteStrategyDailyAnalysis(Long strategyId, String analysisId) {
+    public void deleteStrategyDailyAnalysis(Long strategyId, Long analysisId) {
         Strategy strategy = findStrategyById(strategyId);
 
         // TODO : 유저 권한 확인 로직 추가 예정
         verifyUserPermission(strategy);
 
-        // analysisId Long 변환
-        Long analysisIdAsLong = parseAnalysisId(analysisId);
-
         // 존재 여부 확인
-        boolean exists = dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
+        boolean exists = dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId);
         if (!exists) {
             throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
         }
 
-        dailyAnalysisRepository.deleteByStrategyAndDailyAnalysisId(strategy, analysisIdAsLong);
+        dailyAnalysisRepository.deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
     }
 
     private Strategy findStrategyById(Long strategyId) {
@@ -109,14 +106,6 @@ public class StrategyAnalysisService {
     public PageResponseDto<DailyAnalysisResponse> getMyDailyAnalysis(Long strategyId, Pageable pageable) {
         Page<DailyAnalysisResponse> myDailyAnalysis = dailyAnalysisRepository.findMyDailyAnalysis(strategyId, pageable);
         return new PageResponseDto<>(myDailyAnalysis);
-    }
-
-    private Long parseAnalysisId(String analysisId) {
-        try {
-            return Long.parseLong(analysisId);
-        } catch (NumberFormatException e) {
-            throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
-        }
     }
 
     private void verifyUserPermission(Strategy strategy) {

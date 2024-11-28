@@ -137,7 +137,7 @@ public class StrategyController {
     @DeleteMapping("{strategyId}/daily-analysis")
     @Operation(summary = "전략 (일간 분석) 삭제(전체 삭제 포함)", description = "<a href='https://field-sting-eff.notion.site/ca5091b0aaa54a39b94c6f1cd4a832af?pvs=4' target='_blank'>API 명세서(1개 삭제)</a><br/><a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서(전체 삭제)</a>")
     public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId,
-                                                                             @RequestParam(required = false) Optional<String> analysisId) {
+                                                                             @RequestParam(required = false) Optional<Long> analysisId) {
         analysisId.ifPresentOrElse(
                 id -> strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, id),
                 () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId)
