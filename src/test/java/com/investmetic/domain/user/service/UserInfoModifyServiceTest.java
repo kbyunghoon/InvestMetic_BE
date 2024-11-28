@@ -49,7 +49,7 @@ class UserInfoModifyServiceTest {
     static Stream<Arguments> userModifyDtos() {
         return Stream.of(Arguments.arguments("이미지만 변경",
                         UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.TRUE)
-                                .imageDto(new ImageMetadata("testImage.jpg", "image/jpg", 5000))
+                                .imageDto(new ImageMetadata("testImage.jpg", 5000))
                                 .build()),
 
                 Arguments.arguments("닉네임만 변경",
@@ -86,7 +86,7 @@ class UserInfoModifyServiceTest {
         User oneUser = createOneUser();
 
         //이미지 메타데이터 설정
-        ImageMetadata imageMetadata = new ImageMetadata("test.jpg", "image/jpg", 1024 * 500);
+        ImageMetadata imageMetadata = new ImageMetadata("test.jpg", 1024 * 500);
 
         // 변경된 회원값
         UserModifyDto userModifyDto = UserModifyDto.builder().email(oneUser.getEmail()).imageDto(imageMetadata)

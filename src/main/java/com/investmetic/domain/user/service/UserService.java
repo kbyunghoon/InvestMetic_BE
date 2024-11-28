@@ -6,6 +6,7 @@ import static com.investmetic.domain.user.dto.object.ColumnCondition.PHONE;
 import static com.investmetic.global.util.s3.FilePath.USER_PROFILE;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
@@ -116,12 +117,12 @@ public class UserService {
     /**
      * 트레이더 목록 조회
      *
-     * @param orderBy null일 때 구독순
+     * @param sort    null일 때 구독순
      * @param keyword null일 때 키워드 검색 x
      */
-    public PageResponseDto<TraderProfileDto> getTraderList(String orderBy, String keyword, Pageable pageable) {
+    public PageResponseDto<TraderProfileDto> getTraderList(TraderListSort sort, String keyword, Pageable pageable) {
 
-        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, keyword, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, keyword, pageable);
 
         // 조회된 트레이더가 없을 때
         if (page.getContent().isEmpty()) {

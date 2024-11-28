@@ -90,7 +90,7 @@ class UserServiceTest {
                 .email("test@example.com")
                 .role(Role.INVESTOR)
                 .infoAgreement(true)
-                .imageMetadata(new ImageMetadata("test.jpg", "image/jpg", 10000))
+                .imageMetadata(new ImageMetadata("test.jpg", 10000))
                 .build();
 
         // when

@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.controller;
 
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
@@ -62,16 +63,16 @@ public class UserController {
     /**
      * 트레이더 목록 조회
      *
-     * @param orderBy  정렬할 조건, null 가능
+     * @param sort     정렬할 조건, null 가능
      * @param keyword  닉네임 검색 키워드, null 가능
      * @param pageable 현재 페이지, 사이즈 - 디자인에서는 12개로 확인됨.
      */
     @GetMapping("/traders")
     public ResponseEntity<BaseResponse<PageResponseDto<TraderProfileDto>>> getTraderList(
-            @RequestParam String orderBy,
-            @RequestParam String keyword,
+            @RequestParam TraderListSort sort,
+            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 9) Pageable pageable) {
-        return BaseResponse.success(userService.getTraderList(orderBy, keyword, pageable));
+        return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
     }
 }
