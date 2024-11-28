@@ -1,5 +1,6 @@
 package com.investmetic.global.util;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -43,14 +44,17 @@ public class JWTUtil {
     }
 
     public Boolean isExpired(String token) {
-
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey)  // 서명 검증 키 설정
-                .build()
-                .parseClaimsJws(token)     // 토큰 검증 및 파싱
-                .getBody()                 // Claims(Payload) 반환
-                .getExpiration()           // 만료 시간 확인
-                .before(new Date());       // 현재 시간과 비교
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)  // 서명 검증 키 설정
+                    .build()
+                    .parseClaimsJws(token)     // 토큰 검증 및 파싱
+                    .getBody()                 // Claims(Payload) 반환
+                    .getExpiration()           // 만료 시간 확인
+                    .before(new Date());       // 현재 시간과 비교
+        } catch (JwtException e) {
+            return true;  // 예외 발생 시 만료된 것으로 간주
+        }
     }
 
 

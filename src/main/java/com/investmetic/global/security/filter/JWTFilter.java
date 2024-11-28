@@ -4,7 +4,6 @@ import com.investmetic.domain.user.dto.response.CustomUserDetails;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.util.JWTUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,15 +36,12 @@ public class JWTFilter extends OncePerRequestFilter {
         accessToken = accessToken.replace("Bearer ", "");
 
         // 토큰 만료 여부 확인, 만료시 다음 필터로 넘기지 않음
-        try {
-            jwtUtil.isExpired(accessToken);
-        } catch (ExpiredJwtException e) {
-
-            //response body
+        if (jwtUtil.isExpired(accessToken)) {
+            // 토큰이 만료되었으면 응답 처리
             PrintWriter writer = response.getWriter();
             writer.print("access token expired");
 
-            //response status code
+            // 응답 상태 코드 설정
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

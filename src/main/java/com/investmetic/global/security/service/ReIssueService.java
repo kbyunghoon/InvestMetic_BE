@@ -45,9 +45,8 @@ public class ReIssueService {
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_MISSING);
         }
 
-        try {
-            jwtUtil.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
+        if (jwtUtil.isExpired(refresh)) {
+            // 만약 토큰이 만료되었다면, 비즈니스 예외를 던짐
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
 
