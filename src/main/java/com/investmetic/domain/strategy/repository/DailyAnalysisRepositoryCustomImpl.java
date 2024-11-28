@@ -11,6 +11,7 @@ import com.investmetic.domain.strategy.model.entity.QDailyAnalysis;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
@@ -72,6 +73,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
     @Override
     public Page<DailyAnalysisResponse> findByStrategyId(Long strategyId, Pageable pageable) {
         List<DailyAnalysisResponse> content = queryFactory.select(new QDailyAnalysisResponse(
+                        Expressions.nullExpression(Long.class),
                         dailyAnalysis.dailyDate,
                         dailyAnalysis.principal,
                         dailyAnalysis.transaction,
@@ -104,6 +106,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
     public List<DailyAnalysisResponse> findDailyAnalysisForExcel(Long strategyId) {
         return queryFactory
                 .select(new QDailyAnalysisResponse(
+                        Expressions.nullExpression(Long.class),
                         dailyAnalysis.dailyDate,
                         dailyAnalysis.principal,
                         dailyAnalysis.transaction,
@@ -120,6 +123,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
     public Page<DailyAnalysisResponse> findMyDailyAnalysis(Long strategyId, Pageable pageable) {
         List<DailyAnalysisResponse> content = queryFactory
                 .select(new QDailyAnalysisResponse(
+                        dailyAnalysis.dailyAnalysisId,
                         dailyAnalysis.dailyDate,
                         dailyAnalysis.principal,
                         dailyAnalysis.transaction,

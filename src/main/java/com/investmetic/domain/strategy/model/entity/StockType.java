@@ -28,10 +28,10 @@ public class StockType extends BaseEntity {
     private Boolean activateState; // 종목 활성 상태
 
     @Column(length = 1000)
-    private String stockTypeIconURL; // 종목아이콘 경로
+    private String stockTypeIconUrl; // 종목아이콘 경로
 
-    public void changeStockTypeIconURL(String stockTypeIconURL) {
-        this.stockTypeIconURL = stockTypeIconURL;
+    public void changeStockTypeIconURL(String stockTypeIconUrl) {
+        this.stockTypeIconUrl = stockTypeIconUrl;
     }
 
     public void changeActivateState() {

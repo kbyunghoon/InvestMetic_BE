@@ -1,6 +1,8 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.investmetic.global.util.exceldownload.ExcelColumn;
 import com.investmetic.global.util.exceldownload.ExcelSheet;
 import com.querydsl.core.annotations.QueryProjection;
@@ -10,6 +12,9 @@ import lombok.Getter;
 @Getter
 @ExcelSheet(name = "전략 일간 분석")
 public class DailyAnalysisResponse {
+
+    @JsonInclude(Include.NON_NULL)
+    private final Long dailyAnalysisId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @ExcelColumn(headerName = "날짜")
     private final LocalDate dailyDate;
@@ -27,9 +32,10 @@ public class DailyAnalysisResponse {
     private final double cumulativeProfitLossRate;   // 누적 수익률
 
     @QueryProjection
-    public DailyAnalysisResponse(LocalDate dailyDate, long principal, long transaction, long dailyProfitLoss,
+    public DailyAnalysisResponse(Long dailyAnalysisId, LocalDate dailyDate, long principal, long transaction, long dailyProfitLoss,
                                  double dailyProfitLossRate, long cumulativeProfitLoss,
                                  double cumulativeProfitLossRate) {
+        this.dailyAnalysisId = dailyAnalysisId;
         this.dailyDate = dailyDate;
         this.principal = principal;
         this.transaction = transaction;

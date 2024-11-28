@@ -13,13 +13,13 @@ public class TradeTypeRequestDTO {
     private String tradeTypeName;
 
     @Column(length = 1000)
-    private String tradeTypeIconURL;
+    private String tradeTypeIconUrl;
     private int size;
 
     @Builder
-    public TradeTypeRequestDTO(String tradeTypeName, String tradeTypeIconURL, int size) {
+    public TradeTypeRequestDTO(String tradeTypeName, String tradeTypeIconUrl, int size) {
         this.tradeTypeName = tradeTypeName;
-        this.tradeTypeIconURL = tradeTypeIconURL;
+        this.tradeTypeIconUrl = tradeTypeIconUrl;
         this.size = size;
     }
 
@@ -28,7 +28,7 @@ public class TradeTypeRequestDTO {
         return TradeType.builder()
                 .tradeTypeName(tradeTypeName)
                 .activateState(true) // 기본값으로 활성 상태 설정
-                .tradeTypeIconURL(tradeTypeIconURL)
+                .tradeTypeIconUrl(tradeTypeIconUrl)
                 .build();
     }
 

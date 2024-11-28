@@ -16,15 +16,15 @@ public class StockTypeResponseDTO {
     private Boolean activateState; // 종목 활성 상태
 
     @Column(length = 1000)
-    private String stockTypeIconURL;
+    private String stockTypeIconUrl;
 
     @Builder
     public StockTypeResponseDTO(Long stockTypeId, String stockTypeName, Boolean activateState,
-                                String stockTypeIconURL) {
+                                String stockTypeIconUrl) {
         this.stockTypeId = stockTypeId;
         this.stockTypeName = stockTypeName;
         this.activateState = activateState;
-        this.stockTypeIconURL = stockTypeIconURL;
+        this.stockTypeIconUrl = stockTypeIconUrl;
     }
 
     public static StockTypeResponseDTO from(StockType stockType) {
@@ -32,7 +32,7 @@ public class StockTypeResponseDTO {
                 .stockTypeId(stockType.getStockTypeId())
                 .stockTypeName(stockType.getStockTypeName())
                 .activateState(stockType.getActivateState())
-                .stockTypeIconURL(stockType.getStockTypeIconURL())
+                .stockTypeIconUrl(stockType.getStockTypeIconUrl())
                 .build();
     }
 }

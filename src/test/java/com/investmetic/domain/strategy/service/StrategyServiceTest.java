@@ -87,16 +87,16 @@ class StrategyServiceTest {
 
         tradeTypeList = List.of(
                 TradeType.builder().tradeTypeId(1L).tradeTypeName("TradeType1").activateState(true)
-                        .tradeTypeIconURL("https://example.com/TradeType1.png").build(),
+                        .tradeTypeIconUrl("https://example.com/TradeType1.png").build(),
                 TradeType.builder().tradeTypeId(2L).tradeTypeName("TradeType2").activateState(true)
-                        .tradeTypeIconURL("https://example.com/TradeType2.png").build()
+                        .tradeTypeIconUrl("https://example.com/TradeType2.png").build()
         );
 
         stockTypeList = List.of(
                 StockType.builder().stockTypeId(1L).stockTypeName("StockType1").activateState(true)
-                        .stockTypeIconURL("https://example.com/StockType1.png").build(),
+                        .stockTypeIconUrl("https://example.com/StockType1.png").build(),
                 StockType.builder().stockTypeId(2L).stockTypeName("StockType2").activateState(true)
-                        .stockTypeIconURL("https://example.com/StockType2.png").build()
+                        .stockTypeIconUrl("https://example.com/StockType2.png").build()
         );
 
         user = User.builder()
@@ -258,7 +258,7 @@ class StrategyServiceTest {
 
         TradeTypeDto tradeTypeDto = responseDto.getTradeTypes().get(0);
         assertThat(tradeTypeDto.getTradeTypeName()).isEqualTo("TradeType1");
-        assertThat(tradeTypeDto.getTradeTypeIconURL()).isEqualTo("https://example.com/TradeType1.png");
+        assertThat(tradeTypeDto.getTradeTypeIconUrl()).isEqualTo("https://example.com/TradeType1.png");
 
         StockTypeDto stockTypeDto = responseDto.getStockTypes().get(0);
         assertThat(stockTypeDto.getStockTypeName()).isEqualTo("StockType1");

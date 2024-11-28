@@ -77,14 +77,14 @@ class StrategyDailyAnalysisServiceTest {
     void 테스트_1() {
         Long strategyId = 1L;
         LocalDate date = LocalDate.now();
-        TraderDailyAnalysisRequestDto requestDto = TraderDailyAnalysisRequestDto.builder()
+        TraderDailyAnalysisRequestDto traderDailyAnalysisRequestDto = TraderDailyAnalysisRequestDto.builder()
                 .date(date)
                 .transaction(100L)
                 .dailyProfitLoss(100L)
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        strategyAnalysisService.createDailyAnalysis(strategyId, List.of(requestDto));
+        strategyAnalysisService.createDailyAnalysis(strategyId, List.of(traderDailyAnalysisRequestDto));
 
         verify(dailyAnalysisRepository, times(1)).save(any(DailyAnalysis.class));
     }
@@ -94,7 +94,7 @@ class StrategyDailyAnalysisServiceTest {
     void 테스트_2() {
         Long strategyId = 1L;
         LocalDate date = LocalDate.now();
-        TraderDailyAnalysisRequestDto requestDto = TraderDailyAnalysisRequestDto.builder()
+        TraderDailyAnalysisRequestDto traderDailyAnalysisRequestDto = TraderDailyAnalysisRequestDto.builder()
                 .date(date)
                 .transaction(100L)
                 .dailyProfitLoss(200L)
@@ -102,7 +102,7 @@ class StrategyDailyAnalysisServiceTest {
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
-        List<TraderDailyAnalysisRequestDto> requestList = List.of(requestDto);
+        List<TraderDailyAnalysisRequestDto> requestList = List.of(traderDailyAnalysisRequestDto);
 
         BusinessException exception = assertThrows(BusinessException.class,
                 () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList));
@@ -204,5 +204,41 @@ class StrategyDailyAnalysisServiceTest {
         assertEquals(ErrorCode.DAILY_ANALYSIS_NOT_FOUND, exception.getErrorCode());
         verify(strategyRepository).findById(1L);
         verify(dailyAnalysisRepository).findDailyAnalysisByStrategyAndDate(strategy, LocalDate.now());
+    }
+
+
+    @Test
+    @DisplayName("전략 일간 분석 삭제 - 성공 테스트")
+    void 테스트_9() {
+        Long strategyId = 1L;
+        Long analysisId = 123L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
+                .thenReturn(true);
+
+        strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId);
+
+        verify(dailyAnalysisRepository, times(1))
+                .deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
+    }
+
+    @Test
+    @DisplayName("전략 일간 분석 삭제 - 해당 일간 분석이 존재하지 않을 경우 예외 발생")
+    void 테스트_10() {
+        Long strategyId = 1L;
+        Long analysisId = 123L;
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
+                .thenReturn(false);
+
+        BusinessException exception = assertThrows(BusinessException.class, () ->
+                strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId)
+        );
+
+        assertEquals(ErrorCode.INVALID_TYPE_VALUE, exception.getErrorCode());
+        verify(dailyAnalysisRepository, never())
+                .deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
     }
 }
