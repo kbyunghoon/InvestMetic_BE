@@ -1,8 +1,9 @@
 package com.investmetic.domain.qna.service;
 
-import com.investmetic.domain.qna.dto.SearchCondition;
-import com.investmetic.domain.qna.dto.StateCondition;
+import com.investmetic.domain.qna.dto.request.AdminQuestionsRequest;
+import com.investmetic.domain.qna.dto.request.InvestorQuestionsRequest;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.request.TraderQuestionsRequest;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsPageResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsResponse;
@@ -75,88 +76,92 @@ public class QuestionService {
         questionRepository.delete(question);
     }
 
-    //투자자 문의 목록 조회
-
-    public QuestionsPageResponse getInvestorQuestions(Long userId, String keyword, SearchCondition searchCondition,
-                                                      StateCondition stateCondition, String strategyName,
-                                                      String traderName,
-                                                      Pageable pageable, Role role) {
+    // 투자자 문의 목록 조회
+    public QuestionsPageResponse getInvestorQuestions(Long userId, Role userRole, InvestorQuestionsRequest request,
+                                                      Pageable pageable) {
         // 사용자 존재 여부 확인
-
         userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-        if (!Role.isAdmin(role) && role != Role.INVESTOR) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 투자자나 관리자가 아니면 예외
+        // 사용자 역할 확인
+        if (!Role.isAdmin(userRole) && userRole != Role.INVESTOR) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
+        // 문의 검색
         Page<Question> questions = questionRepository.searchQuestions(
                 userId,
-                keyword,
-                searchCondition,
-                stateCondition,
-                role,
+                request.getKeyword(),
+                request.getSearchCondition(),
+                request.getStateCondition(),
+                userRole,
                 pageable,
-                strategyName,
-                traderName,
+                request.getStrategyName(),
+                request.getTraderName(),
                 null
         );
 
+        // 결과 매핑 및 반환
         Page<QuestionsResponse> responsePage = questions.map(QuestionsResponse::from);
         return QuestionsPageResponse.from(new PageResponseDto<>(responsePage));
     }
 
-    //트레이더 문의 목록 조회
-    public QuestionsPageResponse getTraderQuestions(Long userId, String keyword, SearchCondition searchCondition,
-                                                    StateCondition stateCondition, String investorName,
-                                                    String strategyName,
+    // 트레이더 문의 목록 조회
+    public QuestionsPageResponse getTraderQuestions(Long userId, Role userRole, TraderQuestionsRequest request,
                                                     Pageable pageable) {
         // 사용자 존재 여부 확인
-
-        Role role = userRepository.findById(userId)
-                .map(User::getRole)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
+        // 사용자 역할 확인
+        if (userRole != Role.TRADER) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        // 문의 검색
         Page<Question> questions = questionRepository.searchQuestions(
                 userId,
-                keyword,
-                searchCondition,
-                stateCondition,
-                role,
+                request.getKeyword(),
+                request.getSearchCondition(),
+                request.getStateCondition(),
+                userRole,
                 pageable,
-                strategyName,
+                request.getStrategyName(),
                 null,
-                investorName
+                request.getInvestorName()
         );
 
+        // 결과 매핑 및 반환
         Page<QuestionsResponse> responsePage = questions.map(QuestionsResponse::from);
         return QuestionsPageResponse.from(new PageResponseDto<>(responsePage));
     }
 
-    //관리자 문의 목록 조회
-    public QuestionsPageResponse getAdminQuestions(Long userId, String keyword, SearchCondition searchCondition,
-                                                   StateCondition stateCondition, String investorName,
-                                                   String strategyName, String traderName, Pageable pageable,
-                                                   Role role) {
-        User admin = userRepository.findById(userId)
+    // 관리자 문의 목록 조회
+    public QuestionsPageResponse getAdminQuestions(Long userId, Role userRole, AdminQuestionsRequest request,
+                                                   Pageable pageable) {
+        // 사용자 존재 여부 확인
+        userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
         // 관리자 여부 확인
-        if (!Role.isAdmin(role)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 관리자가 아니면 예외 처리
+        if (!Role.isAdmin(userRole)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
+
+        // 문의 검색
         Page<Question> questions = questionRepository.searchQuestions(
                 userId,
-                keyword,
-                searchCondition,
-                stateCondition,
-                role, // 실제 역할에 따라 관리자 역할 중 하나를 전달
+                request.getKeyword(),
+                request.getSearchCondition(),
+                request.getStateCondition(),
+                userRole,
                 pageable,
-                strategyName,
-                traderName,
-                investorName
+                request.getStrategyName(),
+                request.getTraderName(),
+                request.getInvestorName()
         );
 
-
+        // 결과 매핑 및 반환
         Page<QuestionsResponse> responsePage = questions.map(QuestionsResponse::from);
         return QuestionsPageResponse.from(new PageResponseDto<>(responsePage));
     }
@@ -189,7 +194,6 @@ public class QuestionService {
 
         return QuestionsDetailResponse.from(question, answer);
     }
-
 
 
 }

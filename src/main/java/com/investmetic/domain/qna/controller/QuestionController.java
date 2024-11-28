@@ -74,28 +74,19 @@ public class QuestionController {
      * 투자자 문의 목록 조회
      *
      * @param userId   사용자 ID
-     * @param request  검색 조건 DTO
+     * @param userRole 사용자 역할
+     * @param request  투자자 요청 DTO
      * @param pageable 페이징 정보
-     * @return 투자자 문의 목록 응답
+     * @return 투자자 문의 목록
      */
     @PostMapping("/investor/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getInvestorQuestions(
             @PathVariable Long userId,
-            @RequestParam Role userRole, // Role을 추가로 받음
+            @RequestParam Role userRole,
             @RequestBody @Valid InvestorQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
-        QuestionsPageResponse response = questionService.getInvestorQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                request.getStrategyName(),
-                request.getTraderName(),
-                pageable,
-                userRole
-        );
-
+        QuestionsPageResponse response = questionService.getInvestorQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 
@@ -103,34 +94,30 @@ public class QuestionController {
      * 트레이더 문의 목록 조회
      *
      * @param userId   사용자 ID
-     * @param request  검색 조건 DTO
+     * @param userRole 사용자 역할
+     * @param request  트레이더 요청 DTO
      * @param pageable 페이징 정보
-     * @return 트레이더 문의 목록 응답
+     * @return 트레이더 문의 목록
      */
     @PostMapping("/trader/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getTraderQuestions(
             @PathVariable Long userId,
+            @RequestParam Role userRole,
             @RequestBody @Valid TraderQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
-        QuestionsPageResponse response = questionService.getTraderQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                request.getInvestorName(),
-                request.getStrategyName(),
-                pageable
-        );
+        QuestionsPageResponse response = questionService.getTraderQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 
     /**
      * 관리자 문의 목록 조회
      *
-     * @param request  검색 조건 DTO
+     * @param userId   사용자 ID
+     * @param userRole 사용자 역할
+     * @param request  관리자 요청 DTO
      * @param pageable 페이징 정보
-     * @return 관리자 문의 목록 응답
+     * @return 관리자 문의 목록
      */
     @PostMapping("/admin/{userId}/questions")
     public ResponseEntity<BaseResponse<QuestionsPageResponse>> getAdminQuestions(
@@ -139,17 +126,7 @@ public class QuestionController {
             @RequestBody @Valid AdminQuestionsRequest request,
             @PageableDefault(size = 8, sort = "createdAt") Pageable pageable) {
 
-        QuestionsPageResponse response = questionService.getAdminQuestions(
-                userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
-                request.getInvestorName(),
-                request.getStrategyName(),
-                request.getTraderName(),
-                pageable,
-                userRole
-        );
+        QuestionsPageResponse response = questionService.getAdminQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 

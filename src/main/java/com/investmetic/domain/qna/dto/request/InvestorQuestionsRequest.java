@@ -6,20 +6,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class InvestorQuestionsRequest {
-
-    private final String keyword;
-    private final SearchCondition searchCondition;
-    private final StateCondition stateCondition;
+public class InvestorQuestionsRequest extends QuestionRequestDto {
     private final String strategyName;
     private final String traderName;
 
     @Builder
     public InvestorQuestionsRequest(String keyword, SearchCondition searchCondition, StateCondition stateCondition,
-                                    String strategyName, String traderName) {
-        this.keyword = keyword;
-        this.searchCondition = searchCondition;
-        this.stateCondition = stateCondition;
+                                    String title, String content, String strategyName, String traderName) {
+        super(keyword, searchCondition, stateCondition, title, content);
         this.strategyName = strategyName;
         this.traderName = traderName;
     }
