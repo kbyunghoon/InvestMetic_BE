@@ -25,19 +25,23 @@ public class QuestionsResponse {
     public static QuestionsResponse from(Question question) {
         return new QuestionsResponse(
                 question.getQuestionId(),
-                question.getTitle(),
-                question.getContent(),
-                question.getStrategy() != null ? question.getStrategy().getStrategyName() : null,
+                getOrDefault(question.getTitle(), "제목 없음"),
+                getOrDefault(question.getContent(), "내용 없음"),
+                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음") : "정보 없음",
                 question.getStrategy() != null && question.getStrategy().getUser() != null
-                        ? question.getStrategy().getUser().getImageUrl()
-                        : null,
-                question.getUser() != null ? question.getUser().getImageUrl() : null,
+                        ? getOrDefault(question.getStrategy().getUser().getImageUrl(), "이미지 없음")
+                        : "이미지 없음",
+                question.getUser() != null ? getOrDefault(question.getUser().getImageUrl(), "이미지 없음") : "이미지 없음",
                 question.getStrategy() != null && question.getStrategy().getUser() != null
-                        ? question.getStrategy().getUser().getNickname()
-                        : null,
-                question.getUser() != null ? question.getUser().getNickname() : null,
-                question.getQnaState() != null ? question.getQnaState().name() : null,
+                        ? getOrDefault(question.getStrategy().getUser().getNickname(), "이름 없음")
+                        : "이름 없음",
+                question.getUser() != null ? getOrDefault(question.getUser().getNickname(), "이름 없음") : "이름 없음",
+                question.getQnaState() != null ? question.getQnaState().name() : "상태 없음",
                 question.getCreatedAt()
         );
+    }
+
+    private static String getOrDefault(String value, String defaultValue) {
+        return value != null && !value.isBlank() ? value : defaultValue;
     }
 }

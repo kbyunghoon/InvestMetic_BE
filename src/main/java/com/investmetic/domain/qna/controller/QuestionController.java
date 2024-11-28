@@ -5,15 +5,15 @@ import com.investmetic.domain.qna.dto.request.InvestorQuestionsRequest;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.dto.request.TraderQuestionsRequest;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
-import com.investmetic.domain.qna.dto.response.QuestionsPageResponse;
+import com.investmetic.domain.qna.dto.response.QuestionsResponse;
 import com.investmetic.domain.qna.service.QuestionService;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.BusinessException;
-import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.exception.SuccessCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -80,14 +80,14 @@ public class QuestionController {
      * @return 투자자 문의 목록
      */
     @PostMapping("/investor/{userId}/questions")
-    public ResponseEntity<BaseResponse<QuestionsPageResponse>> getInvestorQuestions(
+    public ResponseEntity<BaseResponse<Page<QuestionsResponse>>> getInvestorQuestions(
             @PathVariable Long userId,
             @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid InvestorQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
         // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
-        QuestionsPageResponse response = questionService.getInvestorQuestions(userId, userRole, request, pageable);
+        Page<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 
@@ -101,14 +101,14 @@ public class QuestionController {
      * @return 트레이더 문의 목록
      */
     @PostMapping("/trader/{userId}/questions")
-    public ResponseEntity<BaseResponse<QuestionsPageResponse>> getTraderQuestions(
+    public ResponseEntity<BaseResponse<Page<QuestionsResponse>>> getTraderQuestions(
             @PathVariable Long userId,
             @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid TraderQuestionsRequest request,
             @PageableDefault(size = 4, sort = "createdAt") Pageable pageable) {
 
         // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
-        QuestionsPageResponse response = questionService.getTraderQuestions(userId, userRole, request, pageable);
+        Page<QuestionsResponse> response = questionService.getTraderQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 
@@ -122,14 +122,14 @@ public class QuestionController {
      * @return 관리자 문의 목록
      */
     @PostMapping("/admin/{userId}/questions")
-    public ResponseEntity<BaseResponse<QuestionsPageResponse>> getAdminQuestions(
+    public ResponseEntity<BaseResponse<Page<QuestionsResponse>>> getAdminQuestions(
             @PathVariable Long userId,
             @RequestParam Role userRole,// 추후 Security 적용 시 제거 예정
             @RequestBody @Valid AdminQuestionsRequest request,
             @PageableDefault(size = 8, sort = "createdAt") Pageable pageable) {
 
         // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
-        QuestionsPageResponse response = questionService.getAdminQuestions(userId, userRole, request, pageable);
+        Page<QuestionsResponse> response = questionService.getAdminQuestions(userId, userRole, request, pageable);
         return BaseResponse.success(response);
     }
 
@@ -179,10 +179,6 @@ public class QuestionController {
             @RequestParam Role userRole) {// 추후 Security 적용 시 제거 예정
 
         // 추후 Security 적용 시 Authentication 객체로부터 userId와 userRole을 추출할 예정
-        if (userRole == null || !Role.isAdmin(userRole)) { // 유효성 검사 추가
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 관리자가 아니면 접근 불가
-        }
-
         QuestionsDetailResponse response = questionService.getAdminQuestionDetail(questionId);
         return BaseResponse.success(response);
     }

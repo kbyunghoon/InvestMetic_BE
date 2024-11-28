@@ -26,21 +26,28 @@ public class QuestionsDetailResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime answerCreatedAt; // 답변 생성일
 
-    // 정적 팩토리 메서드
     public static QuestionsDetailResponse from(Question question, Answer answer) {
         return new QuestionsDetailResponse(
                 question.getQuestionId(),
-                question.getTitle(),
-                question.getContent(),
-                answer != null ? answer.getContent() : null,
-                question.getStrategy().getStrategyName(),
-                question.getUser().getImageUrl(),
-                question.getUser().getNickname(),
-                question.getStrategy().getUser().getImageUrl(),
-                question.getStrategy().getUser().getNickname(),
-                question.getQnaState().name(),
+                getOrDefault(question.getTitle(), "제목 없음"),
+                getOrDefault(question.getContent(), "내용 없음"),
+                answer != null ? getOrDefault(answer.getContent(), "답변 없음") : "답변 없음",
+                question.getStrategy() != null ? getOrDefault(question.getStrategy().getStrategyName(), "정보 없음") : "정보 없음",
+                question.getUser() != null ? getOrDefault(question.getUser().getImageUrl(), "이미지 없음") : "이미지 없음",
+                question.getUser() != null ? getOrDefault(question.getUser().getNickname(), "이름 없음") : "이름 없음",
+                question.getStrategy() != null && question.getStrategy().getUser() != null
+                        ? getOrDefault(question.getStrategy().getUser().getImageUrl(), "이미지 없음")
+                        : "이미지 없음",
+                question.getStrategy() != null && question.getStrategy().getUser() != null
+                        ? getOrDefault(question.getStrategy().getUser().getNickname(), "이름 없음")
+                        : "이름 없음",
+                question.getQnaState() != null ? question.getQnaState().name() : "상태 없음",
                 question.getCreatedAt(),
                 answer != null ? answer.getCreatedAt() : null
         );
+    }
+
+    private static String getOrDefault(String value, String defaultValue) {
+        return value != null && !value.isBlank() ? value : defaultValue;
     }
 }
