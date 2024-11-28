@@ -6,26 +6,26 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long>, DailyAnalysisRepositoryCustom {
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId")
-    Page<DailyAnalysis> findByStrategyId(@Param("strategyId") Long strategyId, Pageable pageable);
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = false")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = 'NO'")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsFalse(
             @Param("strategy") Strategy strategy,
             @Param("dailyDate") LocalDate dailyDate);
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = true")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = 'YES'")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsTrue(
             @Param("strategy") Strategy strategy,
             @Param("dailyDate") LocalDate dailyDate);
 
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate " +
+            "ORDER BY CASE WHEN d.proceed = 'NO' THEN 1 ELSE 2 END LIMIT 1")
+    Optional<DailyAnalysis> findDailyAnalysisByStrategyAndDate(@Param("strategy") Strategy strategy,
+                                                               @Param("dailyDate") LocalDate dailyDate);
 
     // 특정 전략의 해당 날짜의 이전 데이터들 가져오기
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId AND d.dailyDate <= :startDate ORDER BY d.dailyDate ASC")
@@ -53,16 +53,16 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate ASC")
     List<DailyAnalysis> findAllByStrategy(@Param("strategyId") Long strategyId);
 
-    @Query("SELECT d FROM DailyAnalysis d WHERE d.proceed = false")
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.proceed = 'NO'")
     List<DailyAnalysis> findAllByProceedIsFalse();
 
     @Query("""
             SELECT d FROM DailyAnalysis d
-                WHERE d.proceed = false
+                WHERE d.proceed = 'NO'
                   AND d.dailyDate = (
                       SELECT MIN(d2.dailyDate) FROM DailyAnalysis d2
                       WHERE d2.strategy.strategyId = d.strategy.strategyId
-                        AND d2.proceed = false
+                        AND d2.proceed = 'NO'
                   )
                 ORDER BY d.dailyDate ASC
             """)
@@ -78,4 +78,10 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     Optional<Double> findLatestKpRatioByStrategyId(@Param("strategyId") Long strategyId);
 
     boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
+
+    void deleteAllByStrategy(Strategy strategy);
+
+    boolean existsByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
+
+    void deleteByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
 }

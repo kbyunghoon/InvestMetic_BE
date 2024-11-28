@@ -14,4 +14,20 @@ public enum Role {
             default -> false;
         };
     }
+
+    // 트레이더일 경우
+    public static boolean isTrader(Role role) {
+        return switch (role) {
+            case TRADER, TRADER_ADMIN -> true;
+            default -> false;
+        };
+    }
+
+    // 일반 투자자일 경우
+    public static boolean isInvestor(Role role) {
+        return switch (role) {
+            case INVESTOR , INVESTOR_ADMIN -> true;
+            default -> false;
+        };
+    }
 }

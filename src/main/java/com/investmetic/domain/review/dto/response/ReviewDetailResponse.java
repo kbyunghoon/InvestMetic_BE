@@ -17,20 +17,16 @@ public class ReviewDetailResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt;
     private final int starRating;
-    private final boolean isOwner;
-
 
     // 정적 팩토리 메서드
     public static ReviewDetailResponse from(Review review, User user) {
-        boolean isOwner = review.getUser().equals(user);
         return new ReviewDetailResponse(
                 review.getReviewId(),
                 review.getNickname(),
                 review.getContent(),
                 user.getImageUrl(),
                 review.getCreatedAt(),
-                review.getStarRating(),
-                isOwner
+                review.getStarRating()
         );
     }
 }

@@ -2,6 +2,8 @@ package com.investmetic.domain.strategy.model.entity;
 
 import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -166,5 +168,11 @@ public class DailyAnalysis extends BaseEntity {
     private Double maxDrawDownInRate = 0.0; //
 
     @Builder.Default
-    private Boolean proceed = Boolean.TRUE; // 등록, 수정 시 False
+    @Enumerated(EnumType.STRING)
+    private Proceed proceed = Proceed.YES; // 등록, 수정 시 NO
+
+    public void modifyDailyAnalysis(Long transaction, Long dailyProfitLoss) {
+        this.transaction = transaction;
+        this.dailyProfitLoss = dailyProfitLoss;
+    }
 }

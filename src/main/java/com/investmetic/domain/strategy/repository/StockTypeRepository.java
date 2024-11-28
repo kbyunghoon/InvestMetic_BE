@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.repository;
 
 import com.investmetic.domain.strategy.model.entity.StockType;
 
+import com.investmetic.domain.strategy.model.entity.Strategy;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

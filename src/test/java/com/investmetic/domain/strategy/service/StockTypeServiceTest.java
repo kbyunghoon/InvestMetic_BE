@@ -38,7 +38,7 @@ class StockTypeServiceTest {
         for (int i = 1; i <= 5; i++) {
             StockTypeRequestDTO stockTypeRequestDTO = StockTypeRequestDTO.builder()
                     .stockTypeName("Sample_Stock_Type" + i)
-                    .stockTypeIconURL(String.format("/icons/sampleStock-icon%d.png", i))
+                    .stockTypeIconUrl(String.format("/icons/sampleStock-icon%d.png", i))
                     .size(1200)
                     .build();
             stockTypeRequestList.add(stockTypeRequestDTO);
