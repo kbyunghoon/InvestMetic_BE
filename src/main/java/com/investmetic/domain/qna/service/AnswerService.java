@@ -20,68 +20,118 @@ public class AnswerService {
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
 
-    //문의 답변 등록
-    @Transactional
+    /**
+     * 문의 답변 등록
+     *
+     * @param questionId        문의 ID
+     * @param traderId          트레이더 ID
+     * @param answerRequestDto  답변 요청 DTO
+     */
     public void createAnswer(Long questionId, Long traderId, AnswerRequestDto answerRequestDto) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-        if (question.getStrategy() == null
-                || question.getStrategy().getUser() == null
-                || !question.getStrategy().getUser().getUserId().equals(traderId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
+        // 문의 조회
+        Question question = findQuestionById(questionId);
+
+        // 권한 검증
+        validateTraderAuthorization(question, traderId);
+
+        // 답변 생성 및 저장
         Answer answer = Answer.builder()
                 .question(question)
                 .content(answerRequestDto.getContent())
                 .build();
-
         answerRepository.save(answer);
 
-        // 문의 상태를 COMPLETED로 업데이트
-        question.updateQnaState(QnaState.COMPLETED);
-        questionRepository.save(question);
+        // 문의 상태 업데이트
+        updateQuestionState(question, QnaState.COMPLETED);
     }
 
-
-    // 트레이더 전용 답변 삭제
-    @Transactional
+    /**
+     * 트레이더 전용 답변 삭제
+     *
+     * @param answerId   답변 ID
+     * @param questionId 문의 ID
+     * @param traderId   트레이더 ID
+     */
     public void deleteTraderAnswer(Long answerId, Long questionId, Long traderId) {
-        Question question = questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-        Answer answer = answerRepository.findById(answerId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+        Question question = findQuestionById(questionId);
+        Answer answer = findAnswerById(answerId);
 
-        if (!isTraderAuthorized(question, traderId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
+        // 권한 검증
+        validateTraderAuthorization(question, traderId);
 
+        // 답변 삭제
         deleteAnswer(answer, question);
     }
 
-    // 관리자 전용 답변 삭제
-    @Transactional
+    /**
+     * 관리자 전용 답변 삭제
+     *
+     * @param answerId   답변 ID
+     * @param questionId 문의 ID
+     */
     public void deleteAdminAnswer(Long answerId, Long questionId) {
-        questionRepository.findById(questionId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-        answerRepository.findById(answerId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+        Question question = findQuestionById(questionId);
+        Answer answer = findAnswerById(answerId);
 
-        deleteAnswer(answerRepository.findById(answerId).get(), questionRepository.findById(questionId).get());
+        // 답변 삭제
+        deleteAnswer(answer, question);
     }
 
-    // 공통 메서드: 답변 삭제 및 상태 업데이트
+    /**
+     * 답변 삭제 및 문의 상태 업데이트
+     *
+     * @param answer   삭제할 답변
+     * @param question 답변이 속한 문의
+     */
     private void deleteAnswer(Answer answer, Question question) {
         answerRepository.delete(answer);
-        question.updateQnaState(QnaState.WAITING); // 상태를 WAITING으로 업데이트
+        updateQuestionState(question, QnaState.WAITING);
+    }
+
+    /**
+     * 문의 상태 업데이트
+     *
+     * @param question 문의
+     * @param state    업데이트할 상태
+     */
+    private void updateQuestionState(Question question, QnaState state) {
+        question.updateQnaState(state);
         questionRepository.save(question);
     }
 
-    // 권한 확인: 트레이더가 해당 문의에 접근 권한이 있는지 확인
-    private boolean isTraderAuthorized(Question question, Long traderId) {
-        return question.getStrategy() != null
-                && question.getStrategy().getUser() != null
-                && question.getStrategy().getUser().getUserId().equals(traderId);
+    /**
+     * 트레이더 권한 검증
+     *
+     * @param question 문의
+     * @param traderId 트레이더 ID
+     */
+    private void validateTraderAuthorization(Question question, Long traderId) {
+        if (question.getStrategy() == null ||
+                question.getStrategy().getUser() == null ||
+                !question.getStrategy().getUser().getUserId().equals(traderId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
     }
 
-}
+    /**
+     * 문의 조회
+     *
+     * @param questionId 문의 ID
+     * @return 문의 엔티티
+     */
+    private Question findQuestionById(Long questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+    }
 
+    /**
+     * 답변 조회
+     *
+     * @param answerId 답변 ID
+     * @return 답변 엔티티
+     */
+    private Answer findAnswerById(Long answerId) {
+        return answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+    }
+}
