@@ -420,8 +420,9 @@ public class DailyAnalysisScheduler {
                 .orElse(0.0), currentDrawdownRate);
 
         // FIXME : 도움요청
-        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / (Math.abs(
-                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
+        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1
+//                (Math.abs(
+//                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
 
         // 9. 새로운 DailyAnalysis 객체 생성 및 반환
         DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
