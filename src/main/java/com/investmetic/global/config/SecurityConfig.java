@@ -1,5 +1,7 @@
 package com.investmetic.global.config;
 
+import com.investmetic.global.security.filter.JWTFilter;
+import com.investmetic.global.security.filter.LoginFilter;
 import com.investmetic.global.security.handler.CustomAuthenticationFailureHandler;
 import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
 import com.investmetic.global.security.filter.CustomLogoutFilter;
@@ -88,9 +90,6 @@ public class SecurityConfig {
 
         http
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
-
-        http
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class);
 
         http
                 .sessionManagement((session) -> session
