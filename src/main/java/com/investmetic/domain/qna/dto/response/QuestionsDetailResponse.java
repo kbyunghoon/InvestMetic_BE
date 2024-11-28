@@ -1,56 +1,46 @@
 package com.investmetic.domain.qna.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.investmetic.domain.qna.model.entity.Answer;
 import com.investmetic.domain.qna.model.entity.Question;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Getter
-@Builder
+@RequiredArgsConstructor
 public class QuestionsDetailResponse {
-    private final Long questionId;
-    private final String title;
-    private final String questionContent;
-    private final String answerContent;
-    private final String strategyName;
-    private final String investorImageUrl;
-    private final String investorName;
-    private final String traderImageUrl;
-    private final String traderName;
-    private final String state;
-    private final String questionCreatedAt;
-    private final String answerCreatedAt;
+    private final Long questionId; // 문의 ID
+    private final String title; // 문의 제목
+    private final String questionContent; // 문의 내용
+    private final String answerContent; // 답변 내용
+    private final String strategyName; // 전략 이름
+    private final String investorImageUrl; // 투자자 이미지 URL
+    private final String investorName; // 투자자 이름
+    private final String traderImageUrl; // 트레이더 이미지 URL
+    private final String traderName; // 트레이더 이름
+    private final String state; // 문의 상태
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime questionCreatedAt; // 문의 생성일
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime answerCreatedAt; // 답변 생성일
 
+    // 정적 팩토리 메서드
     public static QuestionsDetailResponse from(Question question, Answer answer) {
-        return QuestionsDetailResponse.builder()
-                .questionId(question.getQuestionId())
-                .title(question.getTitle() != null ? question.getTitle() : "제목 없음") // 기본값 추가
-                .questionContent(question.getContent() != null ? question.getContent() : "내용 없음") // 기본값 추가
-                .answerContent(answer != null ? answer.getContent() : "답변 없음") // 기본값 추가
-                .strategyName(question.getStrategy() != null && question.getStrategy().getStrategyName() != null
-                        ? question.getStrategy().getStrategyName()
-                        : "전략 없음") // 전략 이름 기본값
-                .investorImageUrl(question.getUser() != null && question.getUser().getImageUrl() != null
-                        ? question.getUser().getImageUrl()
-                        : "이미지 없음") // 투자자 이미지 기본값
-                .investorName(question.getUser() != null && question.getUser().getNickname() != null
-                        ? question.getUser().getNickname()
-                        : "투자자 이름 없음") // 투자자 이름 기본값
-                .traderImageUrl(question.getStrategy() != null && question.getStrategy().getUser() != null
-                        && question.getStrategy().getUser().getImageUrl() != null
-                        ? question.getStrategy().getUser().getImageUrl()
-                        : "이미지 없음") // 트레이더 이미지 기본값
-                .traderName(question.getStrategy() != null && question.getStrategy().getUser() != null
-                        && question.getStrategy().getUser().getNickname() != null
-                        ? question.getStrategy().getUser().getNickname()
-                        : "트레이더 이름 없음") // 트레이더 이름 기본값
-                .state(question.getQnaState() != null ? question.getQnaState().name() : "상태 없음") // 상태 기본값
-                .questionCreatedAt(question.getCreatedAt() != null
-                        ? question.getCreatedAt().toString()
-                        : "생성일 없음") // 질문 생성일 기본값
-                .answerCreatedAt(answer != null && answer.getCreatedAt() != null
-                        ? answer.getCreatedAt().toString()
-                        : "답변 생성일 없음") // 답변 생성일 기본값
-                .build();
+        return new QuestionsDetailResponse(
+                question.getQuestionId(),
+                question.getTitle(),
+                question.getContent(),
+                answer != null ? answer.getContent() : null,
+                question.getStrategy().getStrategyName(),
+                question.getUser().getImageUrl(),
+                question.getUser().getNickname(),
+                question.getStrategy().getUser().getImageUrl(),
+                question.getStrategy().getUser().getNickname(),
+                question.getQnaState().name(),
+                question.getCreatedAt(),
+                answer != null ? answer.getCreatedAt() : null
+        );
     }
 }
