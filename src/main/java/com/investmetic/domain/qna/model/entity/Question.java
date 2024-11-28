@@ -43,8 +43,6 @@ public class Question extends BaseEntity {
     @Column(length = 5000)
     private String content;     //문의내용
 
-    private String strategyName; //전략명    ..?
-
     @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
     private Answer answer;
 
