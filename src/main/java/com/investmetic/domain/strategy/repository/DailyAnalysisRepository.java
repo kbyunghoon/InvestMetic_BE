@@ -80,4 +80,8 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
 
     void deleteAllByStrategy(Strategy strategy);
+
+    boolean existsByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
+
+    void deleteByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
 }
