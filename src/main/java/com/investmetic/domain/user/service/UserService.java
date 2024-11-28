@@ -47,6 +47,17 @@ public class UserService {
         // imageUrl 초기화.
         String presignedUrl = null;
 
+        // redis에 저장된 검증된 인증코드 불러오기.
+        String codeFoundByEmail = redisUtil.getData(userSignUpDto.getEmail());
+
+        // 검증된 이메일인지 확인.
+        if (!codeFoundByEmail.equals(userSignUpDto.getCode())) {
+            throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
+        }
+
+        // redis 코드 삭제
+        redisUtil.deleteData(userSignUpDto.getEmail());
+
         //중복 검증
         extracted(userSignUpDto);
 
@@ -66,6 +77,8 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
+
+
     // 이메일 찾기 시 인증코드 발송.
     public void sendAuthenticationCode(String email) {
         // 인증 코드 생성.
@@ -185,6 +198,18 @@ public class UserService {
 
         //성공 하고 나면 해당 데이터 메모리에서 삭제
         redisUtil.deleteData(email);
+    }
+
+    // 회원가입시 인증번호
+    public void verifySignUpEmailCode(String email, String code) {
+
+        // 저장된 인증코드 가져오기.
+        String codeFoundByEmail = redisUtil.getData(email);
+
+        // 입력코드된 인증코드가 저장된 인증코드와 다를때.
+        if (!codeFoundByEmail.equals(code)) {
+            throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
+        }
     }
 
 

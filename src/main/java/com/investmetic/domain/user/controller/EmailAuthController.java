@@ -41,4 +41,16 @@ public class EmailAuthController {
         return BaseResponse.success(SuccessCode.OK);
 
     }
+
+    // 회원가입시 인증코드 검증
+    @PostMapping("/signup")
+    public ResponseEntity<BaseResponse<Void>> checkSignUpCode(
+            @RequestBody EmailRequestDto requestDto) {
+
+        userService.verifySignUpEmailCode(requestDto.getEmail(), requestDto.getCode());
+
+        return BaseResponse.success(SuccessCode.OK);
+    }
+
+
 }
