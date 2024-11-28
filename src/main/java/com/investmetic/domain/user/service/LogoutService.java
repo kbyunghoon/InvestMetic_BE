@@ -24,7 +24,7 @@ public class LogoutService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh".equals(cookie.getName())) {
+                if ("refresh_token".equals(cookie.getName())) {
                     refresh = cookie.getValue();
                     break;
                 }
