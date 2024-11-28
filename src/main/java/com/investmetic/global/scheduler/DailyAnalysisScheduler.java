@@ -420,7 +420,7 @@ public class DailyAnalysisScheduler {
                 .orElse(0.0), currentDrawdownRate);
 
         // FIXME : 도움요청
-        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1
+        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1;
 //                (Math.abs(
 //                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
 
