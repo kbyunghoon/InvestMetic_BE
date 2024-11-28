@@ -5,6 +5,7 @@ import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
 import com.investmetic.domain.user.dto.response.QTraderProfileDto;
 import com.investmetic.domain.user.dto.response.QUserProfileDto;
@@ -103,12 +104,12 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
      * 트레이더 목록 조회 정렬 조건 - STRATEGY_TOTAL 과 SUBSCRIBE_TOTAL로 나누기
      */
     @Override
-    public Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageable) {
+    public Page<TraderProfileDto> getTraderListPage(TraderListSort sort, String traderNickname, Pageable pageable) {
 
         List<OrderSpecifier<?>> orderSpecifiers = new ArrayList<>();
 
         // null safe
-        if (StringUtils.equals(orderBy, "STRATEGY_TOTAL")) {
+        if (sort.equals(TraderListSort.STRATEGY_TOTAL)) {
 
             //STRATEGY_TOTAL이 먼저 들어오면 첫번째 정렬 조건을 전략수순으로 하기.
             orderSpecifiers.add(strategy.count().desc());
