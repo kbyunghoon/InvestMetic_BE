@@ -4,7 +4,6 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -66,16 +65,15 @@ public class ReIssueService {
         String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration); // 30분
         String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration); // 7일
 
-
         // 새로운 리프레시 토큰을 쿠키에 추가
-        Cookie newRefreshCookie = createCookie("refresh", newRefresh, refreshExpiration);
+        Cookie newRefreshCookie = createCookie("refresh_tokne", newRefresh, refreshExpiration);
         response.addCookie(newRefreshCookie);
 
         redisUtil.deleteRefreshToken(username);
         redisUtil.saveRefreshToken(username, newRefresh, refreshExpiration);
 
         // 응답 헤더에 새로운 access 토큰 추가
-        response.setHeader("access", "Bearer " + newAccess);
+        response.setHeader("access_token", "Bearer " + newAccess);
     }
 
     private Cookie createCookie(String key, String value, Long maxAgeMillis) {

@@ -4,7 +4,6 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,7 +59,7 @@ public class LogoutService {
         redisUtil.deleteRefreshToken(username);
 
         // 리프레시 토큰 쿠키 제거
-        Cookie cookie = new Cookie("refresh", null);
+        Cookie cookie = new Cookie("refresh_token", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -69,6 +68,6 @@ public class LogoutService {
 
         response.addCookie(cookie);
         // 응답 헤더에 Access Token 제거 또는 무효화 (선택 사항)
-        response.setHeader("access", null);
+        response.setHeader("access_token", null);
     }
 }

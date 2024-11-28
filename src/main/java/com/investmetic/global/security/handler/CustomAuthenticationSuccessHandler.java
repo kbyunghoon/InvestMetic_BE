@@ -36,7 +36,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-
         String username = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -52,8 +51,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         redisUtil.saveRefreshToken(username, refresh, refreshExpiration);
 
         // 응답 헤더와 JSON 설정
-        response.setHeader("access", "Bearer " + access);
-        response.addCookie(createCookie("refresh", refresh,refreshExpiration));
+        response.setHeader("access_token", "Bearer " + access);
+        response.addCookie(createCookie("refresh_token", refresh, refreshExpiration));
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
