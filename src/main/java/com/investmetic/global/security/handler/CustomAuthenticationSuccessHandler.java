@@ -74,6 +74,15 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         cookie.setHttpOnly(true);
         return cookie;
     }
+    private void deleteOldRefreshCookie(HttpServletResponse response) {
+        Cookie oldRefreshCookie = new Cookie("refresh", null);
+        oldRefreshCookie.setPath("/");
+        oldRefreshCookie.setMaxAge(0); // 쿠키 삭제
+        oldRefreshCookie.setHttpOnly(true);
+        //oldRefreshCookie.setSecure(true);
+        //oldRefreshCookie.setSameSite("Strict");
+        response.addCookie(oldRefreshCookie);
+    }
 
     private record SuccessResponse(boolean isSuccess, String message) {
     }

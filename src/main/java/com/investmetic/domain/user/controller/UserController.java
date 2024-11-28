@@ -2,6 +2,7 @@ package com.investmetic.domain.user.controller;
 
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.CustomUserDetails;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,5 +75,12 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(orderBy, keyword, pageable));
 
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<String> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        // 인증된 사용자의 정보에 접근
+        System.out.println(userDetails.getEmail());
+        String email = userDetails.getEmail();
+        return ResponseEntity.ok("Hello, " + email);
     }
 }
