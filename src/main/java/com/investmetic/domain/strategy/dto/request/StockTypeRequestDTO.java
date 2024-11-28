@@ -13,15 +13,15 @@ public class StockTypeRequestDTO {
     private String stockTypeName; // 종목명
 
     @Column(length = 1000)
-    private String stockTypeIconURL; // 종목아이콘 경로
+    private String stockTypeIconUrl; // 종목아이콘 경로
 
     private int size;
 
 
     @Builder
-    public StockTypeRequestDTO(String stockTypeName, String stockTypeIconURL, int size) {
+    public StockTypeRequestDTO(String stockTypeName, String stockTypeIconUrl, int size) {
         this.stockTypeName = stockTypeName;
-        this.stockTypeIconURL = stockTypeIconURL;
+        this.stockTypeIconUrl = stockTypeIconUrl;
         this.size = size;
     }
 
@@ -30,7 +30,7 @@ public class StockTypeRequestDTO {
         return StockType.builder()
                 .stockTypeName(stockTypeName)
                 .activateState(true)
-                .stockTypeIconURL(stockTypeIconURL).build();
+                .stockTypeIconUrl(stockTypeIconUrl).build();
     }
 
 }

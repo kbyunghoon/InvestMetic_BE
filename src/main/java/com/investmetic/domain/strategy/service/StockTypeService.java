@@ -23,11 +23,11 @@ public class StockTypeService {
 
     public String saveStockType(StockTypeRequestDTO stockTypeRequestDTO) {
         StockType stockType = stockTypeRequestDTO.toEntity();
-        String stockTypeIconURL = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, stockType.getStockTypeIconURL(),
+        String stockTypeIconUrl = s3FileService.getS3Path(FilePath.STRATEGY_IMAGE, stockType.getStockTypeIconUrl(),
                 stockTypeRequestDTO.getSize());
-        stockType.changeStockTypeIconURL(stockTypeIconURL);
+        stockType.changeStockTypeIconURL(stockTypeIconUrl);
         stockTypeRepository.save(stockType);
-        return s3FileService.getPreSignedUrl(stockTypeIconURL);
+        return s3FileService.getPreSignedUrl(stockTypeIconUrl);
     }
 
     public PageResponseDto<StockTypeResponseDTO> getStockTypes(Pageable pageable, Boolean activateState) {
