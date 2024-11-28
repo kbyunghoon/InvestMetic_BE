@@ -8,6 +8,7 @@ import static com.investmetic.global.util.s3.FilePath.USER_PROFILE;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
@@ -65,7 +66,6 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
-
     // 이메일 찾기 시 인증코드 발송.
     public void sendAuthenticationCode(String email) {
         // 인증 코드 생성.
@@ -78,22 +78,41 @@ public class UserService {
         redisUtil.setDataExpire(email, code, 60 * 30L);
     }
 
+    public AvaliableDto checkNicknameDuplicate(String nickname) {
 
-    //닉네임 중복
-    public void checkNicknameDuplicate(String nickname) {
-        validateDuplicate(NICKNAME, nickname, userRepository::existsByNickname);
+        boolean isDuplicate = userRepository.existsByNickname(nickname);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
+        }
     }
 
-    // 이메일 중복
-    public void checkEmailDuplicate(String email) {
-        validateDuplicate(EMAIL, email, userRepository::existsByEmail);
+    public AvaliableDto checkEmailDuplicate(String email) {
+
+        boolean isDuplicate = userRepository.existsByEmail(email);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
+        }
     }
 
-    // 핸드폰 번호 중복
-    public void checkPhoneDuplicate(String phone) {
-        validateDuplicate(PHONE, phone, userRepository::existsByPhone);
-    }
+    public AvaliableDto checkPhoneDuplicate(String phone) {
 
+        boolean isDuplicate = userRepository.existsByPhone(phone);
+
+        // 중복 여부에 따라 DTO 생성
+        if (isDuplicate) {
+            return new AvaliableDto(false);
+        } else {
+            return new AvaliableDto(true);
+        }
+    }
 
     /**
      * 트레이더 목록 조회
@@ -124,7 +143,7 @@ public class UserService {
 
     // 중복 검증 공통 로직
     private void validateDuplicate(ColumnCondition columnName, String value, ValidationFunction validationFunction) {
-        if (!validationFunction.exists(value)) {
+        if (validationFunction.exists(value)) {
             throw new BusinessException(getErrorCodeForField(columnName));
         }
     }

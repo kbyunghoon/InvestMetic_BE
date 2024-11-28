@@ -135,8 +135,6 @@ class TraderListRepositoryTest {
                 // 앞순서의 트레이너의 구독자 수보다 작거나 같아야함.
                 assertThat(traderProfileDto.getTotalSubCount()).isLessThanOrEqualTo(bigger);
 
-                System.out.println(traderProfileDto);
-
                 // 현재 순서의 트레이너 구독자 수 대입.
                 bigger = traderProfileDto.getTotalSubCount();
             }

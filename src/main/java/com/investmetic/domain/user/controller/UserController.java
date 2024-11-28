@@ -2,6 +2,7 @@ package com.investmetic.domain.user.controller;
 
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
+import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
@@ -34,29 +35,29 @@ public class UserController {
 
     //닉네임 중복 검사
     @GetMapping("/check/nickname")
-    public ResponseEntity<BaseResponse<Void>> checkNicknameDuplicate(@RequestParam String nickname) {
+    public ResponseEntity<BaseResponse<AvaliableDto>> checkNicknameDuplicate(@RequestParam String nickname) {
 
-        userService.checkNicknameDuplicate(nickname);
+        AvaliableDto response = userService.checkNicknameDuplicate(nickname);
 
-        return BaseResponse.success();
+        return BaseResponse.success(response);
     }
 
     // 이메일 중복 검사
     @GetMapping("/check/email")
-    public ResponseEntity<BaseResponse<Void>> checkEmailDuplicate(@RequestParam String email) {
+    public ResponseEntity<BaseResponse<AvaliableDto>> checkEmailDuplicate(@RequestParam String email) {
 
-        userService.checkEmailDuplicate(email);
+        AvaliableDto response = userService.checkEmailDuplicate(email);
 
-        return BaseResponse.success();
+        return BaseResponse.success(response);
     }
 
     // 전화번호 중복 검사
     @GetMapping("/check/phone")
-    public ResponseEntity<BaseResponse<Void>> checkPhoneDuplicate(@RequestParam String phone) {
+    public ResponseEntity<BaseResponse<AvaliableDto>> checkPhoneDuplicate(@RequestParam String phone) {
 
-        userService.checkPhoneDuplicate(phone);
+        AvaliableDto response = userService.checkPhoneDuplicate(phone);
 
-        return BaseResponse.success();
+        return BaseResponse.success(response);
     }
 
     /**

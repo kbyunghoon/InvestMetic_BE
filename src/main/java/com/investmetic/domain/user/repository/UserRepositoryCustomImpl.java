@@ -194,7 +194,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     public boolean existsByPhone(String phone) {
         QUser user = QUser.user;
 
-        return queryFactory.selectFrom(user).where(user.phone.eq(phone)).fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.phone.eq(phone)).fetchFirst() != null;
     }
 
     //닉네임 중복검사
@@ -202,7 +202,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     public boolean existsByNickname(String nickname) {
         QUser user = QUser.user;
 
-        return queryFactory.selectFrom(user).where(user.nickname.eq(nickname)).fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.nickname.eq(nickname)).fetchFirst() != null;
     }
 
     //이메일 중복검사
@@ -210,7 +210,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     public boolean existsByEmail(String email) {
         QUser user = QUser.user;
 
-        return queryFactory.selectFrom(user).where(user.email.eq(email)).fetchFirst() == null;
+        return queryFactory.selectFrom(user).where(user.email.eq(email)).fetchFirst() != null;
     }
 
     @Override
