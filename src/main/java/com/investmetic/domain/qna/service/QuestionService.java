@@ -67,15 +67,8 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND)); // 문의 존재 여부 확인
 
-        // 사용자 권한에 따른 삭제 권한 확인
-        if (!Role.isAdmin(user.getRole())) {
-            if (user.getRole() == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-            if (user.getRole() == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-            }
-        }
+        // 권한 검증 분리
+        validateAdminOrOwnership(user, question, userId);
 
         questionRepository.delete(question); // 문의 삭제
     }
@@ -147,7 +140,7 @@ public class QuestionService {
      */
     public Page<QuestionsResponse> getAdminQuestions(Long userId, Role userRole, AdminQuestionsRequest request,
                                                      Pageable pageable) {
-        validateUser(userId, userRole, Role.SUPER_ADMIN); // 관리자 여부 검증
+        validateAdmin(userRole); // 관리자 여부 검증
 
         Page<Question> questions = questionRepository.searchQuestions(
                 userId,
@@ -176,12 +169,7 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND)); // 문의 존재 여부 확인
 
-        if (role == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 투자자 권한 확인
-        }
-        if (role == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 트레이더 권한 확인
-        }
+        validateOwnership(question, userId, role);
 
         return QuestionsDetailResponse.from(question, question.getAnswer()); // DTO 변환 후 반환
     }
@@ -201,10 +189,6 @@ public class QuestionService {
 
     /**
      * 사용자 검증 메서드
-     *
-     * @param userId      사용자 ID
-     * @param userRole    사용자 역할
-     * @param requiredRole 필요 역할
      */
     private void validateUser(Long userId, Role userRole, Role requiredRole) {
         userRepository.findById(userId)
@@ -212,6 +196,41 @@ public class QuestionService {
 
         if (!Role.isAdmin(userRole) && userRole != requiredRole) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS); // 권한 확인
+        }
+    }
+
+    /**
+     * 관리자 여부 검증 메서드
+     */
+    private void validateAdmin(Role role) {
+        if (!Role.isAdmin(role)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    /**
+     * 관리자 또는 본인 여부 확인
+     */
+    private void validateAdminOrOwnership(User user, Question question, Long userId) {
+        if (!Role.isAdmin(user.getRole())) {
+            if (user.getRole() == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+            if (user.getRole() == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+            }
+        }
+    }
+
+    /**
+     * 본인 소유 확인
+     */
+    private void validateOwnership(Question question, Long userId, Role role) {
+        if (role == Role.INVESTOR && !question.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+        if (role == Role.TRADER && !question.getStrategy().getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
 }
