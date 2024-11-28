@@ -15,28 +15,28 @@ public class MainPageService {
     private final StrategyService strategyService;
     private final StrategyRepository strategyRepository;
 
+    private static final int TOP_SUBSCRIBER_OFFSET = 3;
+    private static final int TOP_SMSCORE_OFFSET = 5;
+
     public List<TopRankingStrategyResponseDto> getTopSubscriberStrategy() {
-        int offset = 3;
         OrderSpecifier<?> orderBy = QStrategy.strategy.subscriptionCount.desc();
-        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,offset);
-        contents.forEach(response-> {
-                    Long strategyId = response.getStrategyId();
-                    List<Double> profitRateData =strategyRepository.findProfitRateData(strategyId);
-                    response.updateProfitRateChartData(profitRateData);
-                }
-        );
-        return contents;
+        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,
+                TOP_SUBSCRIBER_OFFSET);
+        return fillProfitRateChartData(contents);
     }
+
     public List<TopRankingStrategyResponseDto> getTopSmscoreStrategy() {
-        int offset = 5;
         OrderSpecifier<?> orderBy = QStrategy.strategy.smScore.desc();
-        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,offset);
-        contents.forEach(response-> {
-                    Long strategyId = response.getStrategyId();
-                    List<Double> profitRateData =strategyRepository.findProfitRateData(strategyId);
-                    response.updateProfitRateChartData(profitRateData);
-                }
-        );
+        List<TopRankingStrategyResponseDto> contents = strategyRepository.findTopRankingStrategy(orderBy,
+                TOP_SMSCORE_OFFSET);
+        return fillProfitRateChartData(contents);
+    }
+    private List<TopRankingStrategyResponseDto> fillProfitRateChartData(List<TopRankingStrategyResponseDto> contents) {
+        contents.forEach(response -> {
+            Long strategyId = response.getStrategyId();
+            List<Double> profitRateData = strategyRepository.findProfitRateData(strategyId);
+            response.updateProfitRateChartData(profitRateData);
+        });
         return contents;
     }
 }
