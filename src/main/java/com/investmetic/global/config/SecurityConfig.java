@@ -1,9 +1,11 @@
 package com.investmetic.global.config;
 
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.security.filter.JWTFilter;
 import com.investmetic.global.security.filter.LoginFilter;
 import com.investmetic.global.security.handler.CustomAuthenticationFailureHandler;
 import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
+import com.investmetic.global.security.service.CustomUserDetailService;
 import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import java.util.List;
@@ -35,6 +37,7 @@ public class SecurityConfig {
     private final RedisUtil redisUtil;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
+    private final UserRepository userRepository;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -84,7 +87,7 @@ public class SecurityConfig {
         loginFilter.setAuthenticationFailureHandler(failureHandler); // 실패 핸들러 설정
 
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil,new CustomUserDetailService(userRepository)), LoginFilter.class);
 
         http
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
