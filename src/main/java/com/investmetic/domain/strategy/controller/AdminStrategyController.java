@@ -5,6 +5,8 @@ import com.investmetic.domain.strategy.service.AdminStrategyService;
 import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,10 +17,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/api/admin/strategies")
 @RequiredArgsConstructor
+@Tag(name = "전략 관리 페이지 API", description = "전략 관리 페이지 관련 API")
 public class AdminStrategyController {
     private final AdminStrategyService adminStrategyService;
+
+    @Operation(summary = "전략 승인, 승인 거부 상태 관리 기능",
+            description = "<a href='https://www.notion.so/a0c8e8de1b264278a44dedda4b4d4ca0' target='_blank'>API 명세서</a>")
     @PatchMapping("/{strategyId}")
-    public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId, IsApproved isApproved) {
+    public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId,
+                                                             IsApproved isApproved) {
         adminStrategyService.manageAproveState(strategyId, isApproved);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
