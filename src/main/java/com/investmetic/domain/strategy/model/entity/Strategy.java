@@ -85,10 +85,6 @@ public class Strategy extends BaseEntity {
 
     @ColumnDefault("0.0")
     @Builder.Default
-    private Double zScore = 0.0;
-
-    @ColumnDefault("0.0")
-    @Builder.Default
     private Double averageRating = 0.0; // 평균별점
 
     @ColumnDefault("0")
@@ -115,10 +111,6 @@ public class Strategy extends BaseEntity {
         }
     }
 
-    public void setZScore(Double zScore) {
-        this.zScore = zScore;
-    }
-
     public void setKpRatio(Double kpRatio) {
         this.kpRatio = kpRatio;
     }
@@ -138,7 +130,6 @@ public class Strategy extends BaseEntity {
     public void resetStrategyDailyAnalysis() {
         this.kpRatio = 0.0;
         this.smScore = 0.0;
-        this.zScore = 0.0;
     }
 
     public void modifyStrategy(String strategyName, String strategyDescription) {

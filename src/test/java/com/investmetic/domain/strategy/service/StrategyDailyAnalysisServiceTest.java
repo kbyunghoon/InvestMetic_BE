@@ -155,7 +155,6 @@ class StrategyDailyAnalysisServiceTest {
 
         assertEquals(0.0, strategy.getKpRatio());
         assertEquals(0.0, strategy.getSmScore());
-        assertEquals(0.0, strategy.getZScore());
     }
 
 
