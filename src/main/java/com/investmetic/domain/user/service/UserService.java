@@ -216,7 +216,7 @@ public class UserService {
     //휴대번호를 통한 이메일 찾기
     public FoundEmailDto findEmailByPhone(String phone) {
         String email = userRepository.findEmailByPhone(phone)
-                .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지않음
+                .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지 않음
 
         // 이메일이 없으면 isFound = false, email = null로 반환
         if (email == null) {
@@ -228,10 +228,9 @@ public class UserService {
 
     //이메일 마스킹 처리
     private String emailMasking(String email) {
-        // email 앞자리가 0이면
+
         String localPart = email.substring(0, email.indexOf('@'));
 
-        // 3자리 보다 작으면 그냥 email 보여줌.
         if (localPart.length() > 3) {
             return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3);
         }
