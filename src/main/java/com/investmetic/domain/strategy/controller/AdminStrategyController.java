@@ -3,14 +3,14 @@ package com.investmetic.domain.strategy.controller;
 import com.investmetic.domain.strategy.dto.response.AdminStrategyResponseDto;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.service.AdminStrategyService;
-import com.investmetic.domain.strategy.service.StrategyService;
+
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
-import com.querydsl.core.annotations.QueryProjection;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +24,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 @RequestMapping("/api/admin/strategies")
 @RequiredArgsConstructor
+@Tag(name = "전략 관리 페이지 API", description = "전략 관리 페이지 관련 API")
 public class AdminStrategyController {
     private final AdminStrategyService adminStrategyService;
+
+    @Operation(summary = "전략 승인, 승인 거부 상태 관리 기능",
+            description = "<a href='https://www.notion.so/a0c8e8de1b264278a44dedda4b4d4ca0' target='_blank'>API 명세서</a>")
     @PatchMapping("/{strategyId}")
-    public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId, IsApproved isApproved) {
+    public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId,
+                                                             IsApproved isApproved) {
         adminStrategyService.manageAproveState(strategyId, isApproved);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
