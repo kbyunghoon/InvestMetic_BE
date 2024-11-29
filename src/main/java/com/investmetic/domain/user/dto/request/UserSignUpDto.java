@@ -19,6 +19,7 @@ public class UserSignUpDto {
     private String password;
     private String email;
     private Role role;
+    private String code;
     private Boolean infoAgreement; //정보제공 동의
     private ImageMetadata imageMetadata;
 
