@@ -14,15 +14,13 @@ public class ImageMetadata {
     @NotBlank(message = "유저 이미지 이름 null")
     private String imageName;
 
-    private String extension;
 
     @Min(value = 1, message = "유저 이미지 0Byte")
     @Max(value = 1024 * 1024 * 2, message = "유저 이미지 2MB 초과.")
     private int size;
 
-    public ImageMetadata(String imageName, String extension, int size) {
+    public ImageMetadata(String imageName, int size) {
         this.imageName = imageName;
-        this.extension = extension;
         this.size = size;
     }
 

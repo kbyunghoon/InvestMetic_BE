@@ -106,7 +106,8 @@ class UserMyPageControllerTest {
         ResultActions resultActions2 = mockMvc.perform(
                 get("/api/users/mypage/profile").param("email", "NotFound@Email.com"));
 
-        resultActions2.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value(ErrorCode.USER_INFO_NOT_FOUND.getCode()))// 실패 상태 확인
+        resultActions2.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(ErrorCode.USER_INFO_NOT_FOUND.getCode()))// 실패 상태 확인
                 .andDo(print());
     }
 
@@ -123,7 +124,7 @@ class UserMyPageControllerTest {
 
     /**
      * 이미지 변경시 delete 수행 test는 하지 않도록 합니다. - api요청이 직접 가기 때문에.
-     * */
+     */
     @Nested
     @DisplayName("개인 정보 수정")
     class userUpdate {
@@ -161,7 +162,8 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
+            resultActions.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 
@@ -171,7 +173,7 @@ class UserMyPageControllerTest {
 
             // imageDto Valid Test
             UserModifyDto userModifyDto = UserModifyDto.builder().email("jlwoo092513@gmail.com")
-                    .imageDto(new ImageMetadata("asdf.jpg", "image/jpg", 1024 * 1024 * 5)).nickname("테스트")
+                    .imageDto(new ImageMetadata("asdf.jpg", 1024 * 1024 * 5)).nickname("테스트")
                     .infoAgreement(Boolean.TRUE).password("asdf").phone("01012345678")
                     .imageChange(true) // primitive 타입으로
                     .build();
@@ -181,7 +183,8 @@ class UserMyPageControllerTest {
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
-            resultActions.andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
+            resultActions.andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 

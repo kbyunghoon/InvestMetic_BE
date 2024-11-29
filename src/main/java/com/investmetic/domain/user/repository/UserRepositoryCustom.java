@@ -1,5 +1,6 @@
 package com.investmetic.domain.user.repository;
 
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserAdminPageRequestDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
@@ -17,7 +18,7 @@ public interface UserRepositoryCustom {
 
     Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageRequest);
 
-    Page<TraderProfileDto> getTraderListPage(String orderBy, String traderNickname, Pageable pageRequest);
+    Page<TraderProfileDto> getTraderListPage(TraderListSort sort, String traderNickname, Pageable pageRequest);
 
 
     boolean existsByEmail(String email);
