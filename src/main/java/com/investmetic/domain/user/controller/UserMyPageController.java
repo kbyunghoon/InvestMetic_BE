@@ -5,6 +5,8 @@ import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.service.UserMyPageService;
 import com.investmetic.global.exception.BaseResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
+@Tag(name="마이페이지 정보 API",description = "마이페이지 회원 정보 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users/mypage")
@@ -26,6 +30,8 @@ public class UserMyPageController {
     /**
      * 회원 정보 제공 기능
      * */
+    @Operation(summary = "회원 정보 제공",
+            description = "<a href='https://www.notion.so/5fd1252c4fe347b2a0f41e174de454a9' target='_blank'>API 명세서</a>")
     @GetMapping("/profile")
     public ResponseEntity<BaseResponse<UserProfileDto>> provideUserInfo(@RequestParam String email) {
 
@@ -42,6 +48,8 @@ public class UserMyPageController {
      *
      * @param userModifyDto 회원이 수정하려고 하는 정보 데이터.
      * */
+    @Operation(summary = "회원 정보 수정",
+            description = "<a href='https://www.notion.so/006c1966582148799c2e0ae31f6a3353' target='_blank'>API 명세서</a>")
     @PatchMapping("/profile")
     public ResponseEntity<BaseResponse<String>> updateUserInfo(@Valid @RequestBody UserModifyDto userModifyDto) {
 
@@ -54,6 +62,8 @@ public class UserMyPageController {
     /**
      * 패스워드 인증
      * */
+    @Operation(summary = "패스워드 인증",
+            description = "<a href='https://www.notion.so/98a13e32b27b4aad9cdbba1b08118d3a' target='_blank'>API 명세서</a>")
     @PostMapping("/authenticate/password")
     public ResponseEntity<BaseResponse<Void>> passwordCheck(@RequestBody PasswordDto passwordDto) {
 
