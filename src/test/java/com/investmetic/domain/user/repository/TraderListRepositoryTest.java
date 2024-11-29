@@ -10,6 +10,7 @@ import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.subscription.repository.SubscriptionRepository;
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.UserState;
@@ -95,12 +96,9 @@ class TraderListRepositoryTest {
                             .isPublic(IsPublic.PUBLIC)
                             .isApproved(IsApproved.APPROVED)
                             .build();
-
                     strategyRepository.save(strategy2);
                 }
-
                 strategyRepository.save(strategy1);
-
             }
         }
     }
@@ -121,13 +119,13 @@ class TraderListRepositoryTest {
 
         // given 가장 큰수로 설정
         Integer bigger = Integer.MAX_VALUE;
-        Integer pagesize = 100;
-        String orderBy = null;
+        int pagesize = 100;
+        TraderListSort sort = TraderListSort.SUBSCRIBE_TOTAL;
 
         Pageable pageable = PageRequest.of(0, pagesize);
 
         // when
-        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, null, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, null, pageable);
 
         // then
         //구독순 확인.
@@ -148,7 +146,7 @@ class TraderListRepositoryTest {
 
             // 페이지 증가시키면서 확인.
             Pageable nextPage = PageRequest.of(i, pagesize);
-            page = userRepository.getTraderListPage(orderBy, null, nextPage);
+            page = userRepository.getTraderListPage(sort, null, nextPage);
         }
     }
 
@@ -160,12 +158,12 @@ class TraderListRepositoryTest {
         // given 가장 큰수로 설정
         long bigger = Integer.MAX_VALUE;
         int pagesize = 5;
-        String orderBy = "STRATEGY_TOTAL";
+        TraderListSort sort = TraderListSort.STRATEGY_TOTAL;
 
         Pageable pageable = PageRequest.of(0, pagesize);
 
         // when - (orderBy = STRATEGY_TOTAL)
-        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, null, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, null, pageable);
 
         // then
         // 전략수 순
@@ -185,7 +183,7 @@ class TraderListRepositoryTest {
             }
 
             Pageable nextPage = PageRequest.of(i, pagesize);
-            page = userRepository.getTraderListPage(orderBy, null, nextPage);
+            page = userRepository.getTraderListPage(sort, null, nextPage);
         }
     }
 
@@ -198,12 +196,12 @@ class TraderListRepositoryTest {
         int bigger = Integer.MAX_VALUE;
         int pagesize = 5;
         String keyword = "2";
-        String orderBy = null;
+        TraderListSort sort = TraderListSort.SUBSCRIBE_TOTAL;
 
         Pageable pageable = PageRequest.of(0, pagesize);
 
         // when - 닉네임에 2가 들어가는지
-        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, keyword, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, keyword, pageable);
 
         // then
         //구독순 확인, 닉네임에 해당 keyword가 들어가는지 확인.
@@ -228,7 +226,7 @@ class TraderListRepositoryTest {
 
             // 페이지 증가시키면서 확인.
             Pageable nextPage = PageRequest.of(i, pagesize);
-            page = userRepository.getTraderListPage(orderBy, null, nextPage);
+            page = userRepository.getTraderListPage(sort, null, nextPage);
         }
     }
 

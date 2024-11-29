@@ -6,6 +6,7 @@ import static com.investmetic.domain.user.dto.object.ColumnCondition.PHONE;
 import static com.investmetic.global.util.s3.FilePath.USER_PROFILE;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
+import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
@@ -46,6 +47,9 @@ public class UserService {
         // imageUrl 초기화.
         String presignedUrl = null;
 
+        // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
+        verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
+
         //중복 검증
         extracted(userSignUpDto);
 
@@ -65,6 +69,8 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
+
+
     // 이메일 찾기 시 인증코드 발송.
     public void sendAuthenticationCode(String email) {
         // 인증 코드 생성.
@@ -116,12 +122,12 @@ public class UserService {
     /**
      * 트레이더 목록 조회
      *
-     * @param orderBy null일 때 구독순
+     * @param sort    null일 때 구독순
      * @param keyword null일 때 키워드 검색 x
      */
-    public PageResponseDto<TraderProfileDto> getTraderList(String orderBy, String keyword, Pageable pageable) {
+    public PageResponseDto<TraderProfileDto> getTraderList(TraderListSort sort, String keyword, Pageable pageable) {
 
-        Page<TraderProfileDto> page = userRepository.getTraderListPage(orderBy, keyword, pageable);
+        Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, keyword, pageable);
 
         // 조회된 트레이더가 없을 때
         if (page.getContent().isEmpty()) {
@@ -174,8 +180,13 @@ public class UserService {
     // 코드 검증
     public void verifyEmailCode(String email, String code) {
 
-        // 저장된 인증코드 가져오기.
-        String codeFoundByEmail = redisUtil.getData(email);
+        /*
+        * 저장된 인증코드 가져오기.
+        * 30분 이후 시간이 지나므로 nullPointException 방지.
+        * */
+        String codeFoundByEmail = redisUtil.getData(email)
+                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
+
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -184,6 +195,23 @@ public class UserService {
 
         //성공 하고 나면 해당 데이터 메모리에서 삭제
         redisUtil.deleteData(email);
+    }
+
+
+
+    // 회원가입시 인증번호 검증
+    public void verifySignUpEmailCode(String email, String code) {
+
+        // 저장된 인증코드 가져오기.
+        String codeFoundByEmail = redisUtil.getData(email)
+                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
+
+
+        // 입력코드된 인증코드가 저장된 인증코드와 다를때.
+        if (!codeFoundByEmail.equals(code)) {
+            throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
+        }
+
     }
 
 

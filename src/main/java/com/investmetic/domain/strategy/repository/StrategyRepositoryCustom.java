@@ -4,9 +4,11 @@ import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,5 +32,9 @@ public interface StrategyRepositoryCustom {
 
     Page<StrategySimpleResponse> findSubscribedStrategies(Long userId, Pageable pageable);
 
+
+    List<TopRankingStrategyResponseDto> findTopRankingStrategy(OrderSpecifier<?> orderBy, int limit);
+
+    List<Double> findProfitRateData(Long strategyId);
 }
 
