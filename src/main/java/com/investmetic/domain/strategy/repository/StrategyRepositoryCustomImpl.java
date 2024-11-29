@@ -38,7 +38,9 @@ import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,15 +302,29 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     // 수익률 그래프 데이터 조회 배치 쿼리
     @Override
     public Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIds) {
-        return queryFactory
-                .select(dailyAnalysis.strategy.strategyId, dailyAnalysis.dailyDate.stringValue(),
+        // 최신 데이터 20개를 가져오기
+        List<Tuple> fetchedData = queryFactory
+                .select(dailyAnalysis.strategy.strategyId,
+                        dailyAnalysis.dailyDate.stringValue(),
                         dailyAnalysis.cumulativeProfitLossRate)
                 .from(dailyAnalysis)
                 .where(dailyAnalysis.strategy.strategyId.in(strategyIds))
-                .fetch()
-                .stream()
+                .orderBy(dailyAnalysis.dailyDate.desc()) // 최신 데이터 기준으로 정렬
+                .limit(20) // 최신 데이터 20개만
+                .fetch();
+
+        // 날짜 오름차순으로 정렬
+        return fetchedData.stream()
                 .collect(Collectors.groupingBy(
-                        tuple -> tuple.get(dailyAnalysis.strategy.strategyId)
+                        tuple -> tuple.get(dailyAnalysis.strategy.strategyId), // Strategy ID로 그룹화
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> list.stream()
+                                        .sorted(Comparator.comparing(
+                                                tuple -> LocalDate.parse(tuple.get(
+                                                        dailyAnalysis.dailyDate.stringValue())))) // 날짜 오름차순 정렬
+                                        .toList()
+                        )
                 ));
     }
 
@@ -379,6 +395,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .limit(limit)
                 .fetch();
     }
+
     @Override
     public List<Double> findProfitRateData(Long strategyId) {
         return queryFactory
