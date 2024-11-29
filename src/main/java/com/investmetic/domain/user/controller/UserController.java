@@ -89,6 +89,8 @@ public class UserController {
 
     }
     // 전화번호를 통한 이메일 찾기
+    @Operation(summary = "휴대번호를 통한 이메일 찾기",
+            description = "<a href='https://www.notion.so/68f9f0bcdde94776a29155b7358b450f' target='_blank'>API 명세서</a>")
     @GetMapping("/email")
     public ResponseEntity<BaseResponse<FoundEmailDto>> findEmailByPhone(@RequestParam String phone) {
 
