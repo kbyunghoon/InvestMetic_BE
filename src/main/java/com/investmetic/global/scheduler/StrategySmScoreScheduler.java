@@ -62,12 +62,12 @@ public class StrategySmScoreScheduler {
         strategiesList.forEach(strategy -> {
             if (standardDeviation == 0.0) {
                 strategy.setZScore(0.0);
-                strategy.setSmScore(0.0); // 기본값 설정
+                strategy.setSmScore(100.0);
             } else {
                 double zScore = (strategy.getKpRatio() - mean) / standardDeviation;
                 strategy.setZScore(zScore);
                 double cdfValue = standardNormal.cumulativeProbability(zScore);
-                strategy.setSmScore(cdfValue * 100); // 백분율로 저장
+                strategy.setSmScore(cdfValue * 100);
             }
         });
     }

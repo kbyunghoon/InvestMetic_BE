@@ -75,11 +75,17 @@ public class Strategy extends BaseEntity {
     @Builder.Default
     private Integer subscriptionCount = 0; // 구독수
 
-    private Double kpRatio;
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double kpRatio = 0.0;
 
-    private Double smScore;
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double smScore = 0.0;
 
-    private Double zScore;
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double zScore = 0.0;
 
     @ColumnDefault("0.0")
     @Builder.Default
