@@ -402,6 +402,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 ))
                 .from(strategy)
                 .where(applySearchWordFilter(searchWord),applyIsApprovedFilter(isApproved))
+                .orderBy(strategy.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
