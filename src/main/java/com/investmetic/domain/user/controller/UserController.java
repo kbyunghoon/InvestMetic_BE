@@ -93,6 +93,7 @@ public class UserController {
     public ResponseEntity<String> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         // 인증된 사용자의 정보에 접근
         System.out.println(userDetails.getEmail());
+        System.out.println(userDetails.getUserId());
         String email = userDetails.getEmail();
         return ResponseEntity.ok("Hello, " + email);
     }

@@ -66,21 +66,30 @@ public class SecurityConfig {
                     config.setAllowCredentials(true);
                     config.addAllowedHeader("*");
                     return config;
-                }))
+                }));
+        http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
+        // CSRF 비활성화 (jwt 토큰 인증방식이기 때문에 비활성화)
+        http
+                .csrf(AbstractHttpConfigurer::disable);
 
+        // Form 로그인 방식 비활성화 (로그인 페이지를 사용하지 않음)
+        http
+                .formLogin((auth) -> auth.disable());
+
+        // 기본 HTTP Basic 인증 비활성화 (헤더에 사용자명과 비밀번호를 노출하는 인증 방식)
+        http
+                .httpBasic((auth) -> auth.disable());
+
+        http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/profile").authenticated() // /profile은 인증 필요
                         .anyRequest().permitAll() // 모든 요청 허용
                 );
 
-        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil,
-                redisUtil);
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration));
         loginFilter.setAuthenticationSuccessHandler(successHandler); // 성공 핸들러 설정
         loginFilter.setAuthenticationFailureHandler(failureHandler); // 실패 핸들러 설정
 
