@@ -49,7 +49,7 @@ public class StibeeEmailService {
     private String traderGroup;
 
 
-
+    // 임시 주소록에서 회원 추가 후에 코드 전송.
     public boolean sendSignUpCode(String email, String code){
 
         // 정보 없이 이메일만 발송 가능하도록 회원 세팅.
@@ -63,7 +63,7 @@ public class StibeeEmailService {
         // 주소록에 회원 추가.
         StibeeSubscribeResponse<SignUpValue> signUpResponse= stibeeClient.subscribe(temporalAdressBook, emailSubscribe);
 
-        log.info("signUpResponse {}",signUpResponse);
+//        log.info("signUpResponse {}",signUpResponse);
 
         // 임시 주소록에 회원 등록
         if(!signUpResponse.isOk()){
@@ -82,11 +82,12 @@ public class StibeeEmailService {
         }
     }
 
+    // 임시 주소록에서 회원 삭제시
     public void deleteTemporalSubscriber(String email){
 
         StibeeSubscribeResponse<DeleteValue> deleteResponse = stibeeClient.deleteSubscriber(temporalAdressBook, List.of(email));
 
-        log.info("deleteResponse {}",deleteResponse);
+//        log.info("deleteResponse {}",deleteResponse);
 
         // 미삭제시 회원 수동 삭제할 수 있도록.
         if(!deleteResponse.isOk()){
