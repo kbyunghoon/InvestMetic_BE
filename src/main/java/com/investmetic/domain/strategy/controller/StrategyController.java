@@ -176,7 +176,7 @@ public class StrategyController {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
-    @Operation(summary = "나의 전략 기본정보 조회(마이페이지) ",
+    @Operation(summary = "나의 전략 상세정보 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}")
     public ResponseEntity<BaseResponse<MyStrategyDetailResponse>> getMyStrategiesDetail(
