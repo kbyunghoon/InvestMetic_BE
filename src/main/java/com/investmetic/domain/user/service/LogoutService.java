@@ -24,7 +24,7 @@ public class LogoutService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh_token".equals(cookie.getName())) {
+                if ("refresh-token".equals(cookie.getName())) {
                     refresh = cookie.getValue();
                     break;
                 }
@@ -59,7 +59,7 @@ public class LogoutService {
         redisUtil.deleteRefreshToken(email);
 
         // 리프레시 토큰 쿠키 제거
-        Cookie cookie = new Cookie("refresh_token", null);
+        Cookie cookie = new Cookie("refresh-token", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -68,6 +68,6 @@ public class LogoutService {
 
         response.addCookie(cookie);
         // 응답 헤더에 Access Token 제거 또는 무효화 (선택 사항)
-        response.setHeader("access_token", null);
+        response.setHeader("access-token", null);
     }
 }

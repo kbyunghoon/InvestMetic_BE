@@ -1,4 +1,4 @@
-package com.investmetic.domain.user.dto.response;
+package com.investmetic.global.security;
 
 import com.investmetic.domain.user.model.entity.User;
 import java.util.Collection;
@@ -40,5 +40,8 @@ public class CustomUserDetails implements UserDetails {
 
     public Long getUserId() {
         return user.getUserId();
+    }
+    public String getNickname() {
+        return user.getNickname();
     }
 }

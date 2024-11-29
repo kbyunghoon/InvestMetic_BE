@@ -3,7 +3,7 @@ package com.investmetic.domain.user.controller;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
-import com.investmetic.domain.user.dto.response.CustomUserDetails;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
