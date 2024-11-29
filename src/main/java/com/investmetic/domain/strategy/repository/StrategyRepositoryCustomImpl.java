@@ -90,7 +90,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.finalProfitLossDate,
                         strategy.createdAt))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
@@ -133,7 +133,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isPublic,
                         strategy.isApproved))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
@@ -180,7 +180,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.reviewCount
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(isApprovedAndPublic(), applyAllFilters(searchRequest))
@@ -226,7 +226,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isPublic
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(user.userId.eq(userId))
@@ -267,12 +267,12 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.reviewCount
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .join(subscription).on(subscription.strategy.eq(strategy))  // 구독 테이블 조인
                 .where(isApprovedAndPublic(), subscription.user.userId.eq(userId))
-                .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
+                .orderBy(subscription.createdAt.desc()) // 최근 구독순으로 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
