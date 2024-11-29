@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/strategies/")
+@RequestMapping("/api/main/")
 @Tag(name = "메인 페이지 데이터 조회 API", description = "메인 페이지 데이터 조회 관련 API")
 public class MainPageController {
     private final MainPageService mainPageService;
