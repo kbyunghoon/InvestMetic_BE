@@ -48,6 +48,9 @@ public class UserService {
         // imageUrl 초기화.
         String presignedUrl = null;
 
+        // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
+        verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
+
         //중복 검증
         extracted(userSignUpDto);
 
@@ -67,6 +70,7 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
+
 
     // 이메일 찾기 시 인증코드 발송.
     public void sendAuthenticationCode(String email) {
@@ -177,8 +181,13 @@ public class UserService {
     // 코드 검증
     public void verifyEmailCode(String email, String code) {
 
-        // 저장된 인증코드 가져오기.
-        String codeFoundByEmail = redisUtil.getData(email);
+        /*
+        * 저장된 인증코드 가져오기.
+        * 30분 이후 시간이 지나므로 nullPointException 방지.
+        * */
+        String codeFoundByEmail = redisUtil.getData(email)
+                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
+
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -187,6 +196,21 @@ public class UserService {
 
         //성공 하고 나면 해당 데이터 메모리에서 삭제
         redisUtil.deleteData(email);
+    }
+
+    // 회원가입시 인증번호 검증
+    public void verifySignUpEmailCode(String email, String code) {
+
+        // 저장된 인증코드 가져오기.
+        String codeFoundByEmail = redisUtil.getData(email)
+                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
+
+
+        // 입력코드된 인증코드가 저장된 인증코드와 다를때.
+        if (!codeFoundByEmail.equals(code)) {
+            throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
+        }
+
     }
 
     //휴대번호를 통한 이메일 찾기
@@ -213,6 +237,8 @@ public class UserService {
         }
         return email;
     }
+
+
 
     @FunctionalInterface
     private interface ValidationFunction {

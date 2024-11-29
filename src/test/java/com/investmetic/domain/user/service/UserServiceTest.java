@@ -15,6 +15,7 @@ import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.util.RedisUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ class UserServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private RedisUtil redisUtil;
 
     private User createOneUser() {
         User user = User.builder()
@@ -61,7 +64,10 @@ class UserServiceTest {
                 .email("test@example.com")
                 .role(Role.INVESTOR)
                 .infoAgreement(true)
+                .code("test")
                 .build();
+        // 인증코드 redis에 저장.
+        redisUtil.setDataExpire(userSignUpDto.getEmail(), userSignUpDto.getCode(), 60);
 
         // when
         userService.signUp(userSignUpDto);
@@ -74,6 +80,9 @@ class UserServiceTest {
         assertEquals(userSignUpDto.getEmail(), savedUser.getEmail());
         assertEquals(userSignUpDto.getPhone(), savedUser.getPhone());
         assertEquals(userSignUpDto.getInfoAgreement(), savedUser.getInfoAgreement());
+
+        //redis에서 인증코드가 삭제가 되어야함.
+        assertThat(redisUtil.getData(userSignUpDto.getEmail())).isNotPresent();
     }
 
 
@@ -91,8 +100,11 @@ class UserServiceTest {
                 .email("test@example.com")
                 .role(Role.INVESTOR)
                 .infoAgreement(true)
+                .code("test")
                 .imageMetadata(new ImageMetadata("test.jpg", 10000))
                 .build();
+        // 인증코드 redis에 저장.
+        redisUtil.setDataExpire(userSignUpDto.getEmail(), userSignUpDto.getCode(), 60);
 
         // when
         String presignedUrl = userService.signUp(userSignUpDto);
@@ -107,6 +119,9 @@ class UserServiceTest {
         assertEquals(userSignUpDto.getEmail(), savedUser.getEmail());
         assertEquals(userSignUpDto.getPhone(), savedUser.getPhone());
         assertEquals(userSignUpDto.getInfoAgreement(), savedUser.getInfoAgreement());
+
+        //redis에서 인증코드가 삭제가 되어야함.
+        assertThat(redisUtil.getData(userSignUpDto.getEmail())).isNotPresent();
     }
 
 
