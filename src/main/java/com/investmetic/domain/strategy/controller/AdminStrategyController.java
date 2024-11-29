@@ -31,7 +31,7 @@ public class AdminStrategyController {
         adminStrategyService.manageAproveState(strategyId, isApproved);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<BaseResponse<PageResponseDto<AdminStrategyResponseDto>>> getStrategies(
             @PageableDefault(size=10, page=1) Pageable pageable,
             @RequestParam(required = false) String searchWord,
