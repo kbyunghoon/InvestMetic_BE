@@ -9,6 +9,7 @@ import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
@@ -66,6 +67,7 @@ public class UserService {
 
         return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
+
     // 이메일 찾기 시 인증코드 발송.
     public void sendAuthenticationCode(String email) {
         // 인증 코드 생성.
@@ -187,6 +189,30 @@ public class UserService {
         redisUtil.deleteData(email);
     }
 
+    //휴대번호를 통한 이메일 찾기
+    public FoundEmailDto findEmailByPhone(String phone) {
+        String email = userRepository.findEmailByPhone(phone)
+                .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지않음
+
+        // 이메일이 없으면 isFound = false, email = null로 반환
+        if (email == null) {
+            return new FoundEmailDto(false, null);
+        }
+
+        return new FoundEmailDto(true, emailMasking(email));
+    }
+
+    //이메일 마스킹 처리
+    private String emailMasking(String email) {
+        // email 앞자리가 0이면
+        String localPart = email.substring(0, email.indexOf('@'));
+
+        // 3자리 보다 작으면 그냥 email 보여줌.
+        if (localPart.length() > 3) {
+            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3);
+        }
+        return email;
+    }
 
     @FunctionalInterface
     private interface ValidationFunction {

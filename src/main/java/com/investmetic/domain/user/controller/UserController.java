@@ -3,6 +3,7 @@ package com.investmetic.domain.user.controller;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
@@ -74,5 +75,11 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
+    }
+    // 전화번호를 통한 이메일 찾기
+    @GetMapping("/email")
+    public ResponseEntity<BaseResponse<FoundEmailDto>> findEmailByPhone(@RequestParam String phone) {
+
+        return BaseResponse.success(userService.findEmailByPhone(phone));
     }
 }
