@@ -77,10 +77,8 @@ public class ReviewController {
     @GetMapping
     public ResponseEntity<BaseResponse<ReviewListResponse>> getReviews(
             @PathVariable Long strategyId,
-            @RequestParam Long userId, // 임시로 userId를 쿼리 파라미터로 받음
             @PageableDefault(size = 5, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-
-        ReviewListResponse result = reviewService.getReviewList(strategyId, userId, pageable);
+        ReviewListResponse result = reviewService.getReviewList(strategyId, pageable);
         return BaseResponse.success(result);
     }
 }

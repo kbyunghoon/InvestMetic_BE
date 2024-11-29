@@ -127,15 +127,12 @@ public class ReviewService {
     }
 
     // 리뷰 목록 조회
-    public ReviewListResponse getReviewList(Long strategyId, Long userId, Pageable pageable) {
+    public ReviewListResponse getReviewList(Long strategyId, Pageable pageable) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
-
         Page<ReviewDetailResponse> reviews = reviewRepository.findByStrategy(strategy, pageable)
-                .map(review -> ReviewDetailResponse.from(review, user));
+                .map(review -> ReviewDetailResponse.from(review));
 
         PageResponseDto<ReviewDetailResponse> responsePageResponseDto = new PageResponseDto<>(reviews);
 
