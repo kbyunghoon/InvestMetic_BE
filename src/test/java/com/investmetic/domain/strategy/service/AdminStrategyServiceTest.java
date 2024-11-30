@@ -1,6 +1,7 @@
 package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
+import com.investmetic.domain.strategy.dto.response.AdminStrategyResponseDto;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
@@ -11,12 +12,16 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.global.common.PageResponseDto;
 import java.util.List;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,16 +39,17 @@ public class AdminStrategyServiceTest {
     @Autowired
     private TradeTypeRepository tradeTypeRepository;
 
-    @Test
-    @DisplayName("승인 상태 변경 테스트")
-    void userDenyApproveTest() {
+    User user;
+    Strategy strategy;
 
+    @BeforeEach
+    void init() {
         // 더미 데이터 입력
-        User user = TestEntityFactory.createTestUser();
+        user = TestEntityFactory.createTestUser();
         userRepository.save(user);
         TradeType tradeType = TestEntityFactory.createTestTradeType();
         tradeTypeRepository.save(tradeType);
-        Strategy strategy = Strategy.builder()
+        strategy = Strategy.builder()
                 .user(user)
                 .tradeType(tradeType)
                 .strategyName("매매 전략")
@@ -55,6 +61,12 @@ public class AdminStrategyServiceTest {
                 .isApproved(IsApproved.PENDING)
                 .subscriptionCount(100).build();
         strategyRepository.save(strategy);
+    }
+    @Test
+    @DisplayName("승인 상태 변경 테스트")
+    void userDenyApproveTest() {
+
+
 
         //기본 승인 유무 확인
         assertEquals(strategy.getIsApproved(), IsApproved.PENDING);
@@ -69,5 +81,15 @@ public class AdminStrategyServiceTest {
         adminStrategyService.manageAproveState(strategy.getStrategyId(), IsApproved.APPROVED);
         strategies = strategyRepository.findAll();
         assertEquals(strategies.get(strategies.size()-1).getIsApproved(), IsApproved.APPROVED);
+    }
+
+    @Test
+    @DisplayName("관리자페이지 전략 목록 조회 테스트")
+    void getAdminStratiesTest(){
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponseDto<AdminStrategyResponseDto> strategies =adminStrategyService.getManageStrategies(pageable,"전략",IsApproved.PENDING);
+
+        assertEquals(strategies.getContent().get(0).getIsApproved(), IsApproved.PENDING);
+        assertEquals(strategies.getContent().get(0).getStrategyName(), strategy.getStrategyName());
     }
 }
