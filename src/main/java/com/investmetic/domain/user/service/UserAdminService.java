@@ -8,6 +8,7 @@ import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.model.entity.UserHistory;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.domain.user.service.logic.CommonLogic;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -26,6 +27,7 @@ public class UserAdminService {
 
     private final UserRepository userRepository;
     private final StibeeEmailService stibeeEmailService;
+    private final CommonLogic commonLogic;
 
 
     /**
@@ -86,6 +88,8 @@ public class UserAdminService {
         // deleteById를 사용하여 조회 시 값이 없을 경우 EmptyResultDataAccessException 이 발생
         User deleteUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
+        commonLogic.deleteUser(deleteUser);
 
         // 유저 정보 삭제.
         userRepository.delete(deleteUser);
