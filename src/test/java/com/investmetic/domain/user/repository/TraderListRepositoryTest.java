@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
+@Transactional
 class TraderListRepositoryTest {
 
     private static final List<Role> roles = new ArrayList<>(
