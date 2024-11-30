@@ -7,8 +7,10 @@ import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -31,10 +33,11 @@ public class UserController {
     @Operation(summary = "회원 가입",
             description = "<a href='https://www.notion.so/3b51884e19b2420e8800a18ee92c310c' target='_blank'>API 명세서</a>")
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<String>> signup(@RequestBody UserSignUpDto userSignUpDto) {
+    public ResponseEntity<BaseResponse<String>> signup(@Valid @RequestBody UserSignUpDto userSignUpDto) {
+        // 회원가입시 오류 BusinessException(ErrorCode.SIGN_UP_FAILED)로
+        userService.signUp(userSignUpDto);
 
-        // 이미지 저장시 presignedUrl 반환.
-        return BaseResponse.success(userService.signUp(userSignUpDto));
+        return BaseResponse.success(SuccessCode.CREATED);
     }
 
     //닉네임 중복 검사
