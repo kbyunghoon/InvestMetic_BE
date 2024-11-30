@@ -19,9 +19,11 @@ import com.investmetic.global.util.RedisUtil;
 import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.security.SecureRandom;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +40,7 @@ public class UserService {
     private final S3FileService s3FileService;
     private final RedisUtil redisUtil;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final TaskScheduler taskScheduler;
 
 
     //회원 가입
@@ -83,26 +86,21 @@ public class UserService {
         redisUtil.setDataExpire(email, code, 60 * 30L);
     }
 
-    //TODO : Thread.sleep 리팩토링 시급.
     // 비로그인 유저에게 인증코드를 발송하기위한 메서드.
     public void sendSignUpCode(String email) {
         // 인증 코드 생성.
         String code = createdCode();
 
         // 해당 이메일로 인증코드 발송.
-        if(!emailService.sendSignUpCode(email, code)){
+        if (!emailService.sendSignUpCode(email, code)) {
 
             //비로그인 회원이 임시 주소록에 추가되지 않은경우.
             throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
         }
-        try{
-            Thread.sleep(2100);
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }
 
         // 임시 주소록에서 해당 회원 삭제.
-        emailService.deleteTemporalSubscriber(email);
+        taskScheduler.schedule(() -> emailService.deleteTemporalSubscriber(email),
+                Instant.now().plusSeconds(8));
 
         // code를 redis에 저장(30 minute)
         redisUtil.setDataExpire(email, code, 60 * 30L);

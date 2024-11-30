@@ -37,7 +37,7 @@ public class StibeeEmailService {
     private int defaultAddressBook;
 
     @Value("${stibee.email.address-book.temporal.address}")
-    private int temporalAdressBook;
+    private int temporalAddressBook;
 
     @Value("${stibee.email.address-book.default.group.admin}")
     private String adminGroup;
@@ -50,7 +50,7 @@ public class StibeeEmailService {
 
 
     // 임시 주소록에서 회원 추가 후에 코드 전송.
-    public boolean sendSignUpCode(String email, String code){
+    public boolean sendSignUpCode(String email, String code) {
 
         // 정보 없이 이메일만 발송 가능하도록 회원 세팅.
         SubscriberField subscriber = SubscriberField.create(email, null);
@@ -61,12 +61,13 @@ public class StibeeEmailService {
         EmailAndCode emailAndCode = new EmailAndCode(email, code);
 
         // 주소록에 회원 추가.
-        StibeeSubscribeResponse<SignUpValue> signUpResponse= stibeeClient.subscribe(temporalAdressBook, emailSubscribe);
+        StibeeSubscribeResponse<SignUpValue> signUpResponse
+                = stibeeClient.subscribe(temporalAddressBook, emailSubscribe);
 
 //        log.info("signUpResponse {}",signUpResponse);
 
         // 임시 주소록에 회원 등록
-        if(!signUpResponse.isOk()){
+        if (!signUpResponse.isOk()) {
 
             //등록 안되면 false반환.
             return false;
@@ -77,15 +78,16 @@ public class StibeeEmailService {
         if (!"ok".equals(response)) {
             log.error("인증코드 발송 실패: {}, {}", response, email);
             throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
-        }else{
-            return true;
         }
+
+        return true;
     }
 
     // 임시 주소록에서 회원 삭제시
     public void deleteTemporalSubscriber(String email){
 
-        StibeeSubscribeResponse<DeleteValue> deleteResponse = stibeeClient.deleteSubscriber(temporalAdressBook, List.of(email));
+        StibeeSubscribeResponse<DeleteValue> deleteResponse
+                = stibeeClient.deleteSubscriber(temporalAddressBook, List.of(email));
 
 //        log.info("deleteResponse {}",deleteResponse);
 
