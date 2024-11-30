@@ -3,7 +3,6 @@ package com.investmetic.domain.user.controller;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
-import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name="사용자 기본 API", description = "사용자 관련 기본 기능 API")
+@Tag(name = "사용자 기본 API", description = "사용자 관련 기본 기능 API")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -88,13 +86,5 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
-    }
-    @GetMapping("/profile")
-    public ResponseEntity<String> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        // 인증된 사용자의 정보에 접근
-        System.out.println(userDetails.getEmail());
-        System.out.println(userDetails.getUserId());
-        String email = userDetails.getEmail();
-        return ResponseEntity.ok("Hello, " + email);
     }
 }
