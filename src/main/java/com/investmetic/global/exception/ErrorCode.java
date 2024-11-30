@@ -43,6 +43,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2501, "Refresh token is missing."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2502, "Refresh token has expired."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
+    AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN,2504,"권한이 없습니다."),
 
 
     // 전략 관련 오류

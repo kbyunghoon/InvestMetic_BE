@@ -2,11 +2,13 @@ package com.investmetic.domain.strategy.repository;
 
 import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.AdminStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
+import com.investmetic.domain.strategy.model.IsApproved;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import java.util.List;
@@ -34,5 +36,7 @@ public interface StrategyRepositoryCustom {
     List<TopRankingStrategyResponseDto> findTopRankingStrategy(OrderSpecifier<?> orderBy, int limit);
 
     List<Double> findProfitRateData(Long strategyId);
+
+    Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord, IsApproved isApproved);
 }
 
