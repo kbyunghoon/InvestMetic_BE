@@ -30,21 +30,17 @@ public class UserModifyDto {
     //디자인을 보면 email은 변경하지 못하게 한다. 토큰의 email과 dto의 email이 일치하는지 검증.
     private String email;
 
-    //Null일 경우 변경 안함.
-    private Boolean infoAgreement;
-
     @NotNull
     private Boolean imageChange;
 
     @Builder
     public UserModifyDto(String nickname, String password, ImageMetadata imageDto, String phone, String email,
-                         Boolean infoAgreement, Boolean imageChange) {
+                         Boolean imageChange) {
         this.nickname = nickname;
         this.password = password;
         this.imageDto = imageDto;
         this.phone = phone;
         this.email = email;
-        this.infoAgreement = infoAgreement;
         this.imageChange = imageChange;
     }
 

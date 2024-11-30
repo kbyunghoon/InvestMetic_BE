@@ -1,12 +1,10 @@
 package com.investmetic.global.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.investmetic.global.util.JWTUtil;
-import com.investmetic.global.util.RedisUtil;
+import com.investmetic.domain.user.dto.request.LoginRequestDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,21 +17,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
 
-    private final JWTUtil jwtUtil;
-
-    private final RedisUtil redisUtil;
-
     private final ObjectMapper objectMapper = new ObjectMapper(); // JSON 파싱용 ObjectMapper
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
+        String email = null;
+        String password = null;
 
         try {
-            Map<String, String> requestBody = objectMapper.readValue(request.getInputStream(), Map.class);
+            LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
 
-            String email = requestBody.get("email");
-            String password = requestBody.get("password");
+            email = loginRequestDto.getEmail();
+            password = loginRequestDto.getPassword();
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(email, password);

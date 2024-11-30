@@ -7,6 +7,8 @@ import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,10 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/strategies")
+@RequestMapping("/api/admin/strategies")
+@Tag(name = "종목 관리 페이지 API", description = "종목 관리 페이지 관련 API")
 public class StockTypeController {
     private final StockTypeService stockTypeService;
 
+    @Operation(summary = "종목 조회(관리자 페이지)",
+            description = "<a href='https://www.notion.so/034c9ed1b0cf4b9bb598ff96bb34f57c' target='_blank'>API 명세서</a>")
     @GetMapping("/stock-type")
     public ResponseEntity<BaseResponse<PageResponseDto<StockTypeResponseDTO>>> getAllStockTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
@@ -29,6 +34,8 @@ public class StockTypeController {
         return BaseResponse.success(stockTypeResponseDTO);
     }
 
+    @Operation(summary = "종목 등록(관리자 페이지)",
+            description = "<a href='https://www.notion.so/de54e885de3c4ba6bcd81f437cbcfb04' target='_blank'>API 명세서</a>")
     @PostMapping("/stock-type")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> addStockType(
             @RequestBody StockTypeRequestDTO stockType) {
@@ -40,6 +47,8 @@ public class StockTypeController {
                         .build());
     }
 
+    @Operation(summary = "종목 활성화/비활성화(관리자 페이지)",
+            description = "<a href='https://www.notion.so/e127e6c077bd4c4bab29d4212f3cebb9' target='_blank'>API 명세서</a>")
     @PatchMapping("stock-type/{stockTypeId}")
     public ResponseEntity<BaseResponse<Void>> updateStockType(@PathVariable Long stockTypeId) {
         stockTypeService.changeActivateState(stockTypeId);

@@ -3,7 +3,6 @@ package com.investmetic.domain.user.service;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.EMAIL;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.NICKNAME;
 import static com.investmetic.domain.user.dto.object.ColumnCondition.PHONE;
-import static com.investmetic.global.util.s3.FilePath.USER_PROFILE;
 
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.TraderListSort;
@@ -20,9 +19,11 @@ import com.investmetic.global.util.RedisUtil;
 import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.security.SecureRandom;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,36 +40,32 @@ public class UserService {
     private final S3FileService s3FileService;
     private final RedisUtil redisUtil;
     private final SecureRandom secureRandom = new SecureRandom();
+    private final TaskScheduler taskScheduler;
 
 
     //회원 가입
     @Transactional
-    public String signUp(UserSignUpDto userSignUpDto) {
+    public void signUp(UserSignUpDto userSignUpDto) {
+        try{
+            // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
+            verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
 
-        // imageUrl 초기화.
-        String presignedUrl = null;
+            //중복 검증
+            extracted(userSignUpDto);
 
-        // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
-        verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
+            User createUser = UserSignUpDto.toEntity(userSignUpDto, bCryptPasswordEncoder);
 
-        //중복 검증
-        extracted(userSignUpDto);
+            //명시적 세이브...
+            userRepository.save(createUser);
 
-        // 사진 저장시.
-        if (userSignUpDto.getImageMetadata() != null) {
-            presignedUrl = s3FileService.getS3Path(USER_PROFILE, userSignUpDto.getImageMetadata().getImageName(),
-                    userSignUpDto.getImageMetadata().getSize());
+            // 스티비 주소록에 회원 추가.
+            emailService.addSubscriber(createUser);
+
+        } catch (BusinessException e) {
+
+            // 실패시 모두 되돌리고 회원가입 실패 에러 보내주기.(모두 초기화)
+            throw new BusinessException(ErrorCode.SIGN_UP_FAILED);
         }
-
-        User createUser = UserSignUpDto.toEntity(userSignUpDto, presignedUrl, bCryptPasswordEncoder);
-
-        //명시적 세이브...
-        userRepository.save(createUser);
-
-        // 스티비 주소록에 회원 추가.
-        emailService.addSubscriber(createUser);
-
-        return presignedUrl == null ? null : s3FileService.getPreSignedUrl(presignedUrl);
     }
 
 
@@ -83,6 +80,27 @@ public class UserService {
         // code를 redis에 저장(30 minute)
         redisUtil.setDataExpire(email, code, 60 * 30L);
     }
+
+    // 비로그인 유저에게 인증코드를 발송하기위한 메서드.
+    public void sendSignUpCode(String email) {
+        // 인증 코드 생성.
+        String code = createdCode();
+
+        // 해당 이메일로 인증코드 발송.
+        if (!emailService.sendSignUpCode(email, code)) {
+
+            //비로그인 회원이 임시 주소록에 추가되지 않은경우.
+            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+
+        // 임시 주소록에서 해당 회원 삭제.
+        taskScheduler.schedule(() -> emailService.deleteTemporalSubscriber(email),
+                Instant.now().plusSeconds(8));
+
+        // code를 redis에 저장(30 minute)
+        redisUtil.setDataExpire(email, code, 60 * 30L);
+    }
+
 
     public AvaliableDto checkNicknameDuplicate(String nickname) {
 
@@ -129,11 +147,6 @@ public class UserService {
     public PageResponseDto<TraderProfileDto> getTraderList(TraderListSort sort, String keyword, Pageable pageable) {
 
         Page<TraderProfileDto> page = userRepository.getTraderListPage(sort, keyword, pageable);
-
-        // 조회된 트레이더가 없을 때
-        if (page.getContent().isEmpty()) {
-            throw new BusinessException(ErrorCode.TRADER_LIST_RETRIEVAL_FAILED);
-        }
 
         return new PageResponseDto<>(page);
     }

@@ -11,6 +11,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Long>, DailyAnalysisRepositoryCustom {
+    List<DailyAnalysis> findByStrategy(Strategy strategyId);
+
+    @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate ASC")
+    List<DailyAnalysis> findByStrategyId(Long strategyId);
 
     @Query("SELECT d FROM DailyAnalysis d WHERE d.strategy = :strategy AND d.dailyDate = :dailyDate AND d.proceed = 'NO'")
     Optional<DailyAnalysis> findByStrategyAndDailyDateAndProceedIsFalse(

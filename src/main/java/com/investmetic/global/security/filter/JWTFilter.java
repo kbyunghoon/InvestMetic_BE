@@ -1,6 +1,6 @@
 package com.investmetic.global.security.filter;
 
-import com.investmetic.domain.user.dto.response.CustomUserDetails;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.security.service.CustomUserDetailService;
 import com.investmetic.global.util.JWTUtil;
 import jakarta.servlet.FilterChain;
@@ -20,12 +20,11 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final CustomUserDetailService customUserDetailService;
-
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         // 헤더에서 access키에 담긴 토큰을 꺼냄
-        String accessToken = request.getHeader("access_token");
+        String accessToken = request.getHeader("access-token");
 
         // 토큰이 없다면 다음 필터로 넘김
         if (accessToken == null) {
@@ -57,9 +56,10 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtUtil.getUsername(accessToken);
+        String email = jwtUtil.getEmail(accessToken);
 
-        CustomUserDetails user = (CustomUserDetails) customUserDetailService.loadUserByUsername(username);
+
+        CustomUserDetails user = (CustomUserDetails) customUserDetailService.loadUserByUsername(email);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(
                 user,

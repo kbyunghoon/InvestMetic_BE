@@ -108,7 +108,7 @@ class UserMyPageRepositoryTest {
 
                     Arguments.arguments("정보 수신 동의 변경",
                             UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
-                                    .infoAgreement(Boolean.FALSE).build()),
+                                    .build()),
 
                     Arguments.arguments("비밀 번호 변경",
                             UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
@@ -132,7 +132,7 @@ class UserMyPageRepositoryTest {
             //생성한 유저 email로 DB를 찾아서 있는지 확인
             assertThat(existUser).isPresent();
 
-            UserModifyDto userModifyDto = UserModifyDto.builder().nickname("테스트").infoAgreement(Boolean.TRUE)
+            UserModifyDto userModifyDto = UserModifyDto.builder().nickname("테스트")
                     .password("dirtyCheck!!").phone("01099999999")
                     .imageDto(new ImageMetadata("TestImage.jpa", 5000)).imageChange(Boolean.TRUE).build();
 

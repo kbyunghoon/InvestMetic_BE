@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.investmetic.domain.user.dto.object.ImageMetadata;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
 import com.investmetic.domain.user.dto.response.FoundEmailDto;
@@ -84,46 +83,6 @@ class UserServiceTest {
         //redis에서 인증코드가 삭제가 되어야함.
         assertThat(redisUtil.getData(userSignUpDto.getEmail())).isNotPresent();
     }
-
-
-    @Test
-    @DisplayName("회원 가입 이미지 변경")
-    void signUpTest2() {
-
-        // given
-        UserSignUpDto userSignUpDto = UserSignUpDto.builder()
-                .username("testUser")
-                .nickname("testNickname")
-                .phone("01012345678")
-                .birthdate("19900101")
-                .password("password")
-                .email("test@example.com")
-                .role(Role.INVESTOR)
-                .infoAgreement(true)
-                .code("test")
-                .imageMetadata(new ImageMetadata("test.jpg", 10000))
-                .build();
-        // 인증코드 redis에 저장.
-        redisUtil.setDataExpire(userSignUpDto.getEmail(), userSignUpDto.getCode(), 60);
-
-        // when
-        String presignedUrl = userService.signUp(userSignUpDto);
-
-        // then - DB에 사용자 정보가 저장되었는지 확인
-        assertThat(presignedUrl).contains(userSignUpDto.getImageMetadata().getImageName());
-
-        UserProfileDto savedUser = userRepository.findByEmailUserInfo(userSignUpDto.getEmail())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
-        assertEquals(userSignUpDto.getUsername(), savedUser.getUserName());
-        assertEquals(userSignUpDto.getNickname(), savedUser.getNickname());
-        assertEquals(userSignUpDto.getEmail(), savedUser.getEmail());
-        assertEquals(userSignUpDto.getPhone(), savedUser.getPhone());
-        assertEquals(userSignUpDto.getInfoAgreement(), savedUser.getInfoAgreement());
-
-        //redis에서 인증코드가 삭제가 되어야함.
-        assertThat(redisUtil.getData(userSignUpDto.getEmail())).isNotPresent();
-    }
-
 
     @Test
     @DisplayName("닉네임 중복이 있을 때")

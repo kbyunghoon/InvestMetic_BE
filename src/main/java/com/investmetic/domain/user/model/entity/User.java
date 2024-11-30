@@ -109,10 +109,6 @@ public class User extends BaseEntity {
             this.nickname = userModifyDto.getNickname();
         }
 
-        if (userModifyDto.getInfoAgreement() != null) {
-            this.infoAgreement = userModifyDto.getInfoAgreement();
-        }
-
         // 기본 이미지를 이용하거나 새로운 사진을 업로드하는 경우. null 또는 presignedUrl
         if (Boolean.TRUE.equals(userModifyDto.getImageChange())) {
             this.imageUrl = imageUrl;
