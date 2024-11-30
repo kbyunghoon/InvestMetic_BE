@@ -17,10 +17,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 
-    // 사용자 정의 메서드 추가
     default Page<Question> searchByConditions(List<BooleanExpression> conditions, Pageable pageable,
                                               JPAQueryFactory queryFactory) {
-        // 데이터 조회 쿼리
+        // 데이터 조회
         List<Question> content = queryFactory.selectFrom(question)
                 .leftJoin(question.strategy, strategy).fetchJoin()
                 .leftJoin(question.user, user).fetchJoin()
@@ -30,12 +29,13 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 카운트 쿼리
-        long total = queryFactory.select(question.count())
-                .from(question)
+        // 총 개수 조회
+        long total = queryFactory.selectFrom(question)
                 .where(conditions.toArray(new BooleanExpression[0]))
-                .fetchOne();
+                .fetchCount();
 
+        // Page 객체 생성
         return PageableExecutionUtils.getPage(content, pageable, () -> total);
     }
+
 }
