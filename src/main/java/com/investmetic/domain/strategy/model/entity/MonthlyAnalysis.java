@@ -11,11 +11,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MonthlyAnalysis extends BaseEntity {
 
@@ -41,4 +45,16 @@ public class MonthlyAnalysis extends BaseEntity {
     private Long cumulativeProfitLoss; // 누적 손익
 
     private Double cumulativeProfitLossRate; // 누적 손익률
+
+    public void setMonthlyAnalysisData(Long monthlyAveragePrincipal, Long depositsWithdrawals, Long monthlyProfitLoss,
+                                       Double monthlyProfitLossRate, Long cumulativeProfitLoss,
+                                       Double cumulativeProfitLossRate
+    ) {
+        this.monthlyAveragePrincipal = monthlyAveragePrincipal;
+        this.depositsWithdrawals = depositsWithdrawals;
+        this.monthlyProfitLoss = monthlyProfitLoss;
+        this.monthlyProfitLossRate = monthlyProfitLossRate;
+        this.cumulativeProfitLoss = cumulativeProfitLoss;
+        this.cumulativeProfitLossRate = cumulativeProfitLossRate;
+    }
 }
