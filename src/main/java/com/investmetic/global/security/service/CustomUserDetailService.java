@@ -24,7 +24,7 @@ public class CustomUserDetailService implements UserDetailsService {
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
-        // CustomUserDetails 생성 후 반환
+        // CustomUserDetails 생성시 필요한 부분만 CustomUserDetails에 저장.
         return new CustomUserDetails(user);
     }
 }
