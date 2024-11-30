@@ -5,12 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class AnswerRequestDto {
     @NotBlank(message = "답변 내용을 입력해주세요.")
     private String content;
-
-    @Builder
-    public AnswerRequestDto(String content) {
-        this.content = content;
-    }
 }
