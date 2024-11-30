@@ -115,8 +115,6 @@ public class DailyAnalysisScheduler {
             // 샤프 비율 (초기값 0.0)
             Double sharpRatio = 0.0;
 
-            // kp ratio, sm score
-
             DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                     .dailyAnalysisId(currentAnalysis.getDailyAnalysisId())
                     .tradingDays(1)
@@ -212,8 +210,6 @@ public class DailyAnalysisScheduler {
 
         // 평가손익
         Long valuationProfitLoss = principal - balance;
-
-        // TODO : kp ratio, sm score, 고점후경과일;
 
         // 기준가
         double referencePrice = (principal != 0) ? (double) balance / principal * 1000 : 0.0;
@@ -364,8 +360,6 @@ public class DailyAnalysisScheduler {
         // 승률
         double winRate = (double) profitableDays / (previousTradingDays + 1);
 
-        System.out.println("profitableDays = " + profitableDays);
-        System.out.println("previousTradingDays = " + previousTradingDays);
         // profitFactor
         double profitFactor = totalLoss < 0 ? totalProfit / Math.abs(totalLoss) : 0;
 
@@ -421,11 +415,6 @@ public class DailyAnalysisScheduler {
                 .min()
                 .orElse(0.0), currentDrawdownRate);
 
-        // FIXME : 도움요청
-        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1;
-//                (Math.abs(
-//                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
-
         // 9. 새로운 DailyAnalysis 객체 생성 및 반환
         DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                 .strategy(currentAnalysis.getStrategy())
@@ -472,7 +461,6 @@ public class DailyAnalysisScheduler {
                 .coefficientOfVariation(RoundUtil.roundToFifth(coefficientOfVariation))
                 .sharpRatio(RoundUtil.roundToFifth(sharpRatio))
                 .maxDrawDownInRate(RoundUtil.roundToFifth(maxDrawDownInRate))
-                .kpRatio(RoundUtil.roundToFifth(kpRatio))
                 .drawDownPeriod(drawDownPeriod)
                 .proceed(Proceed.YES)
                 .build();
