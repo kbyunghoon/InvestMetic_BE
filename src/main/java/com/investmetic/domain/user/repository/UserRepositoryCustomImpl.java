@@ -132,14 +132,15 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.role.in(Role.TRADER, Role.TRADER_ADMIN))
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
-                .offset(pageable.getPageNumber())
+                .offset((long) pageable.getPageNumber() * pageable.getPageSize())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
                 .select(user.count())
                 .from(user)
-                .where(user.role.in(Role.TRADER, Role.TRADER_ADMIN));
+                .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
