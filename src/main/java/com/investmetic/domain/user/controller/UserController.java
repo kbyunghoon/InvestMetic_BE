@@ -10,6 +10,7 @@ import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,7 +33,7 @@ public class UserController {
     @Operation(summary = "회원 가입",
             description = "<a href='https://www.notion.so/3b51884e19b2420e8800a18ee92c310c' target='_blank'>API 명세서</a>")
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<String>> signup(@RequestBody UserSignUpDto userSignUpDto) {
+    public ResponseEntity<BaseResponse<String>> signup(@Valid @RequestBody UserSignUpDto userSignUpDto) {
 
         userService.signUp(userSignUpDto);
 
