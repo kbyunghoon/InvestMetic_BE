@@ -58,7 +58,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
 
     @Override
-    public Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId) {
+    public StrategyDetailResponse findStrategyDetail(Long strategyId) {
 
         // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
@@ -71,7 +71,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // StockTypeInfo로 변환
         StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
-        StrategyDetailResponse response = queryFactory
+        return queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
                         Expressions.constant(stockTypeInfo),
@@ -99,12 +99,10 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
-
-        return Optional.ofNullable(response);
     }
 
     @Override
-    public Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId) {
+    public MyStrategyDetailResponse findMyStrategyDetail(Long strategyId) {
 
         // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
@@ -117,7 +115,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // StockTypeInfo로 변환
         StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
-        MyStrategyDetailResponse response = queryFactory
+        return queryFactory
                 .select(new QMyStrategyDetailResponse(
                         strategy.strategyName,
                         tradeType.tradeTypeIconUrl,
@@ -142,8 +140,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
-
-        return Optional.ofNullable(response);
     }
 
     private @NotNull StockTypeInfo getStockTypeInfo(List<Tuple> stockTypes) {
