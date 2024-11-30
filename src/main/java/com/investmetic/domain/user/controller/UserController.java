@@ -34,10 +34,9 @@ public class UserController {
             description = "<a href='https://www.notion.so/3b51884e19b2420e8800a18ee92c310c' target='_blank'>API 명세서</a>")
     @PostMapping("/signup")
     public ResponseEntity<BaseResponse<String>> signup(@Valid @RequestBody UserSignUpDto userSignUpDto) {
-
+        // 회원가입시 오류 BusinessException(ErrorCode.SIGN_UP_FAILED)로
         userService.signUp(userSignUpDto);
 
-        // 이미지 저장시 presignedUrl 반환.
         return BaseResponse.success(SuccessCode.CREATED);
     }
 

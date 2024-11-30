@@ -362,8 +362,10 @@ public class DailyAnalysisScheduler {
                 .orElse(0.0);
 
         // 승률
-        double winRate = profitableDays / (previousTradingDays + 1);
+        double winRate = (double) profitableDays / (previousTradingDays + 1);
 
+        System.out.println("profitableDays = " + profitableDays);
+        System.out.println("previousTradingDays = " + previousTradingDays);
         // profitFactor
         double profitFactor = totalLoss < 0 ? totalProfit / Math.abs(totalLoss) : 0;
 
@@ -463,8 +465,8 @@ public class DailyAnalysisScheduler {
                 .currentDrawdown(currentDrawdown)
                 .currentDrawdownRate(RoundUtil.roundToFifth(currentDrawdownRate))
                 .maxDrawdown(maxDrawdown)
-                .maxDrawdownRate(Math.round(maxDrawdownRate * 10000) / 10000.0)
-                .winRate(winRate)
+                .maxDrawdownRate(RoundUtil.roundToFifth(maxDrawdownRate))
+                .winRate(RoundUtil.roundToFifth(winRate))
                 .profitFactor(RoundUtil.roundToFifth(profitFactor))
                 .roa(RoundUtil.roundToFifth(roa))
                 .coefficientOfVariation(RoundUtil.roundToFifth(coefficientOfVariation))
