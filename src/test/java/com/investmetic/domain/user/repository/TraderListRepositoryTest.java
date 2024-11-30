@@ -3,6 +3,7 @@ package com.investmetic.domain.user.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.entity.Strategy;
@@ -29,9 +30,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
+@Transactional
 class TraderListRepositoryTest {
 
     private static final List<Role> roles = new ArrayList<>(
@@ -52,7 +55,7 @@ class TraderListRepositoryTest {
     void createUsers50() {
         Strategy strategy1 = null;
         Strategy strategy2 = null;
-        TradeType tradeType = new TradeType(1L, "Test", true, "asdf.jpg");
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
 
         tradeTypeRepository.save(tradeType);
 

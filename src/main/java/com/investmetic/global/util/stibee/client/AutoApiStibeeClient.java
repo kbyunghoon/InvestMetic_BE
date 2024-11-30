@@ -15,4 +15,10 @@ public interface AutoApiStibeeClient {
     void sendAuthenticationCode(@RequestBody EmailAndCode emailAndCode);
 
 
+    @PostExchange("/NWMwN2QyMjUtOGUyNy00ZGRkLWJiZjItNWFhYTMzMmFlYTI5")
+    String sendSignUpCode(@RequestBody EmailAndCode emailAndCode);
+
+
+
+
 }
