@@ -139,7 +139,7 @@ class UserMyPageControllerTest {
             oneUserImageUpload();
 
             UserModifyDto userModifyDto = UserModifyDto.builder().email("jlwoo092513@gmail.com").nickname("테스트")
-                    .infoAgreement(Boolean.TRUE).password("asdf").phone("01012345678").imageChange(Boolean.FALSE)
+                    .password("asdf").phone("01012345678").imageChange(Boolean.FALSE)
                     .build();
 
             ResultActions resultActions = mockMvc.perform(
@@ -155,7 +155,7 @@ class UserMyPageControllerTest {
 
             // imageChange null로 보냄
             UserModifyDto userModifyDto = UserModifyDto.builder().email("jlwoo092513@gmail.com").nickname("테스트")
-                    .infoAgreement(Boolean.TRUE).password("asdf").phone("01012345678").build();
+                    .password("asdf").phone("01012345678").build();
 
             //Valid Test throw MethodArgumentNotValidException
             ResultActions resultActions = mockMvc.perform(
@@ -174,7 +174,7 @@ class UserMyPageControllerTest {
             // imageDto Valid Test
             UserModifyDto userModifyDto = UserModifyDto.builder().email("jlwoo092513@gmail.com")
                     .imageDto(new ImageMetadata("asdf.jpg", 1024 * 1024 * 5)).nickname("테스트")
-                    .infoAgreement(Boolean.TRUE).password("asdf").phone("01012345678")
+                    .password("asdf").phone("01012345678")
                     .imageChange(true) // primitive 타입으로
                     .build();
 

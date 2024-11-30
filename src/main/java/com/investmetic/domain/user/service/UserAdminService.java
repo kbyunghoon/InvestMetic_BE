@@ -7,11 +7,11 @@ import com.investmetic.domain.user.model.ActionType;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.model.entity.UserHistory;
-import com.investmetic.domain.user.repository.UserHistoryRepository;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.util.stibee.StibeeEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAdminService {
 
     private final UserRepository userRepository;
-    private final UserHistoryRepository userHistoryRepository;
+    private final StibeeEmailService stibeeEmailService;
 
 
     /**
@@ -115,6 +115,7 @@ public class UserAdminService {
 
                 // 회원 변경 이력 저장.
                 user.addUserHistory(UserHistory.createEntity(user, ActionType.DEMOTION));
+                stibeeEmailService.releaseGroup(user.getEmail());
             }
 
             // 2. TRADER로 받는경우 해당 회원이 TRADER_ADMIN이 아니면 Exception 발생.
@@ -124,6 +125,7 @@ public class UserAdminService {
                 }
                 user.changeRole(Role.TRADER);
                 user.addUserHistory(UserHistory.createEntity(user, ActionType.DEMOTION));
+                stibeeEmailService.releaseGroup(user.getEmail());
             }
 
             // 3. ADMIN으로 받는경우 TRADER면 TRADER_ADMIN, INVESTOR면 INVESTOR_ADMIN으로
@@ -139,6 +141,7 @@ public class UserAdminService {
                     throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
                 }
                 user.addUserHistory(UserHistory.createEntity(user, ActionType.PROMOTION));
+                stibeeEmailService.assignGroup(user.getEmail());
             }
 
             // 그 외의 값은 모두 예외처리.

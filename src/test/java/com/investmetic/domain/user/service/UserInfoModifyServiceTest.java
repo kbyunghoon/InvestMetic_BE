@@ -62,7 +62,7 @@ class UserInfoModifyServiceTest {
 
                 Arguments.arguments("정보 수신 동의 변경",
                         UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
-                                .infoAgreement(Boolean.FALSE).build()),
+                                .build()),
 
                 Arguments.arguments("비밀 번호 변경",
                         UserModifyDto.builder().email("jlwoo092513@gmail.com").imageChange(Boolean.FALSE)
@@ -90,7 +90,7 @@ class UserInfoModifyServiceTest {
 
         // 변경된 회원값
         UserModifyDto userModifyDto = UserModifyDto.builder().email(oneUser.getEmail()).imageDto(imageMetadata)
-                .infoAgreement(Boolean.FALSE).nickname("자자ㅏㅈ").phone("01012345678").password("9999")
+                .nickname("자자ㅏㅈ").phone("01012345678").password("9999")
                 .imageChange(Boolean.TRUE).build();
 
         when(userRepository.findByEmail(userModifyDto.getEmail())).thenReturn(Optional.of(oneUser));

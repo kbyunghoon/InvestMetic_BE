@@ -17,6 +17,7 @@ import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,6 +47,9 @@ public class AdminPageUserServiceTest {
 
     @InjectMocks
     private UserAdminService userAdminService;
+
+    @Mock
+    private StibeeEmailService stibeeEmailService;
 
 
     @Nested
@@ -180,6 +184,11 @@ public class AdminPageUserServiceTest {
             //given
             User user = createOneUser(previousRole);
             when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
+            if (roleCondition == RoleCondition.ADMIN) {
+                when(stibeeEmailService.assignGroup(anyString())).thenReturn(true);
+            }else{
+                when(stibeeEmailService.releaseGroup(anyString())).thenReturn(true);
+            }
 
             // when, then 유저가 있다고 가정하고 userId는 값을 넣어줌.
             assertThatCode(() -> userAdminService.modifyRole(1L, roleCondition)).doesNotThrowAnyException();

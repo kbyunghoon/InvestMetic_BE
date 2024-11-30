@@ -4,19 +4,26 @@ package com.investmetic.global.util.stibee;
 import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.stibee.client.AutoApiStibeeClient;
 import com.investmetic.global.util.stibee.client.StibeeClient;
+import com.investmetic.global.util.stibee.dto.object.DeleteValue;
 import com.investmetic.global.util.stibee.dto.object.EmailAndCode;
+import com.investmetic.global.util.stibee.dto.object.SignUpValue;
 import com.investmetic.global.util.stibee.dto.request.SubscriberField;
 import com.investmetic.global.util.stibee.dto.request.EmailSubscribe;
+import com.investmetic.global.util.stibee.dto.response.StibeeSubscribeResponse;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StibeeEmailService {
 
     // HttpInterface로 사용.
@@ -29,6 +36,9 @@ public class StibeeEmailService {
     @Value("${stibee.email.address-book.default.address}")
     private int defaultAddressBook;
 
+    @Value("${stibee.email.address-book.temporal.address}")
+    private int temporalAddressBook;
+
     @Value("${stibee.email.address-book.default.group.admin}")
     private String adminGroup;
 
@@ -39,32 +49,79 @@ public class StibeeEmailService {
     private String traderGroup;
 
 
+    // 임시 주소록에서 회원 추가 후에 코드 전송.
+    public boolean sendSignUpCode(String email, String code) {
+
+        // 정보 없이 이메일만 발송 가능하도록 회원 세팅.
+        SubscriberField subscriber = SubscriberField.create(email, null);
+
+        EmailSubscribe emailSubscribe = EmailSubscribe.toSubscriber(null, subscriber);
+
+        // 이메일, 인증번호 세팅
+        EmailAndCode emailAndCode = new EmailAndCode(email, code);
+
+        // 주소록에 회원 추가.
+        StibeeSubscribeResponse<SignUpValue> signUpResponse
+                = stibeeClient.subscribe(temporalAddressBook, emailSubscribe);
+
+//        log.info("signUpResponse {}",signUpResponse);
+
+        // 임시 주소록에 회원 등록
+        if (!signUpResponse.isOk()) {
+
+            //등록 안되면 false반환.
+            return false;
+        }
+
+        String response = autoApiStibeeClient.sendSignUpCode(emailAndCode);
+
+        if (!"ok".equals(response)) {
+            log.error("인증코드 발송 실패: {}, {}", response, email);
+            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
+        }
+
+        return true;
+    }
+
+    // 임시 주소록에서 회원 삭제시
+    public void deleteTemporalSubscriber(String email){
+
+        StibeeSubscribeResponse<DeleteValue> deleteResponse
+                = stibeeClient.deleteSubscriber(temporalAddressBook, List.of(email));
+
+//        log.info("deleteResponse {}",deleteResponse);
+
+        // 미삭제시 회원 수동 삭제할 수 있도록.
+        if(!deleteResponse.isOk()){
+            log.error("email not deleted {}", email);
+        }
+    }
+
+
 
     /**
      * 주소록에 추가 - 회원 가입시, 탈퇴한 회원이 똑같은 이메일로 다시 회원가입 한 경우 이메일 발송 안함. SuperAdmin은 회원가입, 등급 변경 해도 안됨.
      *
      * @param user 주소록에 필요한 사용자 정보 필드가 추가될 수 있으므로 UserEntity를 받습니다.
      */
-    public Boolean addSubscriber(User user) {
+    public void addSubscriber(User user) {
 
         List<String> groupIds = new ArrayList<>();
 
         // 트레이더인지 투자자인지 그룹으로 구분.
         groupIds.add(Role.isTrader(user.getRole()) ? traderGroup : investGroup);
 
-        //이메일 수신 동의 -> 광고성 정보 수신 동의
-        String adAgreed = Boolean.TRUE.equals(user.getInfoAgreement()) ? "Y" : "N";
-
         // 해당 회원 약관 동의 날짜 업데이트
-        SubscriberField subscriber = SubscriberField.create(user.getEmail(), user.getUserName(), adAgreed);
+        SubscriberField subscriber = SubscriberField.create(user.getEmail(), user.getUserName());
         subscriber.updateTermDate();
 
         EmailSubscribe emailSubscribe = EmailSubscribe.toSubscriber(groupIds, subscriber);
 
         // 실패 이유는 SignupValue에서 찾을 수 있음.
         // 실제 이메일 발송되는 주소록에 저장.
-        return stibeeClient.subscribe(defaultAddressBook, emailSubscribe).isOk();
+        stibeeClient.subscribe(defaultAddressBook, emailSubscribe);
     }
+
 
     /**
      * 이미등록된 회원의 정보를 변경.
@@ -81,10 +138,8 @@ public class StibeeEmailService {
             groupIds.add(adminGroup);
         }
 
-        String adAgreed = Boolean.TRUE.equals(user.getInfoAgreement()) ? "Y" : "N";
-
         // 정보 변경시에는 약관 날짜 업데이트하지 않기.
-        SubscriberField subscriber = SubscriberField.create(user.getEmail(), null, adAgreed);
+        SubscriberField subscriber = SubscriberField.create(user.getEmail(), null);
 
         EmailSubscribe emailSubscribe = EmailSubscribe.toManual(groupIds, subscriber);
 
@@ -97,7 +152,7 @@ public class StibeeEmailService {
      */
     public Boolean updateSubscriberTermDate(String email) {
 
-        SubscriberField subscriber = SubscriberField.create(email, null, null);
+        SubscriberField subscriber = SubscriberField.create(email, null);
         //약관날짜 업데이트
         subscriber.updateTermDate();
 
