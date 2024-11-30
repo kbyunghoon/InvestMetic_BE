@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Answer extends BaseEntity {
 
     @Id
@@ -30,12 +33,6 @@ public class Answer extends BaseEntity {
 
     @Column(length = 5000)
     private String content; // 답변내용
-
-    @Builder
-    public Answer(Question question, String content) {
-        this.question = question;
-        this.content = content;
-    }
 
 
 }
