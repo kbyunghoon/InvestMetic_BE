@@ -13,7 +13,9 @@ import static com.investmetic.domain.user.model.entity.QUser.user;
 import com.investmetic.domain.strategy.dto.RangeDto;
 import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.AdminStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
+import com.investmetic.domain.strategy.dto.response.QAdminStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.QMyStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QStrategyDetailResponse;
 import com.investmetic.domain.strategy.dto.response.QTopRankingStrategyResponseDto;
@@ -387,6 +389,25 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .where(strategy.strategyId.eq(strategyId))
                 .fetch();
     }
+    @Override
+    public Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord, IsApproved isApproved){
+        List<AdminStrategyResponseDto> strategies=queryFactory
+                .select(new QAdminStrategyResponseDto(
+                        strategy.createdAt,
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        strategy.user.nickname,
+                        strategy.isPublic,
+                        strategy.isApproved
+                ))
+                .from(strategy)
+                .where(applySearchWordFilter(searchWord),applyIsApprovedFilter(isApproved))
+                .orderBy(strategy.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+        return PageableExecutionUtils.getPage(strategies, pageable, strategies::size);
+    }
 
     // 모든 필터 적용
     private BooleanBuilder applyAllFilters(SearchRequest searchRequest) {
@@ -409,6 +430,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     private BooleanExpression isApprovedAndPublic() {
         return strategy.isApproved.eq(IsApproved.APPROVED)
                 .and(strategy.isPublic.eq(IsPublic.PUBLIC));
+    }
+
+    // 승인상태 필터
+    private BooleanExpression applyIsApprovedFilter(IsApproved isApproved) {
+        return isApproved == null ? null : strategy.isApproved.eq(isApproved);
     }
 
     // 전략명 검색어 필터
