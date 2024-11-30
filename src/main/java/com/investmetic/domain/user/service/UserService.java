@@ -12,6 +12,7 @@ import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.domain.user.repository.UserRepositoryCustomImpl;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -35,6 +36,7 @@ public class UserService {
 
 
     private final UserRepository userRepository;
+    private final UserRepositoryCustomImpl userRepositoryCustom;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final StibeeEmailService emailService;
     private final S3FileService s3FileService;
@@ -46,7 +48,7 @@ public class UserService {
     //회원 가입
     @Transactional
     public void signUp(UserSignUpDto userSignUpDto) {
-        try{
+        try {
             // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
             verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
 
@@ -195,12 +197,11 @@ public class UserService {
     public void verifyEmailCode(String email, String code) {
 
         /*
-        * 저장된 인증코드 가져오기.
-        * 30분 이후 시간이 지나므로 nullPointException 방지.
-        * */
+         * 저장된 인증코드 가져오기.
+         * 30분 이후 시간이 지나므로 nullPointException 방지.
+         * */
         String codeFoundByEmail = redisUtil.getData(email)
-                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
-
+                .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -216,8 +217,7 @@ public class UserService {
 
         // 저장된 인증코드 가져오기.
         String codeFoundByEmail = redisUtil.getData(email)
-                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
-
+                .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -228,6 +228,11 @@ public class UserService {
 
     //휴대번호를 통한 이메일 찾기
     public FoundEmailDto findEmailByPhone(String phone) {
+        boolean exists = userRepositoryCustom.existsByPhone(phone);
+        if (!exists) {
+            return new FoundEmailDto(false, null); //존재여부 먼저 확인
+        }
+
         String email = userRepository.findEmailByPhone(phone)
                 .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지 않음
 
@@ -249,7 +254,6 @@ public class UserService {
         }
         return email;
     }
-
 
 
     @FunctionalInterface
