@@ -28,8 +28,6 @@ public class ReviewService {
     private final StrategyRepository strategyRepository;
     private final UserRepository userRepository;
 
-
-    //TODO : 리뷰 중복등록 방지 추가 + 성능개선 필요
     //리뷰 등록
     @Transactional
     public ReviewResponse addReview(Long strategyId, Long userId, ReviewRequestDto reviewRequestDto) {
@@ -38,6 +36,17 @@ public class ReviewService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+
+        // 본인의 전략인지 확인
+        if(strategy.getUser().equals(user)){
+            throw new BusinessException(ErrorCode.CANNOT_REVIEW_OWN_STRATEGY);
+        }
+
+        boolean alreadyReviewed = reviewRepository.existMyReview(strategyId, userId);
+
+        if (alreadyReviewed) {
+            throw new BusinessException(ErrorCode.DUPLICATE_REVIEW);
+        }
 
         Review review = reviewRequestDto.toEntity(user, strategy);
 
