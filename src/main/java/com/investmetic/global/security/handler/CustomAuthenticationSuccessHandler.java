@@ -36,7 +36,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-        String username = authentication.getName();
+        String email = authentication.getName();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -45,14 +45,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String role = auth.getAuthority();
 
         // 토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, accessExpiration);
-        String refresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration);
+        String access = jwtUtil.createJwt("access", email, role, accessExpiration);
+        String refresh = jwtUtil.createJwt("refresh", email, role, refreshExpiration);
 
-        redisUtil.saveRefreshToken(username, refresh, refreshExpiration);
+        redisUtil.saveRefreshToken(email, refresh, refreshExpiration);
 
         // 응답 헤더와 JSON 설정
-        response.setHeader("access_token", "Bearer " + access);
-        response.addCookie(createCookie("refresh_token", refresh, refreshExpiration));
+        response.setHeader("access-token", "Bearer " + access);
+        response.addCookie(createCookie("refresh-token", refresh, refreshExpiration));
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -73,6 +73,15 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         //cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
+    }
+    private void deleteOldRefreshCookie(HttpServletResponse response) {
+        Cookie oldRefreshCookie = new Cookie("refresh", null);
+        oldRefreshCookie.setPath("/");
+        oldRefreshCookie.setMaxAge(0); // 쿠키 삭제
+        oldRefreshCookie.setHttpOnly(true);
+        //oldRefreshCookie.setSecure(true);
+        //oldRefreshCookie.setSameSite("Strict");
+        response.addCookie(oldRefreshCookie);
     }
 
     private record SuccessResponse(boolean isSuccess, String message) {

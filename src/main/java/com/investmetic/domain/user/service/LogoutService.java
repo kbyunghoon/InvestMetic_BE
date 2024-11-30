@@ -24,7 +24,7 @@ public class LogoutService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh_token".equals(cookie.getName())) {
+                if ("refresh-token".equals(cookie.getName())) {
                     refresh = cookie.getValue();
                     break;
                 }
@@ -46,8 +46,8 @@ public class LogoutService {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        String username = jwtUtil.getUsername(refresh); // 사용자 이메일
-        String key = "REFRESH_TOKEN:" + username; // Redis 키 생성
+        String email = jwtUtil.getEmail(refresh); // 사용자 이메일
+        String key = "REFRESH_TOKEN:" + email; // Redis 키 생성
 
         // Redis에 저장되어 있는지 확인
         boolean isExist = redisUtil.existData(key);
@@ -56,10 +56,10 @@ public class LogoutService {
         }
 
         // 로그아웃 진행: Redis에서 리프레시 토큰 삭제
-        redisUtil.deleteRefreshToken(username);
+        redisUtil.deleteRefreshToken(email);
 
         // 리프레시 토큰 쿠키 제거
-        Cookie cookie = new Cookie("refresh_token", null);
+        Cookie cookie = new Cookie("refresh-token", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
@@ -68,6 +68,6 @@ public class LogoutService {
 
         response.addCookie(cookie);
         // 응답 헤더에 Access Token 제거 또는 무효화 (선택 사항)
-        response.setHeader("access_token", null);
+        response.setHeader("access-token", null);
     }
 }

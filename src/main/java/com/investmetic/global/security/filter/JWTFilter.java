@@ -1,8 +1,7 @@
 package com.investmetic.global.security.filter;
 
-import com.investmetic.domain.user.dto.response.CustomUserDetails;
-import com.investmetic.domain.user.model.Role;
-import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.global.security.CustomUserDetails;
+import com.investmetic.global.security.service.CustomUserDetailService;
 import com.investmetic.global.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,12 +19,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-
+    private final CustomUserDetailService customUserDetailService;
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         // 헤더에서 access키에 담긴 토큰을 꺼냄
-        String accessToken = request.getHeader("access_token");
+        String accessToken = request.getHeader("access-token");
 
         // 토큰이 없다면 다음 필터로 넘김
         if (accessToken == null) {
@@ -57,22 +56,15 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String username = jwtUtil.getUsername(accessToken);
-        String role = jwtUtil.getRole(accessToken);
+        String email = jwtUtil.getEmail(accessToken);
 
 
-        User user = User.builder()
-                .userName(username)
-                .password("tempassword")
-                .role(Role.valueOf(role.replace("ROLE_", "")))
-                .build();
-
-        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+        CustomUserDetails user = (CustomUserDetails) customUserDetailService.loadUserByUsername(email);
 
         Authentication authToken = new UsernamePasswordAuthenticationToken(
-                customUserDetails,
+                user,
                 null,
-                customUserDetails.getAuthorities()
+                user.getAuthorities()
         );
 
         SecurityContextHolder.getContext().setAuthentication(authToken);

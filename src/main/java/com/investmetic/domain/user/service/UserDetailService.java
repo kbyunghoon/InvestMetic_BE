@@ -1,6 +1,6 @@
 package com.investmetic.domain.user.service;
 
-import com.investmetic.domain.user.dto.response.CustomUserDetails;
+import com.investmetic.global.security.CustomUserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserDetailService {

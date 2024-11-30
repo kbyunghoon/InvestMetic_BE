@@ -18,6 +18,9 @@ public class ReIssueService {
 
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private static final String REFRESH_TOKEN = "refresh-token";
+    private static final String ACCESS_TOKEN = "access-token";
+
 
     @Value("${jwt.expiration.access}")
     private Long accessExpiration;
@@ -33,7 +36,7 @@ public class ReIssueService {
 
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh_token".equals(cookie.getName())) {
+                if (REFRESH_TOKEN.equals(cookie.getName())) {
                     refresh = cookie.getValue();
                     break;
                 }
@@ -55,25 +58,27 @@ public class ReIssueService {
             throw new BusinessException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        String username = jwtUtil.getUsername(refresh); // 이메일
+        String email = jwtUtil.getEmail(refresh); // 이메일
         String role = jwtUtil.getRole(refresh);
 
         // 기존 리프레시 토큰 삭제
         redisUtil.deleteRefreshToken(refresh);
+        deleteOldRefreshCookie(response);
 
         // 새 토큰 발급
-        String newAccess = jwtUtil.createJwt("access", username, role, accessExpiration); // 30분
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, refreshExpiration); // 7일
+        String newAccess = jwtUtil.createJwt("access", email, role, accessExpiration); // 30분
+        String newRefresh = jwtUtil.createJwt("refresh", email, role, refreshExpiration); // 7일
 
         // 새로운 리프레시 토큰을 쿠키에 추가
-        Cookie newRefreshCookie = createCookie("refresh_token", newRefresh, refreshExpiration);
+        Cookie newRefreshCookie = createCookie(REFRESH_TOKEN, newRefresh, refreshExpiration);
+        newRefreshCookie.setPath("/");
         response.addCookie(newRefreshCookie);
 
-        redisUtil.deleteRefreshToken(username);
-        redisUtil.saveRefreshToken(username, newRefresh, refreshExpiration);
+        redisUtil.deleteRefreshToken(email);
+        redisUtil.saveRefreshToken(email, newRefresh, refreshExpiration);
 
         // 응답 헤더에 새로운 access 토큰 추가
-        response.setHeader("access_token", "Bearer " + newAccess);
+        response.setHeader(ACCESS_TOKEN, "Bearer " + newAccess);
     }
 
     private Cookie createCookie(String key, String value, Long maxAgeMillis) {
@@ -85,5 +90,14 @@ public class ReIssueService {
         //cookie.setSecure(true); // HTTPS 사용 시 활성화
         //cookie.setPath("/"); // 필요에 따라 경로 설정
         return cookie;
+    }
+    private void deleteOldRefreshCookie(HttpServletResponse response) {
+        Cookie oldRefreshCookie = new Cookie("refresh-token", null);
+        oldRefreshCookie.setPath("/");
+        oldRefreshCookie.setMaxAge(0); // 쿠키 삭제
+        oldRefreshCookie.setHttpOnly(true);
+        //oldRefreshCookie.setSecure(true);
+        //oldRefreshCookie.setSameSite("Strict");
+        response.addCookie(oldRefreshCookie);
     }
 }
