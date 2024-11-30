@@ -11,9 +11,11 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +83,63 @@ class ReviewServiceTest {
                 .build();
 
         assertThrows(BusinessException.class, () -> updateReviewWithInvalidId(updateDto));
+    }
+
+    @DisplayName("본인의 전략에 리뷰를 등록할 수 없을 때 예외 발생")
+    @Test
+    void 리뷰등록_예외테스트1() {
+        ReviewRequestDto requestDto = ReviewRequestDto.builder()
+                .content("전략 굿")
+                .starRating(5)
+                .build();
+
+        // 본인의 전략에 리뷰 등록 시도
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(), requestDto)
+        );
+
+        // 예외 메시지 및 코드 검증
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CANNOT_REVIEW_OWN_STRATEGY);
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.CANNOT_REVIEW_OWN_STRATEGY.getMessage());
+    }
+
+    @DisplayName("같은 전략에 중복 리뷰 등록 시 예외 발생")
+    @Test
+    void 리뷰등록_예외테스트2() {
+        ReviewRequestDto requestDto = ReviewRequestDto.builder()
+                .content("전략 굿")
+                .starRating(5)
+                .build();
+
+        User newUser = User.builder()
+                .userName("newUser")
+                .nickname("newUser")
+                .phone("01012345678")
+                .birthDate("19900101")
+                .password("password")
+                .email("test@example.com")
+                .role(Role.INVESTOR)
+                .infoAgreement(true)
+                .build();
+
+        userRepository.save(newUser);
+
+        // 첫 번째 리뷰 등록
+        reviewService.addReview(testStrategy.getStrategyId(), newUser.getUserId(), requestDto);
+
+        em.flush();
+        em.clear();
+
+        // 같은 전략에 중복 리뷰 등록 시도
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> reviewService.addReview(testStrategy.getStrategyId(), newUser.getUserId(), requestDto)
+        );
+
+        // 예외 메시지 및 코드 검증
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_REVIEW);
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.DUPLICATE_REVIEW.getMessage());
     }
 
 
