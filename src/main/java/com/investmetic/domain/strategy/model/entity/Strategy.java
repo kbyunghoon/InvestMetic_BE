@@ -75,11 +75,13 @@ public class Strategy extends BaseEntity {
     @Builder.Default
     private Integer subscriptionCount = 0; // 구독수
 
-    private Double kpRatio;
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double kpRatio = 0.0;
 
-    private Double smScore;
-
-    private Double zScore;
+    @ColumnDefault("0.0")
+    @Builder.Default
+    private Double smScore = 0.0;
 
     @ColumnDefault("0.0")
     @Builder.Default
@@ -109,10 +111,6 @@ public class Strategy extends BaseEntity {
         }
     }
 
-    public void setZScore(Double zScore) {
-        this.zScore = zScore;
-    }
-
     public void setKpRatio(Double kpRatio) {
         this.kpRatio = kpRatio;
     }
@@ -132,7 +130,6 @@ public class Strategy extends BaseEntity {
     public void resetStrategyDailyAnalysis() {
         this.kpRatio = 0.0;
         this.smScore = 0.0;
-        this.zScore = 0.0;
     }
 
     public void modifyStrategy(String strategyName, String strategyDescription) {
