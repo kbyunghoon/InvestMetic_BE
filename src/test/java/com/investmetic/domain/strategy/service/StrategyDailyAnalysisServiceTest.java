@@ -16,6 +16,8 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -47,10 +49,28 @@ class StrategyDailyAnalysisServiceTest {
     private Strategy strategy;
     private DailyAnalysis dailyAnalysis;
     private TraderDailyAnalysisRequestDto requestDto;
+    private User user;
 
     @BeforeEach
     void setUp() {
-        User user = TestEntityFactory.createTestUser();
+        user = User.builder()
+                .userId(1L)
+                .userName("testUser")
+                .nickname("Test Nickname")
+                .email("testuser@example.com")
+                .password("encryptedPassword")
+                .imageUrl("http://example.com/image.jpg")
+                .phone("123-456-7890")
+                .birthDate("19900101")
+                .ipAddress("192.168.0.1")
+                .infoAgreement(true)
+                .joinDate(LocalDate.now())
+                .withdrawalDate(null)
+                .userState(UserState.ACTIVE)
+                .withdrawalStatus(false)
+                .role(Role.INVESTOR)
+                .build();
+        ;
 
         TradeType tradeType = TestEntityFactory.createTestTradeType();
 
@@ -84,7 +104,8 @@ class StrategyDailyAnalysisServiceTest {
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        strategyAnalysisService.createDailyAnalysis(strategyId, List.of(traderDailyAnalysisRequestDto));
+        strategyAnalysisService.createDailyAnalysis(strategyId, List.of(traderDailyAnalysisRequestDto),
+                1L);
 
         verify(dailyAnalysisRepository, times(1)).save(any(DailyAnalysis.class));
     }
@@ -105,7 +126,7 @@ class StrategyDailyAnalysisServiceTest {
         List<TraderDailyAnalysisRequestDto> requestList = List.of(traderDailyAnalysisRequestDto);
 
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList));
+                () -> strategyAnalysisService.createDailyAnalysis(strategyId, requestList, user.getUserId()));
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
     }
@@ -114,7 +135,7 @@ class StrategyDailyAnalysisServiceTest {
     @Test
     @DisplayName("전략 모든 일간 분석 전체 삭제 - 성공 테스트")
     void 테스트_3() {
-        Long strategyId = 1L;
+        Long strategyId = strategy.getStrategyId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
@@ -128,7 +149,7 @@ class StrategyDailyAnalysisServiceTest {
     @Test
     @DisplayName("전략 모든 일간 분석 전체 삭제 - 전략이 존재하지 않을 경우")
     void 테스트_4() {
-        Long strategyId = 999L;
+        Long strategyId = strategy.getStrategyId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
@@ -144,7 +165,7 @@ class StrategyDailyAnalysisServiceTest {
     @Test
     @DisplayName("전략 모든 일간 분석 전체 삭제 - 성공 (전략 초기화 확인)")
     void 테스트_5() {
-        Long strategyId = 1L;
+        Long strategyId = strategy.getStrategyId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
@@ -209,7 +230,7 @@ class StrategyDailyAnalysisServiceTest {
     @Test
     @DisplayName("전략 일간 분석 삭제 - 성공 테스트")
     void 테스트_9() {
-        Long strategyId = 1L;
+        Long strategyId = strategy.getStrategyId();
         Long analysisId = 123L;
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
@@ -225,7 +246,7 @@ class StrategyDailyAnalysisServiceTest {
     @Test
     @DisplayName("전략 일간 분석 삭제 - 해당 일간 분석이 존재하지 않을 경우 예외 발생")
     void 테스트_10() {
-        Long strategyId = 1L;
+        Long strategyId = strategy.getStrategyId();
         Long analysisId = 123L;
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
