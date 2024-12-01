@@ -63,6 +63,7 @@ public class StrategyController {
     }
 
     @GetMapping("/register")
+    @PreAuthorize("hasRole('TRADER')")
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
         return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
@@ -90,9 +91,12 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 일간 분석 등록 기능", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> createStrategyDailyAnalysis(
             @PathVariable Long strategyId,
-            @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos
+            @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisRequestDtos);
+        strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisRequestDtos,
+                customUserDetails.getUserId());
+
         return BaseResponse.success();
     }
 
@@ -103,6 +107,7 @@ public class StrategyController {
             @RequestBody TraderDailyAnalysisRequestDto dailyAnalysisRequestDto
     ) {
         strategyAnalysisService.modifyDailyAnalysis(strategyId, dailyAnalysisRequestDto);
+
         return BaseResponse.success(SuccessCode.UPDATED);
     }
 
@@ -112,6 +117,7 @@ public class StrategyController {
             @PathVariable Long strategyId
     ) {
         strategyService.updateVisibility(strategyId);
+
         return BaseResponse.success(SuccessCode.UPDATED);
     }
 
@@ -119,6 +125,7 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId) {
         strategyService.deleteStrategy(strategyId);
+
         return BaseResponse.success();
     }
 
@@ -130,6 +137,7 @@ public class StrategyController {
 
         String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,

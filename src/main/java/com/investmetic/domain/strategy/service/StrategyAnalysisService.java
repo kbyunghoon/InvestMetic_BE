@@ -1,6 +1,5 @@
 package com.investmetic.domain.strategy.service;
 
-import com.github.dockerjava.api.exception.UnauthorizedException;
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
@@ -26,11 +25,13 @@ public class StrategyAnalysisService {
     private final StrategyRepository strategyRepository;
 
     @Transactional
-    public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests) {
-        for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
-            Strategy strategy = findStrategyById(strategyId);
+    public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
+                                    Long userId) {
+        Strategy strategy = findStrategyById(strategyId);
 
-            // proceed가 false이고 dailyDate가 같은 값을 가져옴
+        verifyUserPermission(strategy, userId);
+
+        for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
             Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findByStrategyAndDailyDateAndProceedIsFalse(
                     strategy,
                     analysisRequest.getDate());
@@ -74,7 +75,7 @@ public class StrategyAnalysisService {
         Strategy strategy = findStrategyById(strategyId);
 
         // TODO : 유저 권한 확인 로직 추가 예정
-        verifyUserPermission(strategy);
+        verifyUserPermission(strategy, 1L);
 
         strategy.resetStrategyDailyAnalysis();
 
@@ -86,7 +87,7 @@ public class StrategyAnalysisService {
         Strategy strategy = findStrategyById(strategyId);
 
         // TODO : 유저 권한 확인 로직 추가 예정
-        verifyUserPermission(strategy);
+        verifyUserPermission(strategy, 1L);
 
         // 존재 여부 확인
         boolean exists = dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId);
@@ -108,9 +109,9 @@ public class StrategyAnalysisService {
         return new PageResponseDto<>(myDailyAnalysis);
     }
 
-    private void verifyUserPermission(Strategy strategy) {
-        // TODO: 유저 권한 확인 로직 구현
-        // e.g., 현재 사용자와 전략 소유자 등
-        // if (!userHasPermission()) throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+    private void verifyUserPermission(Strategy strategy, Long userId) {
+        if (!strategy.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
     }
 }

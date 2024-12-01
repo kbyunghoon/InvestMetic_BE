@@ -13,18 +13,15 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
-        // SecurityScheme 설정 추가 (Bearer Token 인증)
-        SecurityScheme bearerAuthScheme = new SecurityScheme()
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
+        SecurityScheme accessTokenScheme = new SecurityScheme()
+                .type(SecurityScheme.Type.APIKEY)
                 .in(SecurityScheme.In.HEADER)
-                .name("Authorization");
+                .name("access-token")
+                .description("액세스 토큰 - Bearer까지 포함하여 등록");
 
-        // OpenAPI 구성 설정
         return new OpenAPI()
-                .components(new Components().addSecuritySchemes("인증 토큰", bearerAuthScheme))
-                .addSecurityItem(new SecurityRequirement().addList("인증 토큰"))
+                .components(new Components().addSecuritySchemes("access-token", accessTokenScheme))
+                .addSecurityItem(new SecurityRequirement().addList("access-token"))
                 .info(apiInfo());
     }
 
