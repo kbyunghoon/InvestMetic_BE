@@ -122,7 +122,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                         dailyAnalysis.cumulativeProfitLoss,
                         dailyAnalysis.cumulativeProfitLossRate))
                 .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId),dailyAnalysis.proceed.eq(Proceed.YES))
                 .fetch();
     }
 
