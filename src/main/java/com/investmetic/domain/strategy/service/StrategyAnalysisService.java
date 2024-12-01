@@ -32,28 +32,23 @@ public class StrategyAnalysisService {
         verifyUserPermission(strategy, userId);
 
         for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
-            Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findByStrategyAndDailyDateAndProceedIsFalse(
+            Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
                     strategy,
                     analysisRequest.getDate());
 
             if (existsDailyData.isPresent()) {
-                DailyAnalysis updatedDailyAnalysis = existsDailyData.get().toBuilder()
-                        .transaction(analysisRequest.getTransaction())
-                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
-                        .build();
-
-                dailyAnalysisRepository.save(updatedDailyAnalysis);
-            } else {
-                DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
-                        .strategy(strategy)
-                        .dailyDate(analysisRequest.getDate())
-                        .transaction(analysisRequest.getTransaction())
-                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
-                        .proceed(Proceed.NO)
-                        .build();
-
-                dailyAnalysisRepository.save(dailyAnalysis);
+                throw new BusinessException(ErrorCode.DAILY_ANALYSIS_ALREADY_EXISTS);
             }
+
+            DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
+                    .strategy(strategy)
+                    .dailyDate(analysisRequest.getDate())
+                    .transaction(analysisRequest.getTransaction())
+                    .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                    .proceed(Proceed.NO)
+                    .build();
+
+            dailyAnalysisRepository.save(dailyAnalysis);
         }
     }
 
