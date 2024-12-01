@@ -58,7 +58,7 @@ public class StrategyAnalysisService {
     }
 
     @Transactional
-    public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest) {
+    public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
         // proceed가 false가 존재하면 false 데이터, 없으면 true 데이터에서 dailyDate가 같은 값을 가져옴
