@@ -10,6 +10,7 @@ import com.investmetic.domain.strategy.model.AnalysisOption;
 import com.investmetic.domain.strategy.service.StrategyDetailService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.util.exceldownload.ExcelUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +21,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +40,7 @@ public class StrategyDetailController {
     private static final String DAILY_ANALYSIS_EXCEL_NAME = "daily_analysis";
     private static final String MONTHLY_ANALYSIS_EXCEL_NAME = "monthly_analysis";
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 통계 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/50c978f6e5a944f2842ad1c48b8f7256' target='_blank'>API 명세서</a>")
     @GetMapping("/statistics")
@@ -46,6 +50,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 일간분석 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/50c978f6e5a944f2842ad1c48b8f7256' target='_blank'>API 명세서</a>")
     @GetMapping("/daily-analysis")
@@ -56,6 +61,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 월간분석 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/9c47850bbe2d4dc0823f0ea99690914d' target='_blank'>API 명세서</a>")
     @GetMapping("/monthly-analysis")
@@ -67,20 +73,23 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 상세 정보 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/6affc64db91b4ee6b8d882fa288205bb' target='_blank'>API 명세서</a>")
     @GetMapping("/detail")
     public ResponseEntity<BaseResponse<StrategyDetailResponse>> getStrategyDetail(
             @PathVariable Long strategyId,
-            @RequestParam Long userId) {
-        StrategyDetailResponse result = strategyDetailService.getStrategyDetail(strategyId, userId);
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        StrategyDetailResponse result = strategyDetailService.getStrategyDetail(strategyId,
+                customUserDetails.getUserId());
         return BaseResponse.success(result);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 분석 그래프 조회(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/50c978f6e5a944f2842ad1c48b8f7256' target='_blank'>API 명세서</a>")
     @GetMapping("/analysis")
-    public ResponseEntity<BaseResponse<StrategyAnalysisResponse>> getStrategyAnalyisis(
+    public ResponseEntity<BaseResponse<StrategyAnalysisResponse>> getStrategyAnalysis(
             @PathVariable Long strategyId,
             @RequestParam AnalysisOption option1,
             @RequestParam AnalysisOption option2) {
@@ -88,6 +97,7 @@ public class StrategyDetailController {
         return BaseResponse.success(result);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 일간분석 엑셀다운(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/42416d40378940648f4798070a6ac5ca' target='_blank'>API 명세서</a>")
     @GetMapping("/daily-analysis/download")
@@ -105,6 +115,7 @@ public class StrategyDetailController {
         excelUtils.download(DAILY_ANALYSIS_EXCEL_NAME);
     }
 
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 월간분석 엑셀다운(전략 상세페이지) ",
             description = "<a href='https://www.notion.so/7ba6f427a5594eefb3e9bd103e6ccc31' target='_blank'>API 명세서</a>")
     @GetMapping("/monthly-analysis/download")
@@ -123,7 +134,7 @@ public class StrategyDetailController {
         excelUtils.download(MONTHLY_ANALYSIS_EXCEL_NAME);
     }
 
-
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "전략 실계좌 이미지 목록조회 (전략 상세페이지) ",
             description = "<a href='https://www.notion.so/81d16fa5d985466899d4284e8ed04098' target='_blank'>API 명세서</a>")
     @GetMapping("/account-images")

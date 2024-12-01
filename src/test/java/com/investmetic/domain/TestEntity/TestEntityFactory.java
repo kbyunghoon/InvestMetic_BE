@@ -55,4 +55,23 @@ public class TestEntityFactory {
                 .subscriptionCount(100)
                 .build();
     }
+
+    public static User createTestUser(String userName, String email) {
+        return User.builder()
+                .userName(userName)
+                .nickname("Test Nickname " + userName)
+                .email(email)
+                .password("encryptedPassword")
+                .imageUrl("http://example.com/image.jpg")
+                .phone("123-456-7890")
+                .birthDate("19900101")
+                .ipAddress("192.168.0.1")
+                .infoAgreement(true)
+                .joinDate(LocalDate.now())
+                .withdrawalDate(null)
+                .userState(UserState.ACTIVE)
+                .withdrawalStatus(false)
+                .role(Role.INVESTOR)
+                .build();
+    }
 }
