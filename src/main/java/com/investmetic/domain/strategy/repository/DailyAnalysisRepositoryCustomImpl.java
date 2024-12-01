@@ -1,6 +1,7 @@
 package com.investmetic.domain.strategy.repository;
 
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
+import static com.investmetic.domain.strategy.model.entity.QStrategy.strategy;
 
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.QDailyAnalysisResponse;
@@ -10,6 +11,7 @@ import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.QDailyAnalysis;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -17,8 +19,12 @@ import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -152,6 +158,71 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
+
+    // 메인 페이지 통합 지표 조회
+    @Override
+    public List<String> findTotalStrategyMetricsXAxis(LocalDate startDate, LocalDate endDate){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+
+        return queryFactory.select(dailyAnalysis.dailyDate)
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.dailyDate.between(startDate, endDate))
+                .fetch()
+                .stream()
+                .map(date -> date.format(formatter)) // LocalDate를 String으로 변환
+                .collect(Collectors.toList());
+    }
+    public Map<String, List<Double>> findTotalStrategyMetricsYAxis(LocalDate startDate, LocalDate endDate){
+        List<Tuple> yAxisData = queryFactory
+                .select(
+                        dailyAnalysis.dailyDate,                        // 날짜
+                        dailyAnalysis.referencePrice.avg(),            // 날짜별 평균 referencePrice
+                        queryFactory.select(dailyAnalysis.referencePrice) // 가장 높은 smScore의 referencePrice
+                                .from(dailyAnalysis)
+                                .join(strategy).on(dailyAnalysis.strategy.strategyId.eq(strategy.strategyId))
+                                .where(dailyAnalysis.strategy.strategyId.eq(
+                                        queryFactory.select(strategy.strategyId)
+                                                .from(strategy)
+                                                .where(strategy.smScore.eq(
+                                                        queryFactory.select(strategy.smScore.max())
+                                                                .from(strategy)
+                                                ))
+                                                // 동률일 경우 최신걸 가져오도록 정렬 기준 정의
+                                                .orderBy(strategy.createdAt.desc())
+                                                .limit(1)
+                                                .fetchOne()
+                                )),
+                        queryFactory.select(dailyAnalysis.referencePrice) // 가장 높은 구독수 referencePrice
+                                .from(dailyAnalysis)
+                                .join(strategy).on(dailyAnalysis.strategy.strategyId.eq(strategy.strategyId))
+                                .where(dailyAnalysis.strategy.strategyId.eq(
+                                        queryFactory.select(strategy.strategyId)
+                                                .from(strategy)
+                                                .where(strategy.subscriptionCount.eq(
+                                                        queryFactory.select(strategy.subscriptionCount.max())
+                                                                .from(strategy)
+                                                ))
+                                                // 동률일 경우 최신걸 가져오도록 정렬 기준 정의
+                                                .orderBy(strategy.createdAt.desc())
+                                                .limit(1)
+                                                .fetchOne()
+                                ))
+                )
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.dailyDate.between(startDate, endDate))
+                .groupBy(dailyAnalysis.dailyDate)
+                .fetch();
+        return yAxisData.stream()
+                .collect(Collectors.toMap(
+                        tuple -> tuple.get(dailyAnalysis.dailyDate).toString(), // 날짜를 키로 설정
+                        tuple -> List.of(
+                                tuple.get(dailyAnalysis.referencePrice.avg()),   // 평균 referencePrice
+                                tuple.get(2, Double.class),                      // smScore가 가장 높은 전략의 referencePrice
+                                tuple.get(3, Double.class)                       // 구독 수 최대값
+                        )
+                ));
+    };
 
     private BooleanExpression isLatestDailyAnalysis(QDailyAnalysis d1, Long strategyId) {
 
