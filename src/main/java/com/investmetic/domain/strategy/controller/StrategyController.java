@@ -59,6 +59,7 @@ public class StrategyController {
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
             @RequestBody StrategyRegisterRequestDto requestDto) {
+
         return BaseResponse.success(SuccessCode.CREATED, strategyService.registerStrategy(requestDto));
     }
 
@@ -66,6 +67,7 @@ public class StrategyController {
     @PreAuthorize("hasRole('TRADER')")
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
+
         return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
     }
 
@@ -74,6 +76,7 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
             @PathVariable Long strategyId
     ) {
+
         return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId));
     }
 
@@ -83,6 +86,7 @@ public class StrategyController {
             @PathVariable Long strategyId,
             @RequestBody StrategyModifyRequestDto requestDto
     ) {
+
         return BaseResponse.success(SuccessCode.UPDATED,
                 strategyService.modifyStrategy(strategyId, requestDto));
     }
@@ -177,7 +181,8 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getSubscribedStrategies(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 8) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
+        return BaseResponse.success(
+                strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
     }
 
     @PreAuthorize("hasRole('INVESTOR')")

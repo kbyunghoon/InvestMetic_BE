@@ -19,6 +19,8 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.model.UserState;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -69,7 +71,23 @@ class StrategyDailyAnalysisServiceTest {
     @BeforeEach
     void setUp() {
         date = LocalDate.now();
-        user = TestEntityFactory.createTestUser().toBuilder().userId(1L).build();
+        user = User.builder()
+                .userId(1L)
+                .userName("testUser")
+                .nickname("Test Nickname")
+                .email("testuser@example.com")
+                .password("encryptedPassword")
+                .imageUrl("http://example.com/image.jpg")
+                .phone("123-456-7890")
+                .birthDate("19900101")
+                .ipAddress("192.168.0.1")
+                .infoAgreement(true)
+                .joinDate(LocalDate.now())
+                .withdrawalDate(null)
+                .userState(UserState.ACTIVE)
+                .withdrawalStatus(false)
+                .role(Role.INVESTOR)
+                .build();
 
         TradeType tradeType = TestEntityFactory.createTestTradeType();
 

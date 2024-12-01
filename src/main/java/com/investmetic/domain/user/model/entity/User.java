@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,8 +29,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicUpdate
-@Builder(toBuilder = true)
-@AllArgsConstructor
 public class User extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -73,6 +70,28 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role; // 회원 등급 또는 역할
 
+
+    @Builder
+    public User(String userName, String nickname, String email, String password, String imageUrl, String phone,
+                String birthDate, String ipAddress, Boolean infoAgreement, LocalDate joinDate, LocalDate withdrawalDate,
+                UserState userState, Boolean withdrawalStatus, Role role, Long userId) {
+
+        this.userName = userName;
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+        this.imageUrl = imageUrl;
+        this.phone = phone;
+        this.birthDate = birthDate;
+        this.ipAddress = ipAddress;
+        this.infoAgreement = infoAgreement;
+        this.joinDate = joinDate;
+        this.withdrawalDate = withdrawalDate;
+        this.userState = userState;
+        this.withdrawalStatus = withdrawalStatus;
+        this.role = role;
+        this.userId = userId;
+    }
 
     /**
      * update를 위한 메서드 Setter와 Builder 사용하지 않기위해 작성. 이메일은 변경하지 않는다.
