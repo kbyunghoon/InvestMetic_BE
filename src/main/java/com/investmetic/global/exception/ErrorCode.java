@@ -75,8 +75,9 @@ public enum ErrorCode {
     EXCEL_DOWNLOAD_ERROR(HttpStatus.NOT_FOUND, 3032, "Excel 다운로드 중 오류가 발생했습니다."),
 
     // 전략리뷰 관련오류(3300번대 );
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다.");
-
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다."),
+    CANNOT_REVIEW_OWN_STRATEGY(HttpStatus.FORBIDDEN,3302,"본인전략에는 리뷰를 달 수 없습니다."),
+    DUPLICATE_REVIEW(HttpStatus.FORBIDDEN,3303,"리뷰는 한번만 가능합니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드

@@ -18,6 +18,7 @@ import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URLEncoder;
@@ -32,6 +33,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -146,27 +149,27 @@ public class StrategyController {
         return BaseResponse.success(SuccessCode.DELETED);
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('TRADER')")
     @Operation(summary = "트레이더 나의 전략목록 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/2ddd1d0be73a47a7a683394d77943b20' target='_blank'>API 명세서</a>")
     @GetMapping
     public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> getMyStrategies(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 4) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getMyStrategies(userId, pageable));
+        return BaseResponse.success(strategyListingService.getMyStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
     @Operation(summary = "구독한 전략목록 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/5a2dd36508804ca8945692d269c47710' target='_blank'>API 명세서</a>")
     @GetMapping("/subscribed")
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getSubscribedStrategies(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 8) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getSubscribedStrategies(userId, pageable));
+        return BaseResponse.success(strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('INVESTOR')")
     @Operation(summary = "나의 전략 일간분석 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}/daily-analysis")
@@ -176,7 +179,8 @@ public class StrategyController {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
-    @Operation(summary = "나의 전략 기본정보 조회(마이페이지) ",
+    @PreAuthorize("hasRole('INVESTOR')")
+    @Operation(summary = "나의 전략 상세정보 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}")
     public ResponseEntity<BaseResponse<MyStrategyDetailResponse>> getMyStrategiesDetail(
