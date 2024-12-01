@@ -20,7 +20,7 @@ public class UserSignUpDto {
     private String nickname;
 
     @NotNull
-    @Pattern(regexp = "^010-(\\d{3}|\\d{4})-(\\d{4})$")
+//    @Pattern(regexp = "^010(\\d{3}|\\d{4})(\\d{4})$") // 010 필수
     private String phone;
 
     @NotNull
