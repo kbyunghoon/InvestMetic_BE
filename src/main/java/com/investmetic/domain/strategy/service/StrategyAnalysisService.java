@@ -61,13 +61,26 @@ public class StrategyAnalysisService {
     public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        // proceed가 false가 존재하면 false 데이터, 없으면 true 데이터에서 dailyDate가 같은 값을 가져옴
-        DailyAnalysis dailyAnalysis = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
+        verifyUserPermission(strategy, userId);
+
+        DailyAnalysis existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
                         strategy,
                         analysisRequest.getDate())
                 .orElseThrow(() -> new BusinessException(ErrorCode.DAILY_ANALYSIS_NOT_FOUND));
 
-        dailyAnalysis.modifyDailyAnalysis(analysisRequest.getTransaction(), analysisRequest.getDailyProfitLoss());
+        if (existsDailyData.getProceed() == Proceed.YES) {
+            DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
+                    .strategy(strategy)
+                    .dailyDate(analysisRequest.getDate())
+                    .transaction(analysisRequest.getTransaction())
+                    .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                    .proceed(Proceed.NO)
+                    .build();
+
+            dailyAnalysisRepository.save(dailyAnalysis);
+        } else {
+            existsDailyData.modifyDailyAnalysis(analysisRequest.getTransaction(), analysisRequest.getDailyProfitLoss());
+        }
     }
 
     @Transactional
