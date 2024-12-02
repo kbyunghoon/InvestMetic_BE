@@ -9,7 +9,6 @@ import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDt
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
 import com.investmetic.domain.strategy.dto.response.common.StrategySimpleResponse;
 import com.investmetic.domain.strategy.model.IsApproved;
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +21,6 @@ public interface StrategyRepositoryCustom {
     MyStrategyDetailResponse findMyStrategyDetail(Long strategyId);
 
     Map<Long, StockTypeInfo> findStockTypeInfoMap(List<Long> strategyIdS);
-
-    Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIdS);
 
     Map<Long, Boolean> findBySubscriptionMap(Long userId, List<Long> strategyIdS);
 

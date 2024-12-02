@@ -1,10 +1,11 @@
 package com.investmetic.domain.strategy.service;
 
-import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
+import static java.util.stream.Collectors.toList;
 
 import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
 import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
+import com.investmetic.domain.strategy.dto.response.ProfitRateData;
 import com.investmetic.domain.strategy.dto.response.SearchInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.BaseStrategyResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
@@ -15,7 +16,7 @@ import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.global.common.PageResponseDto;
-import com.querydsl.core.Tuple;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -92,12 +93,40 @@ public class StrategyListingService {
 
         // 각 전략 ID에 대한 배치 쿼리 조회 (성능개선)
         Map<Long, StockTypeInfo> stockTypeInfoMap = strategyRepository.findStockTypeInfoMap(strategyIds);
-        Map<Long, List<Tuple>> profitRateDataMap = strategyRepository.findProfitRateDataMap(strategyIds);
+        Map<Long, ProfitRateChartDto> profitRateDataMap = getProfitRateDataForStrategies(strategyIds);
 
         // 응답 데이터 업데이트
         updateContent(content, stockTypeInfoMap, subscriptionMap, profitRateDataMap);
 
         return new PageResponseDto<>(content);
+    }
+
+
+    private Map<Long, ProfitRateChartDto> getProfitRateDataForStrategies(List<Long> strategyIds) {
+        // 리포지토리에서 원본 데이터 가져오기
+        List<ProfitRateData> profitRateDatas = findTop20ProfitRatesByStrategyIds(strategyIds);
+
+        // strategyId별로 데이터를 그룹화
+        return profitRateDatas.stream()
+                .collect(Collectors.groupingBy(
+                        ProfitRateData::getStrategyId,
+                        Collectors.collectingAndThen(
+                                toList(),
+                                this::convertToProfitRateChartDto
+                        )
+                ));
+    }
+
+    private List<ProfitRateData> findTop20ProfitRatesByStrategyIds(List<Long> strategyIds) {
+        List<Object[]> rawResults = strategyRepository.findTop20ProfitRatesByStrategyIds(strategyIds);
+
+        return rawResults.stream()
+                .map(row -> ProfitRateData.builder()
+                        .strategyId((Long) row[0])
+                        .dailyDate(((java.sql.Date) row[1]).toLocalDate())
+                        .cumulativeProfitLossRate((Double) row[2])
+                        .build()
+                ).toList();
     }
 
     /**
@@ -141,7 +170,7 @@ public class StrategyListingService {
     private <T extends BaseStrategyResponse> void updateContent(Page<T> content,
                                                                 Map<Long, StockTypeInfo> stockTypeInfoMap,
                                                                 Map<Long, Boolean> subscriptionMap,
-                                                                Map<Long, List<Tuple>> profitRateDataMap) {
+                                                                Map<Long, ProfitRateChartDto> profitRateDataMap) {
 
         content.forEach(response -> {
             Long strategyId = response.getStrategyId();
@@ -156,21 +185,17 @@ public class StrategyListingService {
             }
 
             // 수익률 그래프 업데이트
-            ProfitRateChartDto profitRateChartData = createProfitRateChartData(profitRateDataMap, strategyId);
-
-            response.updateProfitRateChartData(profitRateChartData);
+            response.updateProfitRateChartData(profitRateDataMap.get(strategyId));
         });
     }
 
-    private ProfitRateChartDto createProfitRateChartData(Map<Long, List<Tuple>> profitRateDataMap, Long strategyId) {
-        List<Tuple> profitRateData = profitRateDataMap.getOrDefault(strategyId, List.of());
-
-        List<String> dates = profitRateData.stream()
-                .map(tuple -> tuple.get(dailyAnalysis.dailyDate.stringValue()))
+    private ProfitRateChartDto convertToProfitRateChartDto(List<ProfitRateData> profitRateDataMap) {
+        List<LocalDate> dates = profitRateDataMap.stream()
+                .map(ProfitRateData::getDailyDate)
                 .toList();
 
-        List<Double> profitRates = profitRateData.stream()
-                .map(tuple -> tuple.get(dailyAnalysis.cumulativeProfitLossRate))
+        List<Double> profitRates = profitRateDataMap.stream()
+                .map(ProfitRateData::getCumulativeProfitLossRate)
                 .toList();
 
         return ProfitRateChartDto.builder()
