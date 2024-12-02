@@ -198,35 +198,56 @@ class StrategyServiceTest {
 
     @Test
     @DisplayName("전략 삭제 - 성공")
-    void 테스트_4() {
-        Long strategyId = 1L;
-        Strategy publicStrategy = Strategy.builder()
-                .strategyId(strategyId)
-                .isPublic(IsPublic.PUBLIC)
-                .build();
+    void 전략_삭제_테스트_1() {
+        Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
+        String proposalFileName = strategy.getProposalFilePath();
 
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(publicStrategy));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        strategyService.deleteStrategy(strategyId);
+        strategyService.deleteStrategy(strategyId, userId);
 
-        verify(strategyRepository, times(1)).findById(strategyId);
-        verify(strategyRepository, times(1)).deleteById(strategyId);
+        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
+        verify(s3FileService, times(1)).deleteFromS3(proposalFileName); // S3 파일 삭제 확인
+        verify(strategyRepository, times(1)).deleteById(strategyId); // 전략 삭제 호출 확인
     }
 
     @Test
     @DisplayName("전략 삭제 - 실패 (전략 ID가 존재하지 않을 때)")
-    void 테스트_5() {
-        Long strategyId = 999L;
+    void 전략_삭제_테스트_2() {
+        Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
-        BusinessException exception = assertThrows(BusinessException.class, () ->
-                strategyService.deleteStrategy(strategyId)
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.deleteStrategy(strategyId, userId)
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
-        verify(strategyRepository, times(1)).findById(strategyId);
-        verify(strategyRepository, never()).deleteById(strategyId);
+        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
+        verify(s3FileService, never()).deleteFromS3(anyString()); // S3 파일 삭제가 호출되지 않았는지 확인
+        verify(strategyRepository, never()).deleteById(anyLong()); // 전략 삭제가 호출되지 않았는지 확인
+    }
+
+    @Test
+    @DisplayName("전략 삭제 - 사용자 권한 없음 예외 발생")
+    void 전략_삭제_테스트_3() {
+        Long strategyId = strategy.getStrategyId();
+        Long otherUserId = 2L; // 다른 사용자 ID
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.deleteStrategy(strategyId, otherUserId)
+        );
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
+        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
+        verify(s3FileService, never()).deleteFromS3(anyString()); // S3 파일 삭제가 호출되지 않았는지 확인
+        verify(strategyRepository, never()).deleteById(anyLong()); // 전략 삭제가 호출되지 않았는지 확인
     }
 
 
