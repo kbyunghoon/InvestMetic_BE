@@ -70,7 +70,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(maxAgeSec);
         //cookie.setSecure(true);
-        //cookie.setPath("/");
+        cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
     }
