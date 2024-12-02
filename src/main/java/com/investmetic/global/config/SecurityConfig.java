@@ -95,6 +95,8 @@ public class SecurityConfig {
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration));
         loginFilter.setAuthenticationSuccessHandler(successHandler); // 성공 핸들러 설정
         loginFilter.setAuthenticationFailureHandler(failureHandler); // 실패 핸들러 설정
+        loginFilter.setFilterProcessesUrl("/api/users/login"); // 로그인 엔드포인트 변경
+
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil,new CustomUserDetailService(userRepository)), LoginFilter.class);
