@@ -1,12 +1,17 @@
 package com.investmetic.global.util.s3;
 
 import com.amazonaws.HttpMethod;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import java.net.URI;
@@ -14,10 +19,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +37,7 @@ import org.springframework.stereotype.Service;
  * <br>
  * image metadata 받아오는 파라미터가 달라질 수 있음.(content-type)
  */
+@Slf4j
 @Service
 public class S3FileService {
 
@@ -101,6 +110,34 @@ public class S3FileService {
 
         //객체 URL 경로 반환.(도메인 경로 포함)
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
+    }
+
+
+    /**
+     * 전략별 폴더를 만들기위한 메서드.
+     * */
+    public String getStrategyS3Path(FilePath filePath, Long strategyId , String fileName, int size) {
+
+        // strategy/{strategy_id}/excel 이렇게 가야할거로 보임.
+
+        //전략 엑셀.
+        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
+            //확장자가 틀리거나 500MB이상 인지 확인
+            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
+                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
+            }
+        }else if(filePath.equals(FilePath.STRATEGY_IMAGE)){
+            //전략 이미지,
+            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
+                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
+            }
+        }else{
+            // 전략이 아닌거로 들어오는경우.
+            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
+        }
+
+        // strategy/{strategyId}/strategy/excel/{UUID}{fileName}
+        return prefixFilePath("strategy",strategyId + filePath.getPath() + createUUID8() + fileName);
     }
 
 
@@ -235,6 +272,66 @@ public class S3FileService {
             //실패시
             throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
         }
+    }
+
+    /**
+     * s3내 폴더 삭제.
+     * AWS CLI나 S3 Batch Operations이 비용이 적다고함.
+     *
+     * @param folderKey ex- strategy/{strategyId}/
+     * @see <a href = "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html"> deleteObjects </a>
+     * */
+    public void deleteStrategyFolder(String folderKey) {
+
+        ObjectListing objectListing = new ObjectListing();
+
+        // folderKey와 매칭되는 하위경로 객체 최대 1000개까지의 반환.
+        try {
+            objectListing = amazonS3.listObjects(bucketName, folderKey);
+        }catch (SdkClientException e){
+            log.error("Loading error in S3 : {}", folderKey);
+        }
+
+        if(objectListing.getObjectSummaries().isEmpty()){
+            // key 하위의 객체가 없다면 return;
+            return;
+        }
+
+        while (true) {
+            // key와 version을 받을 수 있는 객체 리스트 생성.
+            List<KeyVersion> keysToDelete = new ArrayList<>();
+
+            // s3로부터 S3ObjectSummary를가져옴(key, version)
+            for (S3ObjectSummary s3ObjectSummary : objectListing.getObjectSummaries()) {
+                // 모든 객체키를 알고있다면 s3에 요청 안보내도 될 것으로 보임.
+                keysToDelete.add(new KeyVersion(s3ObjectSummary.getKey()));
+            }
+
+            if (!keysToDelete.isEmpty()) {
+                // 해당 s3객체key 리스트를 포함하도록 함.
+                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName)
+                        .withKeys(keysToDelete);
+
+                try {
+                    // s3에서 해당 key리스트 모두 삭제. - 요청 1번.
+                    amazonS3.deleteObjects(deleteObjectsRequest);
+                } catch (SdkClientException e) {
+                    // MultiObjectDeleteException, AmazonServiceException -> SdkClientException
+                    // 삭제 오류
+                    log.error("Not deleted folder in S3 : {}", folderKey);
+                    throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+                }
+
+            }
+
+            // 해당 key경로에 1000개보다 더 많은 객체가 있다면 한번더 요청.
+            if (objectListing.isTruncated()) {
+                objectListing = amazonS3.listNextBatchOfObjects(objectListing);
+            } else {
+                break;
+            }
+        }
+
     }
 
     /**
