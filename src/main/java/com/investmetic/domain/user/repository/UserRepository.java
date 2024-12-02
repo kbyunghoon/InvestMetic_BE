@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
-    @Query("select u.role from User u where u.email = :email")
-    Optional<Role> findRoleByEmail(@Param("email") String email);
+    @Query("select u.role from User u where u.userId = :userId")
+    Optional<Role> findRoleByUserUserId(@Param("userId") Long userId);
 
     Optional<User> findByEmail(String email);
 

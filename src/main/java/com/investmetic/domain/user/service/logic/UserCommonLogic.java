@@ -49,7 +49,7 @@ public class UserCommonLogic {
             reviewRepository.deleteAllInBatch(userReviewList);
         }
 
-        // 문의 삭제 추가 필요.
+        // 문의사항 삭제 추가 필요.
 
         // 해당 유저가 투자자면 메서드 종료
         if (Role.isInvestor(user.getRole())) {
@@ -63,6 +63,7 @@ public class UserCommonLogic {
         if (!strategyList.isEmpty()) {
             // 자신의 전략 하나씩 순회.
             for (Strategy strategy : strategyList) {
+                // 일간, 월간, 통계, 리뷰, 구독, 문의, 투자그룹 삭제.
                 strategyService.deleteStrategy(strategy.getStrategyId(), user.getUserId());
             }
         }

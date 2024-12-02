@@ -12,6 +12,7 @@ import com.investmetic.domain.user.service.logic.UserCommonLogic;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import lombok.RequiredArgsConstructor;
@@ -73,17 +74,17 @@ public class UserAdminService {
      * 강제 유저 탈퇴
      *
      * @param userId 탈퇴시키고자하는 user id
-     * @param email  현재 관리자의 email, security에서 가져오기. 또는 role
+     * @param admin  현재 관리자의 email, security에서 가져오기. 또는 role
      */
     @Transactional
-    public void deleteUser(Long userId, String email) {
+    public void deleteUser(Long userId, CustomUserDetails admin) {
 
         // DB에 해당 email의 값이 없을경우.
-        Role adminRole = userRepository.findRoleByEmail(email)
+        Role adminRole = userRepository.findRoleByUserUserId(admin.getUserId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PERMISSION_DENIED));
 
-        // 관리자가 아닐경우
-        if (!Role.isAdmin(adminRole)) {
+        // 토큰의 정보와 DB상의 Role 값이 다른경우.
+        if (!adminRole.equals(admin.getRole())) {
             throw new BusinessException(ErrorCode.PERMISSION_DENIED);
         }
 
@@ -94,7 +95,7 @@ public class UserAdminService {
         userCommonLogic.deleteUser(deleteUser);
 
         //회원이 프로필을 가지고 있다면 s3 객체 삭제.
-        if (!deleteUser.getImageUrl().isEmpty()) {
+        if (deleteUser.getImageUrl() != null) {
             s3FileService.deleteFromS3(deleteUser.getImageUrl());
         }
 
@@ -116,7 +117,8 @@ public class UserAdminService {
     public void modifyRole(Long userId, RoleCondition role) {
 
         //변경시키려고 하는 회원이 없는경우.
-        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
         // 회원 등급 변경.
         switch (role) {
