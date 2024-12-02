@@ -32,42 +32,50 @@ public class StrategyAnalysisService {
         verifyUserPermission(strategy, userId);
 
         for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
-            Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findByStrategyAndDailyDateAndProceedIsFalse(
+            Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
                     strategy,
                     analysisRequest.getDate());
 
             if (existsDailyData.isPresent()) {
-                DailyAnalysis updatedDailyAnalysis = existsDailyData.get().toBuilder()
-                        .transaction(analysisRequest.getTransaction())
-                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
-                        .build();
-
-                dailyAnalysisRepository.save(updatedDailyAnalysis);
-            } else {
-                DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
-                        .strategy(strategy)
-                        .dailyDate(analysisRequest.getDate())
-                        .transaction(analysisRequest.getTransaction())
-                        .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
-                        .proceed(Proceed.NO)
-                        .build();
-
-                dailyAnalysisRepository.save(dailyAnalysis);
+                throw new BusinessException(ErrorCode.DAILY_ANALYSIS_ALREADY_EXISTS);
             }
+
+            DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
+                    .strategy(strategy)
+                    .dailyDate(analysisRequest.getDate())
+                    .transaction(analysisRequest.getTransaction())
+                    .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                    .proceed(Proceed.NO)
+                    .build();
+
+            dailyAnalysisRepository.save(dailyAnalysis);
         }
     }
 
     @Transactional
-    public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest) {
+    public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        // proceed가 false가 존재하면 false 데이터, 없으면 true 데이터에서 dailyDate가 같은 값을 가져옴
-        DailyAnalysis dailyAnalysis = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
+        verifyUserPermission(strategy, userId);
+
+        DailyAnalysis existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
                         strategy,
                         analysisRequest.getDate())
                 .orElseThrow(() -> new BusinessException(ErrorCode.DAILY_ANALYSIS_NOT_FOUND));
 
-        dailyAnalysis.modifyDailyAnalysis(analysisRequest.getTransaction(), analysisRequest.getDailyProfitLoss());
+        if (existsDailyData.getProceed() == Proceed.YES) {
+            DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
+                    .strategy(strategy)
+                    .dailyDate(analysisRequest.getDate())
+                    .transaction(analysisRequest.getTransaction())
+                    .dailyProfitLoss(analysisRequest.getDailyProfitLoss())
+                    .proceed(Proceed.NO)
+                    .build();
+
+            dailyAnalysisRepository.save(dailyAnalysis);
+        } else {
+            existsDailyData.modifyDailyAnalysis(analysisRequest.getTransaction(), analysisRequest.getDailyProfitLoss());
+        }
     }
 
     @Transactional

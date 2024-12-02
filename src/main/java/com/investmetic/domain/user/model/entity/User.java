@@ -93,7 +93,6 @@ public class User extends BaseEntity {
         this.userId = userId;
     }
 
-
     /**
      * update를 위한 메서드 Setter와 Builder 사용하지 않기위해 작성. 이메일은 변경하지 않는다.
      * <p>
