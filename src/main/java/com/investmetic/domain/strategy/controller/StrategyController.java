@@ -126,11 +126,13 @@ public class StrategyController {
     }
 
     @PatchMapping("/{strategyId}/visibility")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 공개 여부 수정 기능", description = "<a href='https://field-sting-eff.notion.site/6a8af82e40814e6db1da806409bc50d7?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> updateStrategyVisibility(
-            @PathVariable Long strategyId
+            @PathVariable Long strategyId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        strategyService.updateVisibility(strategyId);
+        strategyService.updateVisibility(strategyId, customUserDetails.getUserId());
 
         return BaseResponse.success(SuccessCode.UPDATED);
     }
