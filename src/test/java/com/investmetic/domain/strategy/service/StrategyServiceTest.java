@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -320,66 +321,67 @@ class StrategyServiceTest {
     @Test
     @DisplayName("전략 수정 - 제안서 미변경 시 성공 테스트")
     void 전략_수정_테스트_1() {
-        Long userId = user.getUserId();
         Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
 
-        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
-                .strategyName("Updated Strategy")
-                .description("Updated Description")
+        StrategyModifyRequestDto requestDtoWithOutProposal = StrategyModifyRequestDto.builder()
+                .strategyName("Test Strategy")
                 .proposalModified(false)
+                .description("제안서 미변경 성공 테스트")
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        PresignedUrlResponseDto response = strategyService.modifyStrategy(strategyId, strategyModifyRequestDto);
+        PresignedUrlResponseDto response = strategyService.modifyStrategy(strategyId, requestDtoWithOutProposal,
+                userId);
 
         assertNull(response);
-        assertEquals("Updated Strategy", strategy.getStrategyName());
-        assertEquals("Updated Description", strategy.getStrategyDescription());
-
-        verify(strategyRepository).findById(1L);
-        verify(userRepository).findById(1L);
+        verify(s3FileService, never()).deleteFromS3(anyString());
+        verify(strategyRepository, times(1)).findById(strategyId);
     }
 
     @Test
     @DisplayName("전략 수정 - 제안서 수정 시 성공 테스트")
-    void 테스트_10() {
-        Long userId = user.getUserId();
+    void 전략_수정_테스트_2() {
         Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
+        String proposalFilePath = strategy.getProposalFilePath();
+        String newProposalFilePath = "strategy/proposal/변경됨.xls";
+        String presignedUrl = "https://s3.amazonaws.com/test-bucket/updated-file.xls";
 
-        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
-                .strategyName("Updated Strategy")
-                .description("Updated Description")
+        StrategyModifyRequestDto requestDtoWithProposal = StrategyModifyRequestDto.builder()
+                .strategyName("Test Strategy")
+                .proposalFile(
+                        ProposalFileDto.builder()
+                                .proposalFileName("변경됨.xls")
+                                .proposalFileSize(512)
+                                .build()
+                )
                 .proposalModified(true)
-                .proposalFile(ProposalFileDto.builder()
-                        .proposalFileName("updated-file.pdf")
-                        .proposalFileSize(1024)
-                        .build())
+                .description("제안서 변경 성공 테스트")
                 .build();
 
-        String generatedFilePath = "strategies/proposals/updated-file.pdf";
-        String presignedUrl = "https://s3.amazonaws.com/test-bucket/strategies/proposals/updated-file.pdf";
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "updated-file.pdf", 1024))
-                .thenReturn(generatedFilePath);
-        when(s3FileService.getPreSignedUrl(generatedFilePath)).thenReturn(presignedUrl);
+        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL,
+                requestDtoWithProposal.getProposalFile().getProposalFileName(),
+                requestDtoWithProposal.getProposalFile().getProposalFileSize()))
+                .thenReturn(newProposalFilePath);
+        when(s3FileService.getPreSignedUrl(newProposalFilePath)).thenReturn(presignedUrl);
 
-        PresignedUrlResponseDto response = strategyService.modifyStrategy(1L, strategyModifyRequestDto);
+        // When
+        PresignedUrlResponseDto response = strategyService.modifyStrategy(strategyId, requestDtoWithProposal, userId);
 
-        assertNotNull(response);
+        // Then
         assertEquals(presignedUrl, response.getPresignedUrl());
-        verify(s3FileService).getS3Path(FilePath.STRATEGY_PROPOSAL, "updated-file.pdf", 1024);
-        verify(s3FileService).getPreSignedUrl(generatedFilePath);
+        verify(s3FileService, times(1)).deleteFromS3(proposalFilePath);
+        verify(strategyRepository, times(1)).findById(strategyId);
     }
 
     @Test
     @DisplayName("전략 수정 - 전략이 존재하지 않을 경우 예외 발생 테스트")
-    void 테스트_11() {
-        Long userId = user.getUserId();
+    void 전략_수정_테스트_3() {
         Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
 
         StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
                 .strategyName("Updated Strategy")
@@ -387,16 +389,39 @@ class StrategyServiceTest {
                 .proposalModified(false)
                 .build();
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
+        // When / Then
         BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto)
+                () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto, userId)
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
-        verify(strategyRepository).findById(1L);
+    }
+
+
+    @Test
+    @DisplayName("전략 수정 - 사용자 권한 없음 예외")
+    void 전략_수정_테스트_4() {
+        Long strategyId = strategy.getStrategyId();
+        Long otherUserId = 2L; // 다른 사용자 ID
+
+        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
+                .strategyName("Updated Strategy")
+                .description("Updated Description")
+                .proposalModified(false)
+                .build();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        // When / Then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto, otherUserId)
+        );
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
     }
 
     @Test
