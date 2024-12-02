@@ -61,7 +61,6 @@ class TradeTypeServiceTest {
     @DisplayName("매매유형 상태 변경 테스트")
     void changeStockTypes() {
         // 페이지 조회(true) : 활성 상태 페이지 불러오기
-        Pageable pageable = PageRequest.of(0, 10);
         List<TradeTypeResponseDTO> dtolist = tradeTypeService.getTradeTypes(true);
 
         // 페이지 첫번째 dto 가져오기

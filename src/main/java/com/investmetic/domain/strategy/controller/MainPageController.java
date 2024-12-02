@@ -42,7 +42,7 @@ public class MainPageController {
     @Operation(summary = "대표 전략 통합 지표 조회(메인 페이지)",
     description = "<a href='https://www.notion.so/2c2cb35a42ce464a9c9645a9a3b22730' target='_blank'>API 명세서</a>")
     @GetMapping("/total-strategies-metrics")
-    public ResponseEntity<BaseResponse<TotalStrategyMetricsResponseDto>> getTotalStrategyMetrics(@RequestParam LocalDate endDate) {
-        return BaseResponse.success(mainPageService.getTotalStrategyMetrics(endDate));
+    public ResponseEntity<BaseResponse<TotalStrategyMetricsResponseDto>> getTotalStrategyMetrics() {
+        return BaseResponse.success(mainPageService.getMetricsByDateRange());
     }
 }

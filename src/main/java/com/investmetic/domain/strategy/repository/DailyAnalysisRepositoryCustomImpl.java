@@ -21,7 +21,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.sql.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -174,6 +174,8 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                 .collect(Collectors.toList());
     }
     public Map<String, List<Double>> findTotalStrategyMetricsYAxis(LocalDate startDate, LocalDate endDate){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
         List<Tuple> yAxisData = queryFactory
                 .select(
                         dailyAnalysis.dailyDate,                        // 날짜

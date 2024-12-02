@@ -7,7 +7,9 @@ import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,7 @@ public class MainPageService {
     }
 
     public TotalStrategyMetricsResponseDto getTotalStrategyMetrics(LocalDate endDate) {
+
         LocalDate startDate = endDate.minusYears(1);
         return TotalStrategyMetricsResponseDto.builder()
                 .dates(dailyAnalysisRepository.findTotalStrategyMetricsXAxis(startDate, endDate)).build();
@@ -49,6 +52,38 @@ public class MainPageService {
             response.updateProfitRateChartData(profitRateData);
         });
         return contents;
+    }
+    public TotalStrategyMetricsResponseDto getMetricsByDateRange() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate endDate = LocalDate.of(2023,12,13);
+        LocalDate startDate = endDate.minusYears(1);
+        // 네이티브 쿼리 실행
+        List<Object[]> results = dailyAnalysisRepository.findMetricsByDateRange(startDate.format(formatter), endDate.format(formatter));
+
+        // x축 데이터 (dates)
+        List<String> dates = results.stream()
+                .map(result -> result[0].toString()) // 날짜 데이터를 String으로 변환
+                .toList();
+
+        // y축 데이터 (data)
+        Map<String, List<Double>> data = Map.of(
+                "avgReferencePrice", results.stream()
+                        .map(result -> (Double) result[1]) // 평균 Reference Price
+                        .toList(),
+                "highestSmScoreReferencePrice", results.stream()
+                        .map(result -> (Double) result[2]) // SM Score가 가장 높은 Reference Price
+                        .toList(),
+                "highestSubscribeScoreReferencePrice", results.stream()
+                        .map(result -> (Double) result[3]) // 구독 수가 가장 높은 Reference Price
+                        .toList()
+        );
+
+        // DTO 반환
+        return TotalStrategyMetricsResponseDto.builder()
+                .dates(dates)
+                .data(data)
+                .build();
     }
 
 }

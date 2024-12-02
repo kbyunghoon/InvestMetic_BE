@@ -81,6 +81,53 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     @Query("SELECT d.kpRatio FROM DailyAnalysis d WHERE d.strategy.strategyId = :strategyId ORDER BY d.dailyDate DESC LIMIT 1")
     Optional<Double> findLatestKpRatioByStrategyId(@Param("strategyId") Long strategyId);
 
+    // 대표 전략 통합전략 지표 조회
+    @Query(value = """
+        SELECT
+            DA.daily_date,
+            AVG(DA.reference_price) AS avg_reference_price,
+            (
+                SELECT DA2.reference_price
+                FROM daily_analysis AS DA2
+                JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
+                WHERE st.strategy_id = (
+                    SELECT st1.strategy_id
+                    FROM strategy AS st1
+                    WHERE st1.sm_score = (
+                        SELECT MAX(st2.sm_score) FROM strategy AS st2
+                    )
+                    LIMIT 1
+                )
+                AND DA2.daily_date = DA.daily_date
+                LIMIT 1
+            ) AS highest_sm_score_reference_price,
+            (
+                SELECT DA2.reference_price
+                FROM daily_analysis AS DA2
+                JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
+                WHERE st.strategy_id = (
+                    SELECT st1.strategy_id
+                    FROM strategy AS st1
+                    WHERE st1.subscription_count = (
+                        SELECT MAX(st2.subscription_count) FROM strategy AS st2
+                    )
+                    LIMIT 1
+                )
+                AND DA2.daily_date = DA.daily_date
+                LIMIT 1
+            ) AS highest_subscribe_score_reference_price
+        FROM
+            daily_analysis AS DA
+        WHERE
+            DA.daily_date BETWEEN :startDate AND :endDate
+        GROUP BY
+            DA.daily_date
+        """, nativeQuery = true)
+    List<Object[]> findMetricsByDateRange(
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+    );
+
     boolean existsByStrategyAndDailyDate(Strategy strategy, LocalDate dailyDate);
 
     void deleteAllByStrategy(Strategy strategy);
