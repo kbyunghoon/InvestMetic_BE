@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/strategies")
+@RequestMapping("/api/admin/strategies")
 @Tag(name = "매매유형 관리 페이지 API", description = "매매유형 관리 페이지 관련 API")
 public class TradeTypeController {
 

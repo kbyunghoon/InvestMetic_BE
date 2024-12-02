@@ -23,14 +23,14 @@ public class JWTUtil {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String getUsername(String token) {
+    public String getEmail(String token) {
 
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)  // 서명 검증 키 설정
                 .build()
                 .parseClaimsJws(token)     // 토큰 검증 및 파싱
                 .getBody()                 // Payload (Claims) 반환
-                .get("username", String.class); // "username" 필드 추출
+                .get("email", String.class); // "username" 필드 추출
     }
 
     public String getRole(String token) {
@@ -58,11 +58,11 @@ public class JWTUtil {
     }
 
 
-    public String createJwt(String category, String username, String role, Long expiredMs) {
+    public String createJwt(String category, String email, String role, Long expiredMs) {
 
         return Jwts.builder()
                 .claim("category", category)  // 토큰 종류
-                .claim("username", username) // 사용자 이메일 추가
+                .claim("email", email) // 사용자 이메일 추가
                 .claim("role", role)         // 사용자 역할 추가
                 .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간
                 .setExpiration(new Date(System.currentTimeMillis() + expiredMs)) // 만료 시간

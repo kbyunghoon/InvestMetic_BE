@@ -115,8 +115,6 @@ public class DailyAnalysisScheduler {
             // 샤프 비율 (초기값 0.0)
             Double sharpRatio = 0.0;
 
-            // kp ratio, sm score
-
             DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                     .dailyAnalysisId(currentAnalysis.getDailyAnalysisId())
                     .tradingDays(1)
@@ -212,8 +210,6 @@ public class DailyAnalysisScheduler {
 
         // 평가손익
         Long valuationProfitLoss = principal - balance;
-
-        // TODO : kp ratio, sm score, 고점후경과일;
 
         // 기준가
         double referencePrice = (principal != 0) ? (double) balance / principal * 1000 : 0.0;
@@ -362,7 +358,7 @@ public class DailyAnalysisScheduler {
                 .orElse(0.0);
 
         // 승률
-        double winRate = profitableDays / (previousTradingDays + 1);
+        double winRate = (double) profitableDays / (previousTradingDays + 1);
 
         // profitFactor
         double profitFactor = totalLoss < 0 ? totalProfit / Math.abs(totalLoss) : 0;
@@ -419,11 +415,6 @@ public class DailyAnalysisScheduler {
                 .min()
                 .orElse(0.0), currentDrawdownRate);
 
-        // FIXME : 도움요청
-        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1;
-//                (Math.abs(
-//                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
-
         // 9. 새로운 DailyAnalysis 객체 생성 및 반환
         DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                 .strategy(currentAnalysis.getStrategy())
@@ -463,14 +454,13 @@ public class DailyAnalysisScheduler {
                 .currentDrawdown(currentDrawdown)
                 .currentDrawdownRate(RoundUtil.roundToFifth(currentDrawdownRate))
                 .maxDrawdown(maxDrawdown)
-                .maxDrawdownRate(Math.round(maxDrawdownRate * 10000) / 10000.0)
-                .winRate(winRate)
+                .maxDrawdownRate(RoundUtil.roundToFifth(maxDrawdownRate))
+                .winRate(RoundUtil.roundToFifth(winRate))
                 .profitFactor(RoundUtil.roundToFifth(profitFactor))
                 .roa(RoundUtil.roundToFifth(roa))
                 .coefficientOfVariation(RoundUtil.roundToFifth(coefficientOfVariation))
                 .sharpRatio(RoundUtil.roundToFifth(sharpRatio))
                 .maxDrawDownInRate(RoundUtil.roundToFifth(maxDrawDownInRate))
-                .kpRatio(RoundUtil.roundToFifth(kpRatio))
                 .drawDownPeriod(drawDownPeriod)
                 .proceed(Proceed.YES)
                 .build();

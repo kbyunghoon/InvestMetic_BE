@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -90,6 +91,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(BaseResponse.fail(ErrorCode.METHOD_NOT_ALLOWED));
+    }
+
+    /**
+     * 시큐리티 인가 예외 (권한없음)
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    protected ResponseEntity<BaseResponse<Void>> authorizationDeniedException(
+            final AuthorizationDeniedException e) {
+        log.error("AuthorizationDeniedException 예외 처리 : {}", e.getMessage(), e);
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(BaseResponse.fail(ErrorCode.AUTHORIZATION_DENIED));
     }
 
 

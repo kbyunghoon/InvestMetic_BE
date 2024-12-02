@@ -18,6 +18,7 @@ import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URLEncoder;
@@ -32,6 +33,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -56,12 +59,15 @@ public class StrategyController {
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
             @RequestBody StrategyRegisterRequestDto requestDto) {
+
         return BaseResponse.success(SuccessCode.CREATED, strategyService.registerStrategy(requestDto));
     }
 
     @GetMapping("/register")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
+
         return BaseResponse.success(strategyService.loadStrategyRegistrationInfo());
     }
 
@@ -70,6 +76,7 @@ public class StrategyController {
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
             @PathVariable Long strategyId
     ) {
+
         return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId));
     }
 
@@ -79,27 +86,35 @@ public class StrategyController {
             @PathVariable Long strategyId,
             @RequestBody StrategyModifyRequestDto requestDto
     ) {
+
         return BaseResponse.success(SuccessCode.UPDATED,
                 strategyService.modifyStrategy(strategyId, requestDto));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 일간 분석 등록 기능", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> createStrategyDailyAnalysis(
             @PathVariable Long strategyId,
-            @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos
+            @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisRequestDtos);
+        strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisRequestDtos,
+                customUserDetails.getUserId());
+
         return BaseResponse.success();
     }
 
     @PatchMapping("/{strategyId}/daily-analysis")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 일간 분석 수정 기능", description = "<a href='https://field-sting-eff.notion.site/c9db716164ad405f8f4d4c622476e9f6?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> modifyStrategyDailyAnalysis(
             @PathVariable Long strategyId,
-            @RequestBody TraderDailyAnalysisRequestDto dailyAnalysisRequestDto
+            @RequestBody TraderDailyAnalysisRequestDto dailyAnalysisRequestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        strategyAnalysisService.modifyDailyAnalysis(strategyId, dailyAnalysisRequestDto);
+        strategyAnalysisService.modifyDailyAnalysis(strategyId, dailyAnalysisRequestDto, customUserDetails.getUserId());
+
         return BaseResponse.success(SuccessCode.UPDATED);
     }
 
@@ -109,6 +124,7 @@ public class StrategyController {
             @PathVariable Long strategyId
     ) {
         strategyService.updateVisibility(strategyId);
+
         return BaseResponse.success(SuccessCode.UPDATED);
     }
 
@@ -116,6 +132,7 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId) {
         strategyService.deleteStrategy(strategyId);
+
         return BaseResponse.success();
     }
 
@@ -127,6 +144,7 @@ public class StrategyController {
 
         String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
+
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -146,27 +164,28 @@ public class StrategyController {
         return BaseResponse.success(SuccessCode.DELETED);
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 나의 전략목록 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/2ddd1d0be73a47a7a683394d77943b20' target='_blank'>API 명세서</a>")
     @GetMapping
     public ResponseEntity<BaseResponse<PageResponseDto<MyStrategySimpleResponse>>> getMyStrategies(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 4) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getMyStrategies(userId, pageable));
+        return BaseResponse.success(strategyListingService.getMyStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "구독한 전략목록 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/5a2dd36508804ca8945692d269c47710' target='_blank'>API 명세서</a>")
     @GetMapping("/subscribed")
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getSubscribedStrategies(
-            @RequestParam Long userId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 8) Pageable pageable) {
-        return BaseResponse.success(strategyListingService.getSubscribedStrategies(userId, pageable));
+        return BaseResponse.success(
+                strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    //TODO : 스프링 시큐리티 적용시 수정
+    @PreAuthorize("hasRole('ROLE_INVESTOR')")
     @Operation(summary = "나의 전략 일간분석 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}/daily-analysis")
@@ -176,7 +195,8 @@ public class StrategyController {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
-    @Operation(summary = "나의 전략 기본정보 조회(마이페이지) ",
+    @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @Operation(summary = "나의 전략 상세정보 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}")
     public ResponseEntity<BaseResponse<MyStrategyDetailResponse>> getMyStrategiesDetail(
