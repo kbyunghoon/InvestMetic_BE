@@ -45,8 +45,9 @@ public class StrategyRankingController {
             @RequestBody SearchRequest searchRequest,
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 8, sort = "cumulativeProfitRate", direction = Direction.DESC) Pageable pageable) {
-        return BaseResponse.success(strategyListingService
-                .search(searchRequest, customUserDetails.getUserId(), pageable));
-    }
+        Long userId = customUserDetails == null ? null : customUserDetails.getUserId();
 
+        return BaseResponse.success(strategyListingService
+                .search(searchRequest, userId, pageable));
+    }
 }

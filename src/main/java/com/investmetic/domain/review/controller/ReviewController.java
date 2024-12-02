@@ -36,7 +36,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     // 리뷰 등록
-    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 등록",
             description = "<a href='https://www.notion.so/86c5f9489cdf49d0af3a63194f5e22cf' target='_blank'>API 명세서</a>")
     @PostMapping
@@ -50,7 +50,7 @@ public class ReviewController {
     }
 
     // 리뷰 수정
-    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 수정",
             description = "<a href='https://www.notion.so/a2351a2bd92f4fb7a37bb3ae54908019' target='_blank'>API 명세서</a>")
     @PatchMapping("/{reviewId}")
@@ -64,7 +64,7 @@ public class ReviewController {
     }
 
     // 리뷰 삭제
-    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 삭제",
             description = "<a href='https://www.notion.so/a6a3823a34684cabb0abe2ed9fef3d51' target='_blank'>API 명세서</a>")
     @DeleteMapping("/{reviewId}")
@@ -77,7 +77,7 @@ public class ReviewController {
     }
 
     // 리뷰 목록 조회
-    @PreAuthorize("hasRole('TRADER') or hasRole('INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 목록조회",
             description = "<a href='https://www.notion.so/b7ee34a60de94baa89c77f2227b818ac' target='_blank'>API 명세서</a>")
     @GetMapping
