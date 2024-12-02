@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "로그인 API")
 @RestController
-@RequestMapping("api/users/login")
+@RequestMapping("/api/users/login")
 public class LoginController {
 
     @Operation(summary = "로그인 기능",
