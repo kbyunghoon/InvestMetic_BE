@@ -84,7 +84,6 @@ class StrategyServiceTest {
 
     @BeforeEach
     void setUp() {
-
         tradeTypeList = List.of(
                 TradeType.builder().tradeTypeId(1L).tradeTypeName("TradeType1").activateState(true)
                         .tradeTypeIconUrl("https://example.com/TradeType1.png").build(),
@@ -100,6 +99,7 @@ class StrategyServiceTest {
         );
 
         user = User.builder()
+                .userId(1L)
                 .userName("testUser")
                 .nickname("Tester")
                 .email("test@example.com")
@@ -117,41 +117,39 @@ class StrategyServiceTest {
                         .build())
                 .build();
 
-        TradeType tradeType = TestEntityFactory.createTestTradeType();
-
-        strategy = TestEntityFactory.createTestStrategy(user, tradeType);
+        strategy = TestEntityFactory.createTestStrategy(user, tradeTypeList.get(0));
     }
 
     @Test
     @DisplayName("공개 여부 변경 - 성공 (공개 -> 비공개)")
-    void 테스트_1() {
+    void 전략_공개_여부_수정_테스트_1() {
         Long strategyId = 1L;
-        Strategy strategy = Strategy.builder()
+        Strategy publicStrategy = Strategy.builder()
                 .strategyId(strategyId)
                 .isPublic(IsPublic.PUBLIC)
                 .build();
 
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(publicStrategy));
 
         strategyService.updateVisibility(strategyId);
 
-        assertEquals(IsPublic.PRIVATE, strategy.getIsPublic());
+        assertEquals(IsPublic.PRIVATE, publicStrategy.getIsPublic());
     }
 
     @Test
     @DisplayName("공개 여부 변경 - 성공 (비공개 -> 공개)")
-    void 테스트_2() {
+    void 전략_공개_여부_수정_테스트_2() {
         Long strategyId = 1L;
-        Strategy strategy = Strategy.builder()
+        Strategy privateStrategy = Strategy.builder()
                 .strategyId(strategyId)
                 .isPublic(IsPublic.PRIVATE)
                 .build();
 
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(privateStrategy));
 
         strategyService.updateVisibility(strategyId);
 
-        assertEquals(IsPublic.PUBLIC, strategy.getIsPublic());
+        assertEquals(IsPublic.PUBLIC, privateStrategy.getIsPublic());
     }
 
     @Test
@@ -173,12 +171,12 @@ class StrategyServiceTest {
     @DisplayName("전략 삭제 - 성공")
     void 테스트_4() {
         Long strategyId = 1L;
-        Strategy strategy = Strategy.builder()
+        Strategy publicStrategy = Strategy.builder()
                 .strategyId(strategyId)
                 .isPublic(IsPublic.PUBLIC)
                 .build();
 
-        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(publicStrategy));
 
         strategyService.deleteStrategy(strategyId);
 
@@ -205,14 +203,17 @@ class StrategyServiceTest {
 
     @Test
     @DisplayName("전략 등록 - 성공")
-    void 테스트_6() {
-
+    void 전략_등록_테스트_1() {
+        Long userId = user.getUserId();
         TradeType tradeType = tradeTypeList.get(0);
+        Long tradeTypeId = tradeType.getTradeTypeId();
+
         String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.xls";
         String proposalFilePath = "strategies/proposals/test.xls";
 
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(tradeTypeRepository.findByTradeTypeId(anyLong())).thenReturn(Optional.of(tradeType));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
+                Optional.of(tradeType));
         when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
         when(stockTypeRepository.findById(anyLong()))
@@ -223,24 +224,73 @@ class StrategyServiceTest {
         when(stockTypeGroupRepository.save(any(StockTypeGroup.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        PresignedUrlResponseDto responseDto = strategyService.registerStrategy(requestDto);
+        PresignedUrlResponseDto responseDto = strategyService.registerStrategy(requestDto, userId);
 
         assertEquals(presignedUrl, responseDto.getPresignedUrl());
     }
 
     @Test
-    @DisplayName("전략 성공 - 유저 검증 테스트")
-    void 테스트_7() {
+    @DisplayName("전략 등록 - 사용자 없음 예외 테스트")
+    void 전략_등록_테스트_2() {
+        Long userId = user.getUserId();
 
-        when(userRepository.findById(anyLong())).thenReturn(java.util.Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(java.util.Optional.empty());
 
-        assertThrows(BusinessException.class, () -> strategyService.registerStrategy(requestDto),
+        assertThrows(BusinessException.class, () -> strategyService.registerStrategy(requestDto, userId),
                 ErrorCode.ENTITY_NOT_FOUND.getMessage());
     }
 
     @Test
+    @DisplayName("전략 등록 - 매매 유형 없음 예외")
+    void 전략_등록_테스트_3() {
+        Long userId = user.getUserId();
+        TradeType tradeType = tradeTypeList.get(0);
+        Long tradeTypeId = tradeType.getTradeTypeId();
+
+        // Given
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(Optional.empty());
+
+        // When / Then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.registerStrategy(requestDto, userId)
+        );
+
+        assertEquals(ErrorCode.TRADETYPE_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("전략 등록 - stockType 유형 없음 예외 테스트")
+    void 전략_등록_테스트_4() {
+        Long userId = user.getUserId();
+        TradeType tradeType = tradeTypeList.get(0);
+        Long tradeTypeId = tradeType.getTradeTypeId();
+        String presignedUrl = "https://s3.amazonaws.com/test-bucket/test.xls";
+        String proposalFilePath = "strategies/proposals/test.xls";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
+                Optional.of(tradeType));
+        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024))
+                .thenReturn(proposalFilePath);
+        when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
+        when(stockTypeRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // When / Then
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.registerStrategy(requestDto, 1L)
+        );
+
+        assertEquals(ErrorCode.STOCKTYPE_NOT_FOUND, exception.getErrorCode());
+        verify(stockTypeGroupRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("전략 관련 - TradeType과 StockType 목록 요청 테스트")
-    void 테스트_8() {
+    void 전략_등록_이전_요청_테스트_1() {
 
         when(tradeTypeRepository.findByActivateStateTrue()).thenReturn(tradeTypeList);
         when(stockTypeRepository.findAll()).thenReturn(stockTypeList);
@@ -268,17 +318,20 @@ class StrategyServiceTest {
 
     @Test
     @DisplayName("전략 수정 - 제안서 미변경 시 성공 테스트")
-    void 테스트_9() {
-        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+    void 전략_수정_테스트_1() {
+        Long userId = user.getUserId();
+        Long strategyId = strategy.getStrategyId();
+
+        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
                 .strategyName("Updated Strategy")
                 .description("Updated Description")
                 .proposalModified(false)
                 .build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        PresignedUrlResponseDto response = strategyService.modifyStrategy(1L, requestDto);
+        PresignedUrlResponseDto response = strategyService.modifyStrategy(strategyId, strategyModifyRequestDto);
 
         assertNull(response);
         assertEquals("Updated Strategy", strategy.getStrategyName());
@@ -291,7 +344,10 @@ class StrategyServiceTest {
     @Test
     @DisplayName("전략 수정 - 제안서 수정 시 성공 테스트")
     void 테스트_10() {
-        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+        Long userId = user.getUserId();
+        Long strategyId = strategy.getStrategyId();
+
+        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
                 .strategyName("Updated Strategy")
                 .description("Updated Description")
                 .proposalModified(true)
@@ -304,13 +360,13 @@ class StrategyServiceTest {
         String generatedFilePath = "strategies/proposals/updated-file.pdf";
         String presignedUrl = "https://s3.amazonaws.com/test-bucket/strategies/proposals/updated-file.pdf";
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
         when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "updated-file.pdf", 1024))
                 .thenReturn(generatedFilePath);
         when(s3FileService.getPreSignedUrl(generatedFilePath)).thenReturn(presignedUrl);
 
-        PresignedUrlResponseDto response = strategyService.modifyStrategy(1L, requestDto);
+        PresignedUrlResponseDto response = strategyService.modifyStrategy(1L, strategyModifyRequestDto);
 
         assertNotNull(response);
         assertEquals(presignedUrl, response.getPresignedUrl());
@@ -321,18 +377,21 @@ class StrategyServiceTest {
     @Test
     @DisplayName("전략 수정 - 전략이 존재하지 않을 경우 예외 발생 테스트")
     void 테스트_11() {
-        StrategyModifyRequestDto requestDto = StrategyModifyRequestDto.builder()
+        Long userId = user.getUserId();
+        Long strategyId = strategy.getStrategyId();
+
+        StrategyModifyRequestDto strategyModifyRequestDto = StrategyModifyRequestDto.builder()
                 .strategyName("Updated Strategy")
                 .description("Updated Description")
                 .proposalModified(false)
                 .build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(strategyRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(
                 BusinessException.class,
-                () -> strategyService.modifyStrategy(1L, requestDto)
+                () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto)
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
