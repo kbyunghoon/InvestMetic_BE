@@ -18,6 +18,7 @@ import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
 import com.investmetic.domain.strategy.dto.request.StrategyRegisterRequestDto;
 import com.investmetic.domain.strategy.dto.response.RegisterInfoResponseDto;
+import com.investmetic.domain.strategy.dto.response.StrategyModifyInfoResponseDto;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
@@ -397,4 +398,53 @@ class StrategyServiceTest {
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
         verify(strategyRepository).findById(1L);
     }
+
+    @Test
+    @DisplayName("전략 수정 정보 로드 - 성공")
+    void 전략_수정_정보_로드_테스트_1() {
+        Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(stockTypeGroupRepository.findStockTypeIdsByStrategy(strategy))
+                .thenReturn(stockTypeList);
+
+        StrategyModifyInfoResponseDto response = strategyService.loadStrategyModifyInfo(strategyId, userId);
+
+        assertEquals(strategy.getStrategyName(), response.getStrategyName());
+        assertEquals(strategy.getTradeType().getTradeTypeName(), response.getTradeType().getTradeTypeName());
+        assertEquals(2, response.getStockTypes().size());
+    }
+
+    @Test
+    @DisplayName("전략 수정 정보 로드 - 전략이 없는 경우 예외 발생")
+    void 전략_수정_정보_로드_테스트_2() {
+        Long strategyId = strategy.getStrategyId();
+        Long userId = user.getUserId();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.loadStrategyModifyInfo(strategyId, userId)
+        );
+
+        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("전략 수정 정보 로드 - 사용자 권한 없는 경우 예외 발생")
+    void 전략_수정_정보_로드_테스트_3() {
+        Long strategyId = strategy.getStrategyId();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.loadStrategyModifyInfo(strategyId, 2L)
+        );
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
+    }
+
 }
