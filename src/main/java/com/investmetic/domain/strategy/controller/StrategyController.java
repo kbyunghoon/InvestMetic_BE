@@ -75,12 +75,14 @@ public class StrategyController {
     }
 
     @GetMapping("/modify/{strategyId}")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 수정 페이지 진입 시 해당 전략 정보 조회", description = "<a href='https://field-sting-eff.notion.site/b5f3a515edd6479f8c22a40732b42475?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
-            @PathVariable Long strategyId
+            @PathVariable Long strategyId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
 
-        return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId));
+        return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId, customUserDetails.getUserId()));
     }
 
     @PostMapping("/modify/{strategyId}")

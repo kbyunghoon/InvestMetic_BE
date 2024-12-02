@@ -196,9 +196,11 @@ public class StrategyService {
         return buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
     }
 
-    public StrategyModifyInfoResponseDto loadStrategyModifyInfo(Long strategyId) {
+    public StrategyModifyInfoResponseDto loadStrategyModifyInfo(Long strategyId, Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        verifyUserPermission(strategy, userId);
 
         TradeTypeDto tradeTypeDto = TradeTypeDto.fromEntity(strategy.getTradeType());
 
@@ -242,5 +244,11 @@ public class StrategyService {
     private User verifyUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
+    }
+
+    private void verifyUserPermission(Strategy strategy, Long userId) {
+        if (!strategy.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
     }
 }
