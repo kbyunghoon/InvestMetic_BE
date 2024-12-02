@@ -5,6 +5,7 @@ import com.investmetic.domain.user.dto.request.EmailRequestDto;
 import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserMyPageService;
 import com.investmetic.domain.user.service.UserService;
@@ -94,6 +95,14 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
+    }
+    // 전화번호를 통한 이메일 찾기
+    @Operation(summary = "휴대번호를 통한 이메일 찾기",
+            description = "<a href='https://www.notion.so/68f9f0bcdde94776a29155b7358b450f' target='_blank'>API 명세서</a>")
+    @GetMapping("/email")
+    public ResponseEntity<BaseResponse<FoundEmailDto>> findEmailByPhone(@RequestParam String phone) {
+
+        return BaseResponse.success(userService.findEmailByPhone(phone));
     }
 
 

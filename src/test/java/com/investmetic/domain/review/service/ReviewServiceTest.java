@@ -11,9 +11,11 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,11 +50,13 @@ class ReviewServiceTest {
 
     private Strategy testStrategy;
     private User testUser;
+    private User anotherUser;
     private TradeType testTradeType;
 
     @BeforeEach
     public void setup() {
-        testUser = userRepository.save(TestEntityFactory.createTestUser());
+        testUser = userRepository.save(TestEntityFactory.createTestUser("testUser", "testuser@example.com"));
+        anotherUser = userRepository.save(TestEntityFactory.createTestUser("anotherUser", "another@example.com"));
         testTradeType = tradeTypeRepository.save(TestEntityFactory.createTestTradeType());
         testStrategy = strategyRepository.save(TestEntityFactory.createTestStrategy(testUser, testTradeType));
     }
@@ -83,6 +87,50 @@ class ReviewServiceTest {
         assertThrows(BusinessException.class, () -> updateReviewWithInvalidId(updateDto));
     }
 
+    @DisplayName("본인의 전략에 리뷰를 등록할 수 없을 때 예외 발생")
+    @Test
+    void 리뷰등록_예외테스트1() {
+        ReviewRequestDto requestDto = ReviewRequestDto.builder()
+                .content("전략 굿")
+                .starRating(5)
+                .build();
+
+        // 본인의 전략에 리뷰 등록 시도
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(), requestDto)
+        );
+
+        // 예외 메시지 및 코드 검증
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CANNOT_REVIEW_OWN_STRATEGY);
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.CANNOT_REVIEW_OWN_STRATEGY.getMessage());
+    }
+
+    @DisplayName("같은 전략에 중복 리뷰 등록 시 예외 발생")
+    @Test
+    void 리뷰등록_예외테스트2() {
+        ReviewRequestDto requestDto = ReviewRequestDto.builder()
+                .content("전략 굿")
+                .starRating(5)
+                .build();
+
+        // 첫 번째 리뷰 등록
+        reviewService.addReview(testStrategy.getStrategyId(), anotherUser.getUserId(), requestDto);
+
+        em.flush();
+        em.clear();
+
+        // 같은 전략에 중복 리뷰 등록 시도
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> reviewService.addReview(testStrategy.getStrategyId(), anotherUser.getUserId(), requestDto)
+        );
+
+        // 예외 메시지 및 코드 검증
+        assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_REVIEW);
+        assertThat(exception.getMessage()).isEqualTo(ErrorCode.DUPLICATE_REVIEW.getMessage());
+    }
+
 
     @DisplayName("리뷰 등록 시 리뷰 개수와 평균 별점 업데이트")
     @Test
@@ -95,7 +143,7 @@ class ReviewServiceTest {
         int initialCount = reviewRepository.countByStrategy(testStrategy);
 
         // 리뷰 추가
-        reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(), requestDto);
+        reviewService.addReview(testStrategy.getStrategyId(), anotherUser.getUserId(), requestDto);
 
         em.flush();
         em.clear();
@@ -122,7 +170,11 @@ class ReviewServiceTest {
                     .content("전략 굿")
                     .starRating(i)
                     .build();
-            reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(), requestDto);
+
+            User newUser = TestEntityFactory.createTestUser("test" + i, "email" + i);
+            userRepository.save(newUser);
+
+            reviewService.addReview(testStrategy.getStrategyId(), newUser.getUserId(), requestDto);
         }
 
         em.flush();
@@ -150,7 +202,8 @@ class ReviewServiceTest {
                 .content("전략 굿")
                 .starRating(4)
                 .build();
-        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
+
+        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), anotherUser.getUserId(),
                 initialRequest);
 
         em.flush();
@@ -189,7 +242,7 @@ class ReviewServiceTest {
                 .content("전략 굿")
                 .starRating(4)
                 .build();
-        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), testUser.getUserId(),
+        ReviewResponse response = reviewService.addReview(testStrategy.getStrategyId(), anotherUser.getUserId(),
                 requestDto);
 
         em.flush();
@@ -227,8 +280,13 @@ class ReviewServiceTest {
                     .content("전략 굿")
                     .starRating(i)
                     .build();
+
+            User newUser = TestEntityFactory.createTestUser("test" + i, "email" + i);
+            userRepository.save(newUser);
+
             ReviewResponse review = reviewService.addReview(testStrategy.getStrategyId(),
-                    testUser.getUserId(), requestDto);
+                    newUser.getUserId(), requestDto);
+
             reviewIds.add(review.getReviewId());
         }
 

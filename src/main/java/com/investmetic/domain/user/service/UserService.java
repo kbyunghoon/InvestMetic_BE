@@ -8,9 +8,11 @@ import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.domain.user.repository.UserRepositoryCustomImpl;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -34,6 +36,7 @@ public class UserService {
 
 
     private final UserRepository userRepository;
+    private final UserRepositoryCustomImpl userRepositoryCustom;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final StibeeEmailService emailService;
     private final S3FileService s3FileService;
@@ -200,6 +203,7 @@ public class UserService {
         String codeFoundByEmail = redisUtil.getData(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
+
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
             throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
@@ -208,7 +212,6 @@ public class UserService {
         //성공 하고 나면 해당 데이터 메모리에서 삭제
         redisUtil.deleteData(email);
     }
-
 
     // 회원가입시 인증번호 검증
     public void verifySignUpEmailCode(String email, String code) {
@@ -222,6 +225,30 @@ public class UserService {
             throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
         }
 
+    }
+
+    //휴대번호를 통한 이메일 찾기
+    public FoundEmailDto findEmailByPhone(String phone) {
+        String email = userRepository.findEmailByPhone(phone)
+                .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지 않음
+
+        // 이메일이 없으면 isFound = false, email = null로 반환
+        if (email == null) {
+            return new FoundEmailDto(false, null);
+        }
+
+        return new FoundEmailDto(true, emailMasking(email));
+    }
+
+    //이메일 마스킹 처리
+    private String emailMasking(String email) {
+
+        String localPart = email.substring(0, email.indexOf('@'));
+
+        if (localPart.length() > 3) {
+            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3);
+        }
+        return email;
     }
 
 

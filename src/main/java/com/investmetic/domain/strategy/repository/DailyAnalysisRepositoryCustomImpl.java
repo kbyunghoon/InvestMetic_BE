@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.repository;
 
 import static com.investmetic.domain.strategy.model.entity.QDailyAnalysis.dailyAnalysis;
 
+import com.investmetic.domain.strategy.dto.AnalysisDataDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.QDailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
@@ -10,6 +11,8 @@ import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.QDailyAnalysis;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -17,6 +20,7 @@ import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,47 +30,55 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositoryCustom {
+
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public StrategyAnalysisResponse findStrategyAnalysis(Long strategyId, AnalysisOption option1,
-                                                         AnalysisOption option2) {
+    public List<AnalysisDataDto> findSingleOptionAnalysisData(Long strategyId, AnalysisOption option) {
+        return queryFactory
+                .select(Projections.constructor(AnalysisDataDto.class,
+                        dailyAnalysis.dailyDate.stringValue(), // 날짜
+                        findByOption(option)))                 // 옵션에 따른 Y축 데이터
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId)) // 전략 ID 조건
+                .orderBy(dailyAnalysis.dailyDate.asc())                 // 날짜 오름차순 정렬
+                .fetch();
+    }
 
-        // x축 데이터 조회
-        List<String> xAxis = findXAxis(strategyId);
+    @Override
+    public StrategyAnalysisResponse findStrategyAnalysisData(Long strategyId, AnalysisOption option1,
+                                                             AnalysisOption option2) {
+        List<Tuple> results = queryFactory
+                .select(
+                        dailyAnalysis.dailyDate.stringValue(),
+                        findByOption(option1),
+                        findByOption(option2))
+                .from(dailyAnalysis)
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .orderBy(dailyAnalysis.dailyDate.asc())
+                .fetch();
 
-        // y축 데이터 조회
-        List<Double> firstYAxis = findYAxis(strategyId, option1);
-        List<Double> secondYAxis = findYAxis(strategyId, option2);
+        List<String> dates = new ArrayList<>();
+        List<Double> firstYAxis = new ArrayList<>();
+        List<Double> secondYAxis = new ArrayList<>();
 
-        Map<String, List<Double>> yaxis = Map.of(
+        // 데이터를 날짜와 두 개의 Y축 데이터로 분리
+        for (Tuple result : results) {
+            dates.add(result.get(dailyAnalysis.dailyDate.stringValue()));
+            firstYAxis.add(result.get(findByOption(option1)));
+            secondYAxis.add(result.get(findByOption(option1)));
+        }
+
+        // 응답 데이터 매핑
+        Map<String, List<Double>> yAxis = Map.of(
                 option1.name(), firstYAxis,
                 option2.name(), secondYAxis
         );
 
         return StrategyAnalysisResponse.builder()
-                .dates(xAxis)
-                .data(yaxis)
+                .dates(dates)
+                .data(yAxis)
                 .build();
-    }
-
-    @Override
-    public List<String> findXAxis(Long strategyId) {
-        return queryFactory
-                .select(dailyAnalysis.dailyDate.stringValue())
-                .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
-                .orderBy(dailyAnalysis.dailyDate.asc())
-                .fetch();
-    }
-
-    @Override
-    public List<Double> findYAxis(Long strategyId, AnalysisOption option) {
-        return queryFactory
-                .select(findByOption(option))
-                .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
-                .fetch();
     }
 
 
@@ -87,11 +99,6 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
-        // 전략 존재 여부를 빈 데이터로 판단
-        if (content.isEmpty()) {
-            throw new BusinessException(ErrorCode.STRATEGY_NOT_FOUND);
-        }
 
         // 페이징 count 쿼리 최적화
         JPAQuery<Long> countQuery = queryFactory
@@ -115,7 +122,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                         dailyAnalysis.cumulativeProfitLoss,
                         dailyAnalysis.cumulativeProfitLossRate))
                 .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.eq(strategyId))
+                .where(dailyAnalysis.strategy.strategyId.eq(strategyId),dailyAnalysis.proceed.eq(Proceed.YES))
                 .fetch();
     }
 
@@ -139,11 +146,6 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 전략 존재 여부를 빈 데이터로 판단
-        if (content.isEmpty()) {
-            throw new BusinessException(ErrorCode.STRATEGY_NOT_FOUND);
-        }
-
         // 페이징 count 쿼리 최적화
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
@@ -165,7 +167,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
         );
     }
 
-    private NumberExpression<Double> findByOption(AnalysisOption option) {
+    public NumberExpression<Double> findByOption(AnalysisOption option) {
         switch (option) {
             case BALANCE -> {
                 return dailyAnalysis.balance.doubleValue();
