@@ -6,6 +6,7 @@ import com.investmetic.domain.review.dto.response.ReviewResponse;
 import com.investmetic.domain.review.service.ReviewService;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-// TODO : 스프링시큐리티 적용완료되면  @AuthenticationPrincipal로 userId수정
 @RestController
 @RequestMapping("/api/strategies/{strategyId}/reviews")
 @RequiredArgsConstructor
@@ -34,19 +36,21 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     // 리뷰 등록
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 등록",
             description = "<a href='https://www.notion.so/86c5f9489cdf49d0af3a63194f5e22cf' target='_blank'>API 명세서</a>")
     @PostMapping
     public ResponseEntity<BaseResponse<ReviewResponse>> addReview(
             @PathVariable Long strategyId,
-            @RequestParam Long userId, // 임시로 userId를 쿼리 파라미터로 받음
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody @Valid ReviewRequestDto reviewRequestDto) {
 
-        ReviewResponse result = reviewService.addReview(strategyId, userId, reviewRequestDto);
+        ReviewResponse result = reviewService.addReview(strategyId, customUserDetails.getUserId(), reviewRequestDto);
         return BaseResponse.success(SuccessCode.CREATED, result);
     }
 
     // 리뷰 수정
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 수정",
             description = "<a href='https://www.notion.so/a2351a2bd92f4fb7a37bb3ae54908019' target='_blank'>API 명세서</a>")
     @PatchMapping("/{reviewId}")
@@ -60,6 +64,7 @@ public class ReviewController {
     }
 
     // 리뷰 삭제
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 삭제",
             description = "<a href='https://www.notion.so/a6a3823a34684cabb0abe2ed9fef3d51' target='_blank'>API 명세서</a>")
     @DeleteMapping("/{reviewId}")
@@ -72,15 +77,14 @@ public class ReviewController {
     }
 
     // 리뷰 목록 조회
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "리뷰 목록조회",
             description = "<a href='https://www.notion.so/b7ee34a60de94baa89c77f2227b818ac' target='_blank'>API 명세서</a>")
     @GetMapping
     public ResponseEntity<BaseResponse<ReviewListResponse>> getReviews(
             @PathVariable Long strategyId,
-            @RequestParam Long userId, // 임시로 userId를 쿼리 파라미터로 받음
             @PageableDefault(size = 5, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-
-        ReviewListResponse result = reviewService.getReviewList(strategyId, userId, pageable);
+        ReviewListResponse result = reviewService.getReviewList(strategyId, pageable);
         return BaseResponse.success(result);
     }
 }

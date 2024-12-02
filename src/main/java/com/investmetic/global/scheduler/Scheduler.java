@@ -17,7 +17,7 @@ public class Scheduler {
 
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final DailyAnalysisScheduler dailyAnalysisScheduler;
-    private final StrategySmScoreScheduler strategySmScoreScheduler;
+    private final StrategyCalculatorScheduler strategyCalculatorScheduler;
     private final MonthlyAnalysisScheduler monthlyAnalysisScheduler;
 
     // 매일 자정
@@ -58,54 +58,15 @@ public class Scheduler {
             Strategy strategy = dailyAnalysis.getStrategy();
             List<DailyAnalysis> strategyDailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
 
-            Double highProfitLossRate = 0.0;
-            Double minDrawDown = 0.0;
-            Double sumDrawDown = 0.0;
-            Long sumDrawDownPeriod = 0L;
-
-            for (DailyAnalysis strategyDailyAnalysis : strategyDailyAnalyses) {
-                Double currentProfitLossRate = strategyDailyAnalysis.getCumulativeProfitLossRate();
-
-                if (highProfitLossRate > currentProfitLossRate) {
-                    // 손익률 인하되는 시점
-                    sumDrawDownPeriod++;
-                    if (currentProfitLossRate - highProfitLossRate < minDrawDown) {
-                        // DD 갱신
-                        minDrawDown = currentProfitLossRate - highProfitLossRate;
-                    }
-                } else {
-                    highProfitLossRate = currentProfitLossRate;
-                    sumDrawDown += minDrawDown;
-                    minDrawDown = 0.0;
-                }
-            }
-
-            long totalTradingDays = strategyDailyAnalyses.size();
-
-            double accumulatedProfitLossRate = strategyDailyAnalyses.get(strategyDailyAnalyses.size() - 1)
-                    .getCumulativeProfitLossRate();
-
-            if (sumDrawDown == 0 || sumDrawDownPeriod == 0 || totalTradingDays == 0) {
-                strategy.setKpRatio(0.0);
-            }
-            if (Math.sqrt((double) sumDrawDownPeriod / totalTradingDays) == 0) {
-                strategy.setKpRatio(0.0);
-            }
-
-            strategy.setKpRatio(accumulatedProfitLossRate / (sumDrawDown * -1 * Math.sqrt(
-                    (double) sumDrawDownPeriod / totalTradingDays)));
-
-            System.out.println("kpratio + " + accumulatedProfitLossRate / (sumDrawDown * -1 * Math.sqrt(
-                    (double) sumDrawDownPeriod / totalTradingDays)));
+            strategyCalculatorScheduler.calculateKpRatio(strategyDailyAnalyses, strategy);
         });
 
-        strategySmScoreScheduler.calculateSmScores();
+        strategyCalculatorScheduler.calculateSmScores();
 
         dailyAnalyses.forEach(dailyAnalysis -> {
             List<DailyAnalysis> specificDailyAnalyses = dailyAnalysisRepository.findByStrategyId(
                     dailyAnalysis.getStrategy().getStrategyId());
             monthlyAnalysisScheduler.calculateMonthlyAnalysis(specificDailyAnalyses);
         });
-
     }
 }
