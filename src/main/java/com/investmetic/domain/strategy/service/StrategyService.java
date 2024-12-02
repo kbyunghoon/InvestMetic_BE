@@ -98,14 +98,13 @@ public class StrategyService {
     }
 
     @Transactional
-    public void deleteStrategy(Long strategyId) {
+    public void deleteStrategy(Long strategyId, Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        // FIXME : 권한 체크 로직 추가 예정
-//        if (strategy.getCreatedBy() != user) {
-//            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-//        }
+        verifyUserPermission(strategy, userId);
+
+        s3FileService.deleteFromS3(strategy.getProposalFilePath());
 
         strategyRepository.deleteById(strategyId);
     }

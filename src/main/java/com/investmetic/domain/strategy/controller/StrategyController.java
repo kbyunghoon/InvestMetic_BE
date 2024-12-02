@@ -138,9 +138,11 @@ public class StrategyController {
     }
 
     @DeleteMapping("/{strategyId}")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId) {
-        strategyService.deleteStrategy(strategyId);
+    public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId,
+                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        strategyService.deleteStrategy(strategyId, customUserDetails.getUserId());
 
         return BaseResponse.success();
     }
