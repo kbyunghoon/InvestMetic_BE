@@ -45,7 +45,7 @@ public class UserService {
     //회원 가입
     @Transactional
     public void signUp(UserSignUpDto userSignUpDto) {
-        try{
+        try {
             // 비밀번호 인증코드 검증시 사용하는 메서드 재사용.(Redis에서 삭제)
             verifyEmailCode(userSignUpDto.getEmail(), userSignUpDto.getCode());
 
@@ -194,12 +194,11 @@ public class UserService {
     public void verifyEmailCode(String email, String code) {
 
         /*
-        * 저장된 인증코드 가져오기.
-        * 30분 이후 시간이 지나므로 nullPointException 방지.
-        * */
+         * 저장된 인증코드 가져오기.
+         * 30분 이후 시간이 지나므로 nullPointException 방지.
+         * */
         String codeFoundByEmail = redisUtil.getData(email)
-                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
-
+                .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -211,14 +210,12 @@ public class UserService {
     }
 
 
-
     // 회원가입시 인증번호 검증
     public void verifySignUpEmailCode(String email, String code) {
 
         // 저장된 인증코드 가져오기.
         String codeFoundByEmail = redisUtil.getData(email)
-                .orElseThrow(()->new BusinessException(ErrorCode.VERIFICATION_FAILED));
-
+                .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
@@ -231,6 +228,12 @@ public class UserService {
     @FunctionalInterface
     private interface ValidationFunction {
         boolean exists(String value);
+    }
+
+    //비밀번호 찾기 이메일에 인증코드 전송
+    public String sendAuthenticationCodeForPassword(String email) {
+        sendAuthenticationCode(email);
+        return "이메일 전송 완료";
     }
 
 }
