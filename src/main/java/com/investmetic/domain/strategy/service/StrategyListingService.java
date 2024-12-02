@@ -5,7 +5,7 @@ import static java.util.stream.Collectors.toList;
 import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
 import com.investmetic.domain.strategy.dto.StockTypeInfo;
 import com.investmetic.domain.strategy.dto.request.SearchRequest;
-import com.investmetic.domain.strategy.dto.response.ProfitRateData;
+import com.investmetic.domain.strategy.dto.ProfitRateData;
 import com.investmetic.domain.strategy.dto.response.SearchInfoResponseDto;
 import com.investmetic.domain.strategy.dto.response.common.BaseStrategyResponse;
 import com.investmetic.domain.strategy.dto.response.common.MyStrategySimpleResponse;
