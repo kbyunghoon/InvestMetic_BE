@@ -2,7 +2,6 @@ package com.investmetic.domain.strategy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -126,14 +125,16 @@ class StrategyServiceTest {
     @DisplayName("공개 여부 변경 - 성공 (공개 -> 비공개)")
     void 전략_공개_여부_수정_테스트_1() {
         Long strategyId = 1L;
+        Long userId = user.getUserId();
         Strategy publicStrategy = Strategy.builder()
                 .strategyId(strategyId)
                 .isPublic(IsPublic.PUBLIC)
+                .user(user)
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(publicStrategy));
 
-        strategyService.updateVisibility(strategyId);
+        strategyService.updateVisibility(strategyId, userId);
 
         assertEquals(IsPublic.PRIVATE, publicStrategy.getIsPublic());
     }
@@ -142,31 +143,57 @@ class StrategyServiceTest {
     @DisplayName("공개 여부 변경 - 성공 (비공개 -> 공개)")
     void 전략_공개_여부_수정_테스트_2() {
         Long strategyId = 1L;
+        Long userId = user.getUserId();
         Strategy privateStrategy = Strategy.builder()
                 .strategyId(strategyId)
                 .isPublic(IsPublic.PRIVATE)
+                .user(user)
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(privateStrategy));
 
-        strategyService.updateVisibility(strategyId);
+        strategyService.updateVisibility(strategyId, userId);
 
-        assertEquals(IsPublic.PUBLIC, privateStrategy.getIsPublic());
+        assertEquals(IsPublic.PUBLIC, strategy.getIsPublic()); // 상태가 PUBLIC으로 변경되었는지 확인
+        verify(strategyRepository, times(1)).findById(strategyId);
     }
 
     @Test
     @DisplayName("공개 여부 변경 - 실패 (전략 ID가 존재하지 않음)")
-    void 테스트_3() {
+    void 전략_공개_여부_수정_테스트_3() {
         Long strategyId = 999L;
+        Long userId = user.getUserId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                strategyService.updateVisibility(strategyId)
+                strategyService.updateVisibility(strategyId, userId)
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
         verify(strategyRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("공개 여부 변경 - 사용자 권한 없음")
+    void 전략_공개_여부_수정_테스트_4() {
+        Long strategyId = strategy.getStrategyId();
+        Long otherUserId = 2L; // 다른 사용자 ID
+        Strategy privateStrategy = Strategy.builder()
+                .strategyId(strategyId)
+                .isPublic(IsPublic.PRIVATE)
+                .user(user)
+                .build();
+
+        when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(privateStrategy));
+
+        BusinessException exception = assertThrows(
+                BusinessException.class,
+                () -> strategyService.updateVisibility(strategyId, otherUserId)
+        );
+
+        assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
+        verify(strategyRepository, times(1)).findById(strategyId);
     }
 
     @Test
@@ -249,11 +276,9 @@ class StrategyServiceTest {
         TradeType tradeType = tradeTypeList.get(0);
         Long tradeTypeId = tradeType.getTradeTypeId();
 
-        // Given
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(Optional.empty());
 
-        // When / Then
         BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> strategyService.registerStrategy(requestDto, userId)
@@ -280,7 +305,6 @@ class StrategyServiceTest {
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
         when(stockTypeRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // When / Then
         BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> strategyService.registerStrategy(requestDto, 1L)
@@ -368,10 +392,8 @@ class StrategyServiceTest {
                 .thenReturn(newProposalFilePath);
         when(s3FileService.getPreSignedUrl(newProposalFilePath)).thenReturn(presignedUrl);
 
-        // When
         PresignedUrlResponseDto response = strategyService.modifyStrategy(strategyId, requestDtoWithProposal, userId);
 
-        // Then
         assertEquals(presignedUrl, response.getPresignedUrl());
         verify(s3FileService, times(1)).deleteFromS3(proposalFilePath);
         verify(strategyRepository, times(1)).findById(strategyId);
@@ -391,7 +413,6 @@ class StrategyServiceTest {
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
-        // When / Then
         BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto, userId)
@@ -415,7 +436,6 @@ class StrategyServiceTest {
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        // When / Then
         BusinessException exception = assertThrows(
                 BusinessException.class,
                 () -> strategyService.modifyStrategy(strategyId, strategyModifyRequestDto, otherUserId)
