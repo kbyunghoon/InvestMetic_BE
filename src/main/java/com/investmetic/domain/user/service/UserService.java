@@ -228,11 +228,6 @@ public class UserService {
 
     //휴대번호를 통한 이메일 찾기
     public FoundEmailDto findEmailByPhone(String phone) {
-        boolean exists = userRepositoryCustom.existsByPhone(phone);
-        if (!exists) {
-            return new FoundEmailDto(false, null); //존재여부 먼저 확인
-        }
-
         String email = userRepository.findEmailByPhone(phone)
                 .orElse(null);  //이메일이 없어도 요청은 성공이므로 예외처리하지 않음
 
