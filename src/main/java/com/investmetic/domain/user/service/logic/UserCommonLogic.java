@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CommonLogic {
+public class UserCommonLogic {
 
     private final StrategyRepository strategyRepository;
     private final StrategyService strategyService;
@@ -39,15 +39,17 @@ public class CommonLogic {
                 strategy.minusSubscriptionCount();
             }
             // 모든 구독 지우기.
-            subscriptionRepository.deleteAll(userSubscriptionList);
+            subscriptionRepository.deleteAllInBatch(userSubscriptionList);
         }
 
         List<Review> userReviewList = reviewRepository.findAllByUserUserId(user.getUserId());
 
         // 자신이 남긴 모든 리뷰 목록 지우기.
         if (!userReviewList.isEmpty()) {
-            reviewRepository.deleteAll(userReviewList);
+            reviewRepository.deleteAllInBatch(userReviewList);
         }
+
+        // 문의 삭제 추가 필요.
 
         // 해당 유저가 투자자면 메서드 종료
         if (Role.isInvestor(user.getRole())) {
@@ -61,24 +63,7 @@ public class CommonLogic {
         if (!strategyList.isEmpty()) {
             // 자신의 전략 하나씩 순회.
             for (Strategy strategy : strategyList) {
-                //자신의 전략을 구독한 모든 구독 목록 조회
-                List<Subscription> strategySubscriptionList = subscriptionRepository.findAllByStrategyStrategyId(
-                        strategy.getStrategyId());
-
-                // 모든 구독 목록 삭제.
-                subscriptionRepository.deleteAll(strategySubscriptionList);
-
-                //자신의 전략의 모든 리뷰 목록 조회.
-                List<Review> strategyReviewList = reviewRepository.findAllByStrategy(strategy);
-
-                // 자신의 전략에 있는 리뷰 모두 삭제.
-                if(!strategyReviewList.isEmpty()){
-                    reviewRepository.deleteAll(strategyReviewList);
-                }
-
                 strategyService.deleteStrategy(strategy.getStrategyId());
-
-
             }
         }
     }

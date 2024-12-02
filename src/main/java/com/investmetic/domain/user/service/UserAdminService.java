@@ -8,10 +8,11 @@ import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.model.entity.UserHistory;
 import com.investmetic.domain.user.repository.UserRepository;
-import com.investmetic.domain.user.service.logic.CommonLogic;
+import com.investmetic.domain.user.service.logic.UserCommonLogic;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,8 @@ public class UserAdminService {
 
     private final UserRepository userRepository;
     private final StibeeEmailService stibeeEmailService;
-    private final CommonLogic commonLogic;
+    private final UserCommonLogic userCommonLogic;
+    private final S3FileService s3FileService;
 
 
     /**
@@ -89,7 +91,15 @@ public class UserAdminService {
         User deleteUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-        commonLogic.deleteUser(deleteUser);
+        userCommonLogic.deleteUser(deleteUser);
+
+        //회원이 프로필을 가지고 있다면 s3 객체 삭제.
+        if (!deleteUser.getImageUrl().isEmpty()) {
+            s3FileService.deleteFromS3(deleteUser.getImageUrl());
+        }
+
+        // 스티비 주소록에서 해당 회원 삭제.
+        stibeeEmailService.deleteSubscriber(deleteUser.getEmail());
 
         // 유저 정보 삭제.
         userRepository.delete(deleteUser);
