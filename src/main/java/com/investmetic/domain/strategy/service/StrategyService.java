@@ -176,8 +176,15 @@ public class StrategyService {
             );
 
             String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
+
+            s3FileService.deleteFromS3(strategy.getProposalFilePath());
+            strategy.modifyStrategyWithProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription(),
+                    proposalFilePath);
+
             return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
         } else {
+            strategy.modifyStrategyWithoutProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription());
+
             return null;
         }
     }
