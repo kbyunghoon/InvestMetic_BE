@@ -63,7 +63,7 @@ public class UserCommonLogic {
         if (!strategyList.isEmpty()) {
             // 자신의 전략 하나씩 순회.
             for (Strategy strategy : strategyList) {
-                strategyService.deleteStrategy(strategy.getStrategyId());
+                strategyService.deleteStrategy(strategy.getStrategyId(), user.getUserId());
             }
         }
     }

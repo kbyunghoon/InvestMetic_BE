@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
@@ -149,4 +150,25 @@ class UserServiceTest {
 
         assertTrue(result.getIsAvailable());
     }
+
+    @Test
+    @DisplayName("전화번호에 해당하는 이메일이 있을 때")
+    void findEmailByPhoneTest1() {
+        User user = createOneUser();
+
+        FoundEmailDto result = userService.findEmailByPhone(user.getPhone());
+
+        assertTrue(result.getIsFound());
+    }
+
+    @Test
+    @DisplayName("전화번호에 해당하는 이메일이 없을 때")
+    void findEmailByPhoneTest2() {
+        String phone = "없는 번호임";
+
+        FoundEmailDto result = userService.findEmailByPhone(phone);
+
+        assertFalse(result.getIsFound());
+    }
+
 }

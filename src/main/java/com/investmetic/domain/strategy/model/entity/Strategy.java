@@ -132,9 +132,16 @@ public class Strategy extends BaseEntity {
         this.smScore = 0.0;
     }
 
-    public void modifyStrategy(String strategyName, String strategyDescription) {
+    public void modifyStrategyWithoutProposalFilePath(String strategyName, String strategyDescription) {
         this.strategyName = strategyName;
         this.strategyDescription = strategyDescription;
+    }
+
+    public void modifyStrategyWithProposalFilePath(String strategyName, String strategyDescription,
+                                                   String proposalFilePath) {
+        this.strategyName = strategyName;
+        this.strategyDescription = strategyDescription;
+        this.proposalFilePath = proposalFilePath;
     }
 
     public void modifyStrategyProposalFilePath(String proposalFilePath) {

@@ -45,6 +45,9 @@ public class DailyAnalysisScheduler {
             // 최대 일간 이익 및 최대 일간 손실률 계산
             // 최대 일간 이익 (손익이 양수일 경우 해당 값, 그렇지 않으면 0)
             Long maxDailyProfit = Math.max(currentAnalysis.getDailyProfitLoss(), 0);
+
+            Long maxDailyLoss = Math.min(currentAnalysis.getDailyProfitLoss(), 0);
+
             // 최대 일간 손실률 (손익률이 음수일 경우 해당 값, 양수일 경우 0)
             double maxDailyLossRate = dailyProfitLossRate < 0 ? dailyProfitLossRate : 0;
 
@@ -131,6 +134,7 @@ public class DailyAnalysisScheduler {
                     .cumulativeDeposit(0L)
                     .withdrawal(0L)
                     .cumulativeWithdrawal(0L)
+                    .maxDailyLoss(maxDailyLoss)
                     .dailyProfitLossRate(RoundUtil.roundToFifth(dailyProfitLossRate))
                     .maxDailyProfit(maxDailyProfit)
                     .maxDailyProfitRate(RoundUtil.roundToFifth(dailyProfitLossRate))
@@ -254,6 +258,13 @@ public class DailyAnalysisScheduler {
                 .filter(rate -> rate > 0)
                 .max()
                 .orElse(0.0);
+
+        // 최대 일간 손실
+        long maxDailyLoss = beforeDatas.stream()
+                .mapToLong(DailyAnalysis::getDailyProfitLoss)
+                .filter(profitLoss -> profitLoss < 0)
+                .min()
+                .orElse(0L);
 
         // 최대 일간 손실률
         double maxDailyLossRate = beforeDatas.stream()
@@ -462,6 +473,7 @@ public class DailyAnalysisScheduler {
                 .sharpRatio(RoundUtil.roundToFifth(sharpRatio))
                 .maxDrawDownInRate(RoundUtil.roundToFifth(maxDrawDownInRate))
                 .drawDownPeriod(drawDownPeriod)
+                .maxDailyLoss(maxDailyLoss)
                 .proceed(Proceed.YES)
                 .build();
 
