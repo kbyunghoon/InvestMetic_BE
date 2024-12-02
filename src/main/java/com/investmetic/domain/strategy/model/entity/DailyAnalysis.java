@@ -87,6 +87,9 @@ public class DailyAnalysis extends BaseEntity {
     private Double maxDailyProfitRate = 0.0; // 최대 일간 이익률
 
     @Builder.Default
+    private Long maxDailyLoss = 0L;
+
+    @Builder.Default
     private Double maxDailyLossRate = 0.0; // 최대 일간 손실률
 
     @Builder.Default

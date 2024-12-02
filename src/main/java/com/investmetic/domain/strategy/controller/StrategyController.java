@@ -56,11 +56,14 @@ public class StrategyController {
     private final StrategyListingService strategyListingService;
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
-            @RequestBody StrategyRegisterRequestDto requestDto) {
+            @RequestBody StrategyRegisterRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        return BaseResponse.success(SuccessCode.CREATED, strategyService.registerStrategy(requestDto));
+        return BaseResponse.success(SuccessCode.CREATED,
+                strategyService.registerStrategy(requestDto, customUserDetails.getUserId()));
     }
 
     @GetMapping("/register")
@@ -72,23 +75,27 @@ public class StrategyController {
     }
 
     @GetMapping("/modify/{strategyId}")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 수정 페이지 진입 시 해당 전략 정보 조회", description = "<a href='https://field-sting-eff.notion.site/b5f3a515edd6479f8c22a40732b42475?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
-            @PathVariable Long strategyId
+            @PathVariable Long strategyId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
 
-        return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId));
+        return BaseResponse.success(strategyService.loadStrategyModifyInfo(strategyId, customUserDetails.getUserId()));
     }
 
     @PostMapping("/modify/{strategyId}")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 수정", description = "<a href='https://field-sting-eff.notion.site/cec6a33cd3ba4d598fd31793c6d086cc?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> modifyStrategyInfo(
             @PathVariable Long strategyId,
-            @RequestBody StrategyModifyRequestDto requestDto
+            @RequestBody StrategyModifyRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
 
         return BaseResponse.success(SuccessCode.UPDATED,
-                strategyService.modifyStrategy(strategyId, requestDto));
+                strategyService.modifyStrategy(strategyId, requestDto, customUserDetails.getUserId()));
     }
 
     @PostMapping("/{strategyId}/daily-analysis")
@@ -119,19 +126,23 @@ public class StrategyController {
     }
 
     @PatchMapping("/{strategyId}/visibility")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 공개 여부 수정 기능", description = "<a href='https://field-sting-eff.notion.site/6a8af82e40814e6db1da806409bc50d7?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> updateStrategyVisibility(
-            @PathVariable Long strategyId
+            @PathVariable Long strategyId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        strategyService.updateVisibility(strategyId);
+        strategyService.updateVisibility(strategyId, customUserDetails.getUserId());
 
         return BaseResponse.success(SuccessCode.UPDATED);
     }
 
     @DeleteMapping("/{strategyId}")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId) {
-        strategyService.deleteStrategy(strategyId);
+    public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId,
+                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        strategyService.deleteStrategy(strategyId, customUserDetails.getUserId());
 
         return BaseResponse.success();
     }
