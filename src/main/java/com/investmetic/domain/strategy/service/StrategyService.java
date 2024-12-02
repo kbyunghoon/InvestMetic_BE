@@ -116,17 +116,12 @@ public class StrategyService {
 
     @Transactional
     public PresignedUrlResponseDto registerStrategy(
-            StrategyRegisterRequestDto requestDto) {
-        // TODO: 추후 삭제 ----------
-        // TODO: 유저 가져오기, tradeType 가져오기, stockType 추가 예정
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
-        // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
-        TradeType tradeType = tradeTypeRepository.findByTradeTypeId(requestDto.getTradeTypeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
-        // TODO: 추후 삭제 ----------
+            StrategyRegisterRequestDto requestDto, Long userId) {
+        User user = verifyUser(userId);
 
-        // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
+        TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+
         String proposalFilePath = s3FileService.getS3Path(
                 FilePath.STRATEGY_PROPOSAL,
                 requestDto.getProposalFile().getProposalFileName(),
@@ -135,7 +130,6 @@ public class StrategyService {
 
         String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
-        // 3. Strategy 생성 및 저장
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
@@ -243,5 +237,10 @@ public class StrategyService {
                 .tradeTypes(tradeTypes)
                 .stockTypes(stockTypes)
                 .build();
+    }
+
+    private User verifyUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
     }
 }

@@ -56,11 +56,14 @@ public class StrategyController {
     private final StrategyListingService strategyListingService;
 
     @PostMapping("/register")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
-            @RequestBody StrategyRegisterRequestDto requestDto) {
+            @RequestBody StrategyRegisterRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        return BaseResponse.success(SuccessCode.CREATED, strategyService.registerStrategy(requestDto));
+        return BaseResponse.success(SuccessCode.CREATED,
+                strategyService.registerStrategy(requestDto, customUserDetails.getUserId()));
     }
 
     @GetMapping("/register")
