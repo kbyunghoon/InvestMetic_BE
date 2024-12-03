@@ -192,7 +192,7 @@ class UserServiceTest {
         User updatedUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
 
-        userMyPageService.changeUserInfo(userModifyDto, userModifyDto.getEmail());
+        userMyPageService.resetPassword(userModifyDto, userModifyDto.getEmail());
         assertTrue(passwordEncoder.matches(newPassword, updatedUser.getPassword())); //비밀번호 재설정 됐는지 확인
         assertFalse(passwordEncoder.matches(user.getPassword(), updatedUser.getPassword())); //기존 비밀번호와 비교
     }

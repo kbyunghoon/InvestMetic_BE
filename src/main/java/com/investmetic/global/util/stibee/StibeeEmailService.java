@@ -211,7 +211,7 @@ public class StibeeEmailService {
 //         response.getBody() -> inputStream
         String response = autoApiStibeeClient.sendAuthenticationCode(emailAndCode);
         if (!"ok".equals(response)) {
-            throw new BusinessException(ErrorCode.EMAIL_SEND_FAILED);
+            throw new BusinessException(ErrorCode.USERS_NOT_FOUND);
         }
 
         return true;

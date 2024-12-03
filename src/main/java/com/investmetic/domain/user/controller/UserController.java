@@ -110,7 +110,7 @@ public class UserController {
     public ResponseEntity<BaseResponse<String>> resetPassword(
             @RequestBody UserModifyDto userModifyDto) {
 
-        userMyPageService.changeUserInfo(userModifyDto, userModifyDto.getEmail());
+        userMyPageService.resetPassword(userModifyDto, userModifyDto.getEmail());
         return BaseResponse.success(SuccessCode.OK);
     }
 }
