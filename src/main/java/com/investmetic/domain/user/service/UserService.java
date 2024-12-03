@@ -105,38 +105,50 @@ public class UserService {
 
 
     public AvaliableDto checkNicknameDuplicate(String nickname) {
+        if (nickname == null || nickname.trim().isEmpty()) {
+            return new AvaliableDto(false,"닉네임을 입력해주세요."); // 적절한 에러코드 사용
+        }
 
+        String nicknamePattern = "^[a-zA-Z가-힣0-9._-]{2,10}$";
+
+        if (!nickname.matches(nicknamePattern)) {
+            return new AvaliableDto(false,"닉네임은 2~10자 이내로 설정해야 하며, 특수문자는 ., _, -만 사용할 수 있습니다."); // 적절한 에러코드 사용
+        }
         boolean isDuplicate = userRepository.existsByNickname(nickname);
 
         // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return new AvaliableDto(false,"이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.");
         } else {
-            return new AvaliableDto(true);
+            return new AvaliableDto(true,"사용 가능한 닉네임입니다.");
         }
     }
 
     public AvaliableDto checkEmailDuplicate(String email) {
-
+        if (email == null || email.trim().isEmpty()) {
+            return new AvaliableDto(false,"이메일을 입력해주세요."); // 적절한 에러코드 사용
+        }
         boolean isDuplicate = userRepository.existsByEmail(email);
 
         // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return new AvaliableDto(false,"이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요.");
         } else {
-            return new AvaliableDto(true);
+            return new AvaliableDto(true,"사용 가능한 이메일입니다.");
         }
     }
 
     public AvaliableDto checkPhoneDuplicate(String phone) {
-
+        if (phone == null || phone.trim().isEmpty()) {
+            return new AvaliableDto(false,"휴대번호를 입력해주세요."); // 적절한 에러코드 사용
+        }
         boolean isDuplicate = userRepository.existsByPhone(phone);
 
         // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return new AvaliableDto(false,"이미 사용 중인 휴대번호입니다. 다른 휴대번호를 입력해주세요.");
         } else {
-            return new AvaliableDto(true);
+            return new AvaliableDto(true,"사용 가능한 휴대번호입니다.");
         }
     }
 
