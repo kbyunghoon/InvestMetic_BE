@@ -44,5 +44,6 @@ public class MainPageController {
     @GetMapping("/total-strategies-metrics")
     public ResponseEntity<BaseResponse<TotalStrategyMetricsResponseDto>> getTotalStrategyMetrics() {
         return BaseResponse.success(mainPageService.getMetricsByDateRange());
+
     }
 }

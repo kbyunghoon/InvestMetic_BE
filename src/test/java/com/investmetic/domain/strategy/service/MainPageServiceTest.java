@@ -20,5 +20,6 @@ public class MainPageServiceTest {
         TotalStrategyMetricsResponseDto dto =mainPageService.getMetricsByDateRange();
         System.out.println(dto.getData());
         System.out.println(dto.getDates());
+        System.out.println(dto.getDates().size());
     }
 }

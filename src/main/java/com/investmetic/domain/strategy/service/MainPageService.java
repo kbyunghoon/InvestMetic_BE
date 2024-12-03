@@ -38,24 +38,10 @@ public class MainPageService {
         return fillProfitRateChartData(contents);
     }
 
-    public TotalStrategyMetricsResponseDto getTotalStrategyMetrics(LocalDate endDate) {
-
-        LocalDate startDate = endDate.minusYears(1);
-        return TotalStrategyMetricsResponseDto.builder()
-                .dates(dailyAnalysisRepository.findTotalStrategyMetricsXAxis(startDate, endDate)).build();
-    }
-
-    private List<TopRankingStrategyResponseDto> fillProfitRateChartData(List<TopRankingStrategyResponseDto> contents) {
-        contents.forEach(response -> {
-            Long strategyId = response.getStrategyId();
-            List<Double> profitRateData = strategyRepository.findProfitRateData(strategyId);
-            response.updateProfitRateChartData(profitRateData);
-        });
-        return contents;
-    }
     public TotalStrategyMetricsResponseDto getMetricsByDateRange() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+        // fixme 현제 시간으로 바뀌어야 됨
         LocalDate endDate = LocalDate.of(2023,12,13);
         LocalDate startDate = endDate.minusYears(1);
         // 네이티브 쿼리 실행
@@ -84,6 +70,15 @@ public class MainPageService {
                 .dates(dates)
                 .data(data)
                 .build();
+    }
+    
+    private List<TopRankingStrategyResponseDto> fillProfitRateChartData(List<TopRankingStrategyResponseDto> contents) {
+        contents.forEach(response -> {
+            Long strategyId = response.getStrategyId();
+            List<Double> profitRateData = strategyRepository.findProfitRateData(strategyId);
+            response.updateProfitRateChartData(profitRateData);
+        });
+        return contents;
     }
 
 }

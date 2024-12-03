@@ -83,13 +83,14 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
 
     // 대표 전략 통합전략 지표 조회
     @Query(value = """
-        SELECT
+
+            SELECT
             DA.daily_date,
             AVG(DA.reference_price) AS avg_reference_price,
-            (
+            coalesce((
                 SELECT DA2.reference_price
                 FROM daily_analysis AS DA2
-                JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
+                         JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
                 WHERE st.strategy_id = (
                     SELECT st1.strategy_id
                     FROM strategy AS st1
@@ -98,13 +99,12 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
                     )
                     LIMIT 1
                 )
-                AND DA2.daily_date = DA.daily_date
-                LIMIT 1
-            ) AS highest_sm_score_reference_price,
-            (
+                  AND DA2.daily_date = DA.daily_date
+            ),0) AS highest_sm_score_reference_price,
+            coalesce((
                 SELECT DA2.reference_price
                 FROM daily_analysis AS DA2
-                JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
+                         JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
                 WHERE st.strategy_id = (
                     SELECT st1.strategy_id
                     FROM strategy AS st1
@@ -113,9 +113,8 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
                     )
                     LIMIT 1
                 )
-                AND DA2.daily_date = DA.daily_date
-                LIMIT 1
-            ) AS highest_subscribe_score_reference_price
+                  AND DA2.daily_date = DA.daily_date
+            ),0) AS highest_subscribe_score_reference_price
         FROM
             daily_analysis AS DA
         WHERE

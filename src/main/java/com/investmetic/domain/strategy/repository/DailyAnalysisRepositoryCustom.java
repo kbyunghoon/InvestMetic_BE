@@ -23,7 +23,7 @@ public interface DailyAnalysisRepositoryCustom {
 
     Page<DailyAnalysisResponse> findMyDailyAnalysis(Long strategyId, Pageable pageable);
 
-    List<String> findTotalStrategyMetricsXAxis(LocalDate startDate, LocalDate endDate);
 
-    Map<String, List<Double>> findTotalStrategyMetricsYAxis(LocalDate startDate, LocalDate endDate);
+
+
 }
