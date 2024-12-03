@@ -20,9 +20,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -56,15 +54,6 @@ public class S3FileService {
     @Value("${cloud.aws.s3.defaultImgPath}")
     private String bucketPath;
 
-    private static final HashSet<String> imgExtensionSet;
-    private static final HashSet<String> excelExtensionSet;
-    private static final HashSet<String> docsExtensionSet;
-
-    static {
-        imgExtensionSet = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
-        excelExtensionSet = new HashSet<>(Arrays.asList("xls", "xlsx"));
-        docsExtensionSet = new HashSet<>(Arrays.asList("doc", "docx", "pptx", "ppt"));
-    }
 
     public S3FileService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
@@ -81,111 +70,17 @@ public class S3FileService {
      * @return DB에 저장될 S3경로.
      */
     public String getS3Path(FilePath filePath, String fileName, int size) {
-
-        //전략 엑셀.
-        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
-            //확장자가 틀리거나 500MB이상 인지 확인
-            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-            //전략 이미지, 유저 프로필 사진
-        } else if (filePath.equals(FilePath.STRATEGY_IMAGE) || filePath.equals(FilePath.USER_PROFILE)) {
-            //확장자가 틀리거나 2MB이상인지 확인
-            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-            //공지사항.
-        } else if (filePath.equals(FilePath.NOTICE)) {
-            //확장자가 틀리거나 5MB이상인지 확인
-            if (!filterNoticeExtension(fileName) || size >= 1024 * 1024 * 5) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-        } else {
-
-            // 아무것도 아닌경우. - 이럴 일은 없겠지만...
-            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-        }
-
-        //객체 URL 경로 반환.(도메인 경로 포함)
+        validateFile(filePath, fileName, size);
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
-
     /**
-     * 전략별 폴더를 만들기위한 메서드.
-     * */
-    public String getStrategyS3Path(FilePath filePath, Long strategyId , String fileName, int size) {
-
-        // strategy/{strategy_id}/excel 이렇게 가야할거로 보임.
-
-        //전략 엑셀.
-        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
-            //확장자가 틀리거나 500MB이상 인지 확인
-            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-        }else if(filePath.equals(FilePath.STRATEGY_IMAGE)){
-            //전략 이미지,
-            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-        }else{
-            // 전략이 아닌거로 들어오는경우.
+     * 파일 검증 로직
+     */
+    private void validateFile(FilePath filePath, String fileName, int size) {
+        if (!filePath.isValidExtension(fileName) || size >= filePath.getMaxSize()) {
             throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
         }
-
-        // strategy/{strategyId}/strategy/excel/{UUID}{fileName}
-        return prefixFilePath("strategy",strategyId + filePath.getPath() + createUUID8() + fileName);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 imgExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
-     */
-    private boolean filterImageExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환.
-        return imgExtensionSet.contains(extension);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 excelExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
-     */
-    private boolean filterExcelExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환. O(n)이지만 가독성을 위해...
-        return excelExtensionSet.contains(extension);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 imgExtensionList나 docsExtensionList에 해당하는지 확인.
-     *
-     * @param filename 확장자가 붙은 파일 이름.
-     */
-    private boolean filterNoticeExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        //공치사항에 올릴 파일이 이미지 확장자에 해당하는지 검증.
-        if (filterImageExtension(extension)) {
-            return true;
-        }
-
-        //공지사항헤 올릴 파일이 doc이나 ppt 종류에 해당하는지 검증.
-        return docsExtensionSet.contains(extension);
-
     }
 
     /**
@@ -197,7 +92,6 @@ public class S3FileService {
     private String prefixFilePath(String filePath, String fileName) {
         return String.format("%s%s%s", bucketPath, filePath, fileName);
     }
-
 
     /**
      * AWS에게서 presigned url을 요청한다.
@@ -270,17 +164,16 @@ public class S3FileService {
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
         } catch (Exception e) {
             //실패시
-            throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
+            throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
         }
     }
 
     /**
-     * s3내 폴더 삭제.
-     * AWS CLI나 S3 Batch Operations이 비용이 적다고함.
+     * s3내 폴더 삭제. AWS CLI나 S3 Batch Operations이 비용이 적다고함.
      *
      * @param folderKey ex- strategy/{strategyId}/
      * @see <a href = "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html"> deleteObjects </a>
-     * */
+     */
     public void deleteStrategyFolder(String folderKey) {
 
         ObjectListing objectListing = new ObjectListing();
@@ -288,11 +181,11 @@ public class S3FileService {
         // folderKey와 매칭되는 하위경로 객체 최대 1000개까지의 반환.
         try {
             objectListing = amazonS3.listObjects(bucketName, folderKey);
-        }catch (SdkClientException e){
+        } catch (SdkClientException e) {
             log.error("Loading error in S3 : {}", folderKey);
         }
 
-        if(objectListing.getObjectSummaries().isEmpty()){
+        if (objectListing.getObjectSummaries().isEmpty()) {
             // key 하위의 객체가 없다면 return;
             return;
         }
