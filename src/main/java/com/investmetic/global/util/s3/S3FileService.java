@@ -74,6 +74,7 @@ public class S3FileService {
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
+
     public String getS3StrategyPath(FilePath filePath, Long strategyId, String fileName, int size) {
         validateFile(filePath, fileName, size);
         return prefixFilePath(filePath.getStrategyPath(strategyId), createUUID8() + fileName);

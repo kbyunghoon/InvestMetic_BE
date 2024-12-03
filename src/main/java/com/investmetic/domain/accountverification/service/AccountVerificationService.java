@@ -42,8 +42,9 @@ public class AccountVerificationService {
 
         // 요청된 각 파일에 대해 Presigned URL 생성 및 추가
         for (AccountImageRequestDto accountImageRequestDto : requestDtoList) {
-            String filePath = s3FileService.getS3Path(
+            String filePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_IMAGE,
+                    strategyId,
                     accountImageRequestDto.getFileName(),
                     accountImageRequestDto.getFileSize()
             );
@@ -99,7 +100,7 @@ public class AccountVerificationService {
 //            if (imageEntity.getCreatedBy() != user) {
 //                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
 //            }
-            
+
             accountVerificationRepository.delete(imageEntity);
         }
     }

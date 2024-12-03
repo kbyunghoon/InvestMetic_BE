@@ -160,25 +160,27 @@ public class StrategyService {
         TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
 
-        String proposalFilePath = s3FileService.getS3Path(
-                FilePath.STRATEGY_PROPOSAL,
-                requestDto.getProposalFile().getProposalFileName(),
-                requestDto.getProposalFile().getProposalFileSize()
-        );
-
-        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
-
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
                 .tradeType(tradeType)
                 .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
-                .proposalFilePath(proposalFilePath)
                 .strategyDescription(requestDto.getDescription())
                 .build();
 
-        strategyRepository.save(strategy);
+        Long strategyId = strategyRepository.save(strategy).getStrategyId();
+
+        String proposalFilePath = s3FileService.getS3StrategyPath(
+                FilePath.STRATEGY_PROPOSAL,
+                strategyId,
+                requestDto.getProposalFile().getProposalFileName(),
+                requestDto.getProposalFile().getProposalFileSize()
+        );
+
+        strategy.modifyStrategyProposalFilePath(proposalFilePath);
+
+        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
         requestDto.getStockTypeIds().forEach(stockTypeId -> {
             StockType stockType = stockTypeRepository.findById(stockTypeId)
@@ -207,8 +209,9 @@ public class StrategyService {
         verifyUserPermission(strategy, userId);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
-            String proposalFilePath = s3FileService.getS3Path(
+            String proposalFilePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_PROPOSAL,
+                    strategyId,
                     requestDto.getProposalFile().getProposalFileName(),
                     requestDto.getProposalFile().getProposalFileSize()
             );
