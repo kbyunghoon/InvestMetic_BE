@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -58,7 +57,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
 
 
     @Override
-    public Optional<StrategyDetailResponse> findStrategyDetail(Long strategyId) {
+    public StrategyDetailResponse findStrategyDetail(Long strategyId) {
 
         // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
@@ -71,7 +70,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // StockTypeInfo로 변환
         StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
-        StrategyDetailResponse response = queryFactory
+        return queryFactory
                 .select(new QStrategyDetailResponse(
                         strategy.strategyName,
                         Expressions.constant(stockTypeInfo),
@@ -94,17 +93,15 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategyStatistics.finalProfitLossDate,
                         strategy.createdAt))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
-
-        return Optional.ofNullable(response);
     }
 
     @Override
-    public Optional<MyStrategyDetailResponse> findMyStrategyDetail(Long strategyId) {
+    public MyStrategyDetailResponse findMyStrategyDetail(Long strategyId) {
 
         // 종목 정보 가져오기
         List<Tuple> stockTypes = queryFactory
@@ -117,7 +114,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // StockTypeInfo로 변환
         StockTypeInfo stockTypeInfo = getStockTypeInfo(stockTypes);
 
-        MyStrategyDetailResponse response = queryFactory
+        return queryFactory
                 .select(new QMyStrategyDetailResponse(
                         strategy.strategyName,
                         tradeType.tradeTypeIconUrl,
@@ -137,13 +134,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isPublic,
                         strategy.isApproved))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(strategy.strategyId.eq(strategyId))
                 .fetchOne();
-
-        return Optional.ofNullable(response);
     }
 
     private @NotNull StockTypeInfo getStockTypeInfo(List<Tuple> stockTypes) {
@@ -184,7 +179,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.reviewCount
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(isApprovedAndPublic(), applyAllFilters(searchRequest))
@@ -230,7 +225,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isPublic
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .where(user.userId.eq(userId))
@@ -271,12 +266,12 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.reviewCount
                 ))
                 .from(strategy)
-                .join(strategy.strategyStatistics, strategyStatistics)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
                 .join(strategy.tradeType, tradeType)
                 .join(strategy.user, user)
                 .join(subscription).on(subscription.strategy.eq(strategy))  // 구독 테이블 조인
                 .where(isApprovedAndPublic(), subscription.user.userId.eq(userId))
-                .orderBy(strategyStatistics.cumulativeProfitRate.desc()) // 누적수익률으로 정렬
+                .orderBy(subscription.createdAt.desc()) // 최근 구독순으로 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -297,21 +292,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     private OrderSpecifier<?> getOrderByAlgorithm(AlgorithmType algorithmType) {
         return algorithmType != null ? algorithmType.getOrderSpecifier(strategyStatistics)
                 : strategyStatistics.cumulativeProfitRate.desc();
-    }
-
-    // 수익률 그래프 데이터 조회 배치 쿼리
-    @Override
-    public Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIds) {
-        return queryFactory
-                .select(dailyAnalysis.strategy.strategyId, dailyAnalysis.dailyDate.stringValue(),
-                        dailyAnalysis.cumulativeProfitLossRate)
-                .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.in(strategyIds))
-                .fetch()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        tuple -> tuple.get(dailyAnalysis.strategy.strategyId)
-                ));
     }
 
     // 종목 아이콘목록 조회 배치 쿼리
@@ -381,6 +361,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .limit(limit)
                 .fetch();
     }
+
     @Override
     public List<Double> findProfitRateData(Long strategyId) {
         return queryFactory
@@ -389,9 +370,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .where(strategy.strategyId.eq(strategyId))
                 .fetch();
     }
+
     @Override
-    public Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord, IsApproved isApproved){
-        List<AdminStrategyResponseDto> strategies=queryFactory
+    public Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord,
+                                                              IsApproved isApproved) {
+        List<AdminStrategyResponseDto> strategies = queryFactory
                 .select(new QAdminStrategyResponseDto(
                         strategy.createdAt,
                         strategy.strategyId,
@@ -401,7 +384,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isApproved
                 ))
                 .from(strategy)
-                .where(applySearchWordFilter(searchWord),applyIsApprovedFilter(isApproved))
+                .where(applySearchWordFilter(searchWord), applyIsApprovedFilter(isApproved))
                 .orderBy(strategy.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

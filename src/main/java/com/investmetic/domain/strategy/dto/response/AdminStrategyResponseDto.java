@@ -1,13 +1,9 @@
 package com.investmetic.domain.strategy.dto.response;
 
-import com.investmetic.domain.strategy.dto.ProfitRateChartDto;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
-import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
 import lombok.Getter;
 
 @Getter

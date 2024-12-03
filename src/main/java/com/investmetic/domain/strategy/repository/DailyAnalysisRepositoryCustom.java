@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.repository;
 
+import com.investmetic.domain.strategy.dto.AnalysisDataDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.StrategyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.TotalStrategyMetricsResponseDto;
@@ -11,11 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface DailyAnalysisRepositoryCustom {
-    StrategyAnalysisResponse findStrategyAnalysis(Long strategyId, AnalysisOption option1, AnalysisOption option2);
 
-    List<String> findXAxis(Long strategyId);
+    List<AnalysisDataDto> findSingleOptionAnalysisData(Long strategyId, AnalysisOption option);
 
-    List<Double> findYAxis(Long strategyId, AnalysisOption option);
+    StrategyAnalysisResponse findStrategyAnalysisData(Long strategyId, AnalysisOption option1, AnalysisOption option2);
 
     Page<DailyAnalysisResponse> findByStrategyId(Long strategyId, Pageable pageable);
 

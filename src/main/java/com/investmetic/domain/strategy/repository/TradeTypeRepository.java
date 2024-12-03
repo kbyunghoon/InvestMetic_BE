@@ -12,4 +12,7 @@ public interface TradeTypeRepository extends JpaRepository<TradeType, Long> {
     List<TradeType> findByActivateStateTrue();
 
     Optional<TradeType> findByTradeTypeId(Long tradeTypeId);
+
+    Optional<TradeType> findByTradeTypeIdAndActivateStateTrue(Long tradeTypeId);
+
 }

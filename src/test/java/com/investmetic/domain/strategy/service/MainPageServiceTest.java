@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+//Todo : 테스트 코드 작성 및 개선 예정
 @SpringBootTest
 @Transactional
 public class MainPageServiceTest {
