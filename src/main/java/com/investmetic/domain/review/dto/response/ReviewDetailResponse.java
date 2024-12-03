@@ -3,7 +3,10 @@ package com.investmetic.domain.review.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.investmetic.domain.review.model.entity.Review;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Getter
@@ -21,8 +24,8 @@ public class ReviewDetailResponse {
     public static ReviewDetailResponse from(Review review) {
         return new ReviewDetailResponse(
                 review.getReviewId(),
-                review.getNickname(),
                 review.getContent(),
+                review.getNickname(),
                 review.getUser().getImageUrl(),
                 review.getCreatedAt(),
                 review.getStarRating()
