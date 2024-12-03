@@ -3,14 +3,10 @@ package com.investmetic.domain.review.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.investmetic.domain.review.model.entity.Review;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class ReviewDetailResponse {
     private final Long reviewId;
     private final String content;
@@ -20,15 +16,25 @@ public class ReviewDetailResponse {
     private final LocalDateTime createdAt;
     private final int starRating;
 
-    // 정적 팩토리 메서드
+    @Builder
+    private ReviewDetailResponse(Long reviewId, String content, String nickname, String imageUrl,
+                                 LocalDateTime createdAt, int starRating) {
+        this.reviewId = reviewId;
+        this.content = content;
+        this.nickname = nickname;
+        this.imageUrl = imageUrl;
+        this.createdAt = createdAt;
+        this.starRating = starRating;
+    }
+
     public static ReviewDetailResponse from(Review review) {
-        return new ReviewDetailResponse(
-                review.getReviewId(),
-                review.getContent(),
-                review.getNickname(),
-                review.getUser().getImageUrl(),
-                review.getCreatedAt(),
-                review.getStarRating()
-        );
+        return ReviewDetailResponse.builder()
+                .reviewId(review.getReviewId())
+                .content(review.getContent())
+                .nickname(review.getNickname())
+                .imageUrl(review.getUser().getImageUrl())
+                .createdAt(review.getCreatedAt())
+                .starRating(review.getStarRating())
+                .build();
     }
 }
