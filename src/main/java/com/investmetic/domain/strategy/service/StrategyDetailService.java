@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.accountverification.dto.response.AccountImagesResponseDto;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.strategy.dto.AnalysisDataDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MonthlyAnalysisResponse;
 import com.investmetic.domain.strategy.dto.response.MyStrategyDetailResponse;
@@ -38,7 +39,9 @@ public class StrategyDetailService {
     private final SubscriptionRepository subscriptionRepository;
     private final AccountVerificationRepository accountVerificationRepository;
 
-    // 통계 조회
+    /**
+     * 전략 통계 조회
+     */
     public StrategyStatisticsResponse getStatistics(Long strategyId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
@@ -51,25 +54,33 @@ public class StrategyDetailService {
         return StrategyStatisticsResponse.from(stats);
     }
 
-    // 일간 분석 조회
+    /**
+     * 일간 분석 데이터 조회
+     */
     public PageResponseDto<DailyAnalysisResponse> getDailyAnalysis(Long strategyId, Pageable pageable) {
+        validateStrategyExists(strategyId);
         Page<DailyAnalysisResponse> page = dailyAnalysisRepository.findByStrategyId(strategyId, pageable);
-
         return new PageResponseDto<>(page);
     }
 
-    // 월간 분석 조회
+    /**
+     * 월간 분석 데이터 조회
+     */
     public PageResponseDto<MonthlyAnalysisResponse> getMonthlyAnalysis(Long strategyId, Pageable pageable) {
+        validateStrategyExists(strategyId);
         Page<MonthlyAnalysisResponse> page = monthlyAnalysisRepository.findByStrategyId(strategyId, pageable)
                 .map(MonthlyAnalysisResponse::from);
 
         return new PageResponseDto<>(page);
     }
 
-    // 전략 상세 조회 (전략 상세페이지)
+    /**
+     * 전략 상세 데이터 조회
+     */
     public StrategyDetailResponse getStrategyDetail(Long strategyId, Long userId) {
-        StrategyDetailResponse strategyDetail = strategyRepository.findStrategyDetail(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+        validateStrategyExists(strategyId);
+
+        StrategyDetailResponse strategyDetail = strategyRepository.findStrategyDetail(strategyId);
 
         // 구독여부 체크
         boolean isSubscribed = subscriptionRepository.existsByStrategyIdAndUserId(strategyId, userId);
@@ -80,21 +91,28 @@ public class StrategyDetailService {
         return strategyDetail;
     }
 
-    // 나의 전략 상세 조회(마이페이지)
+    /**
+     * 나의 전략 상세 데이터 조회
+     */
     public MyStrategyDetailResponse getMyStrategyDetail(Long strategyId) {
-        return strategyRepository.findMyStrategyDetail(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+        validateStrategyExists(strategyId);
+        return strategyRepository.findMyStrategyDetail(strategyId);
     }
 
-    // 전략 분석 조회
+    /**
+     * 전략 분석 데이터 조회
+     */
     public StrategyAnalysisResponse getStrategyAnalysis(Long strategyId, AnalysisOption option1,
                                                         AnalysisOption option2) {
         validateOption(option1, option2);
+        validateStrategyExists(strategyId);
 
+        // 동일 옵션 처리
         if (option1.equals(option2)) {
-            return getSingleStrategyAnalysis(option1, strategyId);
+            return getSingleOptionAnalysis(strategyId, option1);
         }
-        return dailyAnalysisRepository.findStrategyAnalysis(strategyId, option1, option2);
+        return dailyAnalysisRepository.findStrategyAnalysisData(strategyId, option1, option2);
+
     }
 
     private void validateOption(AnalysisOption option1, AnalysisOption option2) {
@@ -103,32 +121,59 @@ public class StrategyDetailService {
         }
     }
 
-    // 분석 옵션이 같을때 처리
-    private StrategyAnalysisResponse getSingleStrategyAnalysis(AnalysisOption option, Long strategyId) {
-        List<String> xAxis = dailyAnalysisRepository.findXAxis(strategyId);
-        List<Double> yAxis = dailyAnalysisRepository.findYAxis(strategyId, option);
+    private StrategyAnalysisResponse getSingleOptionAnalysis(Long strategyId, AnalysisOption option) {
+        List<AnalysisDataDto> data = dailyAnalysisRepository.findSingleOptionAnalysisData(strategyId, option);
+
+        List<String> dates = data.stream()
+                .map(AnalysisDataDto::getDate)
+                .toList();
+
+        List<Double> yAxis = data.stream()
+                .map(AnalysisDataDto::getYAxis)
+                .toList();
 
         return StrategyAnalysisResponse.builder()
-                .dates(xAxis)
+                .dates(dates)
                 .data(Map.of(option.name(), yAxis))
                 .build();
     }
 
+    /**
+     * 일간 분석 데이터 엑셀 다운로드용 조회
+     */
     public List<DailyAnalysisResponse> getDailyAnalysisExcelData(Long strategyId) {
+        validateStrategyExists(strategyId);
         return dailyAnalysisRepository.findDailyAnalysisForExcel(strategyId);
     }
 
+    /**
+     * 월간 분석 데이터 엑셀 다운로드용 조회
+     */
     public List<MonthlyAnalysisResponse> getMonthlyAnalysisExcelData(Long strategyId) {
+        validateStrategyExists(strategyId);
         return monthlyAnalysisRepository.findByStrategyStrategyId(strategyId)
                 .stream()
                 .map(MonthlyAnalysisResponse::from)
                 .toList();
     }
 
+    /**
+     * 전략 계좌 이미지 데이터 조회
+     */
     public PageResponseDto<AccountImagesResponseDto> getAccountImages(Long strategyId, Pageable pageable) {
+        validateStrategyExists(strategyId);
         Page<AccountImagesResponseDto> result = accountVerificationRepository.findByStrategyId(strategyId, pageable)
                 .map(AccountImagesResponseDto::createAccountImages);
         return new PageResponseDto<>(result);
+    }
+
+    /**
+     * 전략 존재 여부 검증
+     */
+    private void validateStrategyExists(Long strategyId) {
+        if (!strategyRepository.existsByStrategyId(strategyId)) {
+            throw new BusinessException(ErrorCode.STRATEGY_NOT_FOUND);
+        }
     }
 
 }

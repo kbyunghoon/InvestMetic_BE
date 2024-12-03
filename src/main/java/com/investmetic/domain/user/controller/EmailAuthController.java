@@ -48,6 +48,20 @@ public class EmailAuthController {
 
     }
 
+
+    @Operation(summary = "회원가입시 이메일 인증 코드 전송",
+            description = "<a href='https://www.notion.so/a6dff91d8c204ec2806a9478ff258b33' target='_blank'>API 명세서</a>")
+    @GetMapping("/signup")
+    public ResponseEntity<BaseResponse<Void>> sendSignUpCode(
+            @RequestParam String email) {
+
+        // 코드 생성 및 발송.
+        userService.sendSignUpCode(email); //코드 redis 저장 있어야함.
+
+        return BaseResponse.success(SuccessCode.OK);
+    }
+
+
     // 회원가입시 인증코드 검증
     @Operation(summary = "회원가입시 이메일 인증 코드 검증",
             description = "<a href='https://www.notion.so/1b6156c899da4dbd97c1638faa392128' target='_blank'>API 명세서</a>")

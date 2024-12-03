@@ -45,6 +45,9 @@ public class DailyAnalysisScheduler {
             // 최대 일간 이익 및 최대 일간 손실률 계산
             // 최대 일간 이익 (손익이 양수일 경우 해당 값, 그렇지 않으면 0)
             Long maxDailyProfit = Math.max(currentAnalysis.getDailyProfitLoss(), 0);
+
+            Long maxDailyLoss = Math.min(currentAnalysis.getDailyProfitLoss(), 0);
+
             // 최대 일간 손실률 (손익률이 음수일 경우 해당 값, 양수일 경우 0)
             double maxDailyLossRate = dailyProfitLossRate < 0 ? dailyProfitLossRate : 0;
 
@@ -115,8 +118,6 @@ public class DailyAnalysisScheduler {
             // 샤프 비율 (초기값 0.0)
             Double sharpRatio = 0.0;
 
-            // kp ratio, sm score
-
             DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                     .dailyAnalysisId(currentAnalysis.getDailyAnalysisId())
                     .tradingDays(1)
@@ -133,6 +134,7 @@ public class DailyAnalysisScheduler {
                     .cumulativeDeposit(0L)
                     .withdrawal(0L)
                     .cumulativeWithdrawal(0L)
+                    .maxDailyLoss(maxDailyLoss)
                     .dailyProfitLossRate(RoundUtil.roundToFifth(dailyProfitLossRate))
                     .maxDailyProfit(maxDailyProfit)
                     .maxDailyProfitRate(RoundUtil.roundToFifth(dailyProfitLossRate))
@@ -213,8 +215,6 @@ public class DailyAnalysisScheduler {
         // 평가손익
         Long valuationProfitLoss = principal - balance;
 
-        // TODO : kp ratio, sm score, 고점후경과일;
-
         // 기준가
         double referencePrice = (principal != 0) ? (double) balance / principal * 1000 : 0.0;
 
@@ -258,6 +258,13 @@ public class DailyAnalysisScheduler {
                 .filter(rate -> rate > 0)
                 .max()
                 .orElse(0.0);
+
+        // 최대 일간 손실
+        long maxDailyLoss = beforeDatas.stream()
+                .mapToLong(DailyAnalysis::getDailyProfitLoss)
+                .filter(profitLoss -> profitLoss < 0)
+                .min()
+                .orElse(0L);
 
         // 최대 일간 손실률
         double maxDailyLossRate = beforeDatas.stream()
@@ -362,7 +369,7 @@ public class DailyAnalysisScheduler {
                 .orElse(0.0);
 
         // 승률
-        double winRate = profitableDays / (previousTradingDays + 1);
+        double winRate = (double) profitableDays / (previousTradingDays + 1);
 
         // profitFactor
         double profitFactor = totalLoss < 0 ? totalProfit / Math.abs(totalLoss) : 0;
@@ -419,11 +426,6 @@ public class DailyAnalysisScheduler {
                 .min()
                 .orElse(0.0), currentDrawdownRate);
 
-        // FIXME : 도움요청
-        double kpRatio = currentDrawdownRate == 0 ? 0 : maxDailyProfitRate / 1;
-//                (Math.abs(
-//                currentDrawdown * Math.sqrt((double) 13 / (previousTradingDays + 1))));
-
         // 9. 새로운 DailyAnalysis 객체 생성 및 반환
         DailyAnalysis dailyAnalysis = DailyAnalysis.builder()
                 .strategy(currentAnalysis.getStrategy())
@@ -463,15 +465,15 @@ public class DailyAnalysisScheduler {
                 .currentDrawdown(currentDrawdown)
                 .currentDrawdownRate(RoundUtil.roundToFifth(currentDrawdownRate))
                 .maxDrawdown(maxDrawdown)
-                .maxDrawdownRate(Math.round(maxDrawdownRate * 10000) / 10000.0)
-                .winRate(winRate)
+                .maxDrawdownRate(RoundUtil.roundToFifth(maxDrawdownRate))
+                .winRate(RoundUtil.roundToFifth(winRate))
                 .profitFactor(RoundUtil.roundToFifth(profitFactor))
                 .roa(RoundUtil.roundToFifth(roa))
                 .coefficientOfVariation(RoundUtil.roundToFifth(coefficientOfVariation))
                 .sharpRatio(RoundUtil.roundToFifth(sharpRatio))
                 .maxDrawDownInRate(RoundUtil.roundToFifth(maxDrawDownInRate))
-                .kpRatio(RoundUtil.roundToFifth(kpRatio))
                 .drawDownPeriod(drawDownPeriod)
+                .maxDailyLoss(maxDailyLoss)
                 .proceed(Proceed.YES)
                 .build();
 

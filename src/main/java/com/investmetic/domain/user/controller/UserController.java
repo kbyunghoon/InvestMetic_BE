@@ -3,12 +3,15 @@ package com.investmetic.domain.user.controller;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
+import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name="사용자 기본 API", description = "사용자 관련 기본 기능 API")
+@Tag(name = "사용자 기본 API", description = "사용자 관련 기본 기능 API")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -31,10 +34,11 @@ public class UserController {
     @Operation(summary = "회원 가입",
             description = "<a href='https://www.notion.so/3b51884e19b2420e8800a18ee92c310c' target='_blank'>API 명세서</a>")
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<String>> signup(@RequestBody UserSignUpDto userSignUpDto) {
+    public ResponseEntity<BaseResponse<String>> signup(@Valid @RequestBody UserSignUpDto userSignUpDto) {
+        // 회원가입시 오류 BusinessException(ErrorCode.SIGN_UP_FAILED)로
+        userService.signUp(userSignUpDto);
 
-        // 이미지 저장시 presignedUrl 반환.
-        return BaseResponse.success(userService.signUp(userSignUpDto));
+        return BaseResponse.success(SuccessCode.CREATED);
     }
 
     //닉네임 중복 검사
@@ -86,5 +90,13 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
+    }
+    // 전화번호를 통한 이메일 찾기
+    @Operation(summary = "휴대번호를 통한 이메일 찾기",
+            description = "<a href='https://www.notion.so/68f9f0bcdde94776a29155b7358b450f' target='_blank'>API 명세서</a>")
+    @GetMapping("/email")
+    public ResponseEntity<BaseResponse<FoundEmailDto>> findEmailByPhone(@RequestParam String phone) {
+
+        return BaseResponse.success(userService.findEmailByPhone(phone));
     }
 }

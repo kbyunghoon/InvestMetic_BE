@@ -1,6 +1,7 @@
 package com.investmetic.global.scheduler;
 
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
+import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +17,8 @@ public class Scheduler {
 
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final DailyAnalysisScheduler dailyAnalysisScheduler;
-    private final StrategySmScoreScheduler strategySmScoreScheduler;
+    private final StrategyCalculatorScheduler strategyCalculatorScheduler;
+    private final MonthlyAnalysisScheduler monthlyAnalysisScheduler;
 
     // 매일 자정
     @Scheduled(cron = "0 * * * * *")
@@ -52,8 +54,19 @@ public class Scheduler {
             for (DailyAnalysis specificDailyAnalysis : specificDailyAnalyses) {
                 dailyAnalysisScheduler.calculateDailyAnalysis(specificDailyAnalysis);
             }
+
+            Strategy strategy = dailyAnalysis.getStrategy();
+            List<DailyAnalysis> strategyDailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
+
+            strategyCalculatorScheduler.calculateKpRatio(strategyDailyAnalyses, strategy);
         });
 
-        strategySmScoreScheduler.calculateSmScores();
+        strategyCalculatorScheduler.calculateSmScores();
+
+        dailyAnalyses.forEach(dailyAnalysis -> {
+            List<DailyAnalysis> specificDailyAnalyses = dailyAnalysisRepository.findByStrategyId(
+                    dailyAnalysis.getStrategy().getStrategyId());
+            monthlyAnalysisScheduler.calculateMonthlyAnalysis(specificDailyAnalyses);
+        });
     }
 }

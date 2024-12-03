@@ -2,6 +2,9 @@ package com.investmetic.domain.strategy.service;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
@@ -13,10 +16,14 @@ import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.FileDownloadResponseDto;
@@ -42,17 +49,20 @@ public class StrategyService {
     private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
     private final StockTypeGroupRepository stockTypeGroupRepository;
+    private final DailyAnalysisRepository dailyAnalysisRepository;
+    private final MonthlyAnalysisRepository monthlyAnalysisRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final ReviewRepository reviewRepository;
+    private final StrategyStatisticsRepository strategyStatisticsRepository;
+    private final AccountVerificationRepository accountVerificationRepository;
 
 
     @Transactional
-    public void updateVisibility(Long strategyId) {
+    public void updateVisibility(Long strategyId, Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        // FIXME : 권한 체크 로직 추가 예정
-//        if (strategy.getCreatedBy() != user) {
-//            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-//        }
+        verifyUserPermission(strategy, userId);
 
         strategy.setIsPublic(strategy.getIsPublic() == IsPublic.PUBLIC ? IsPublic.PRIVATE : IsPublic.PUBLIC);
     }
@@ -101,32 +111,55 @@ public class StrategyService {
     }
 
     @Transactional
-    public void deleteStrategy(Long strategyId) {
+    public void deleteStrategy(Long strategyId, Long userId) {
+        // 전략 조회 및 권한 확인
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+        verifyUserPermission(strategy, userId);
 
-        // FIXME : 권한 체크 로직 추가 예정
-//        if (strategy.getCreatedBy() != user) {
-//            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-//        }
+        // 종속 데이터 및 관련 파일 삭제
+        deleteAssociatedData(strategy);
 
+        // 전략 통계 삭제 (존재 여부 확인)
+        if (strategy.getStrategyStatistics() != null) {
+            strategyStatisticsRepository.deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
+        }
+
+        // 전략 삭제
         strategyRepository.deleteById(strategyId);
     }
 
+    private void deleteAssociatedData(Strategy strategy) {
+        // S3 파일 삭제
+        deleteS3Files(strategy);
+
+        // 종속된 데이터 삭제
+        stockTypeGroupRepository.deleteAllByStrategy(strategy);
+        dailyAnalysisRepository.deleteAllByStrategy(strategy);
+        monthlyAnalysisRepository.deleteAllByStrategy(strategy);
+        subscriptionRepository.deleteAllByStrategy(strategy);
+        reviewRepository.deleteAllByStrategy(strategy);
+    }
+
+    private void deleteS3Files(Strategy strategy) {
+        // 전략 제안서 파일 삭제
+        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+
+        // 계좌 인증 파일 삭제
+        List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
+        for (AccountVerification accountVerification : accountVerifications) {
+            s3FileService.deleteFromS3(accountVerification.getAccountVerificationUrl());
+        }
+    }
 
     @Transactional
     public PresignedUrlResponseDto registerStrategy(
-            StrategyRegisterRequestDto requestDto) {
-        // TODO: 추후 삭제 ----------
-        // TODO: 유저 가져오기, tradeType 가져오기, stockType 추가 예정
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
-        // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
-        TradeType tradeType = tradeTypeRepository.findByTradeTypeId(requestDto.getTradeTypeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
-        // TODO: 추후 삭제 ----------
+            StrategyRegisterRequestDto requestDto, Long userId) {
+        User user = verifyUser(userId);
 
-        // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
+        TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+
         String proposalFilePath = s3FileService.getS3Path(
                 FilePath.STRATEGY_PROPOSAL,
                 requestDto.getProposalFile().getProposalFileName(),
@@ -135,7 +168,6 @@ public class StrategyService {
 
         String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
-        // 3. Strategy 생성 및 저장
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
@@ -167,21 +199,14 @@ public class StrategyService {
     @Transactional
     public PresignedUrlResponseDto modifyStrategy(
             Long strategyId,
-            StrategyModifyRequestDto requestDto) {
-        // TODO: 추후 삭제 ----------
-        // TODO: 유저 가져오기, tradeType 가져오기, stockType 추가 예정
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
-        // 1. TradeType 조회 (예제용 코드로 실제 구현 시 TradeTypeService를 사용하여 조회)
-        // TODO: 추후 삭제 ----------
-
+            StrategyModifyRequestDto requestDto,
+            Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        strategy.modifyStrategy(requestDto.getStrategyName(), requestDto.getDescription());
+        verifyUserPermission(strategy, userId);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
-            // 2. 제안서 파일 경로 생성 및 Presigned URL 생성
             String proposalFilePath = s3FileService.getS3Path(
                     FilePath.STRATEGY_PROPOSAL,
                     requestDto.getProposalFile().getProposalFileName(),
@@ -189,8 +214,15 @@ public class StrategyService {
             );
 
             String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
+
+            s3FileService.deleteFromS3(strategy.getProposalFilePath());
+            strategy.modifyStrategyWithProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription(),
+                    proposalFilePath);
+
             return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
         } else {
+            strategy.modifyStrategyWithoutProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription());
+
             return null;
         }
     }
@@ -202,9 +234,11 @@ public class StrategyService {
         return buildRegisterInfoResponse(tradeTypesDto, stockTypesDto);
     }
 
-    public StrategyModifyInfoResponseDto loadStrategyModifyInfo(Long strategyId) {
+    public StrategyModifyInfoResponseDto loadStrategyModifyInfo(Long strategyId, Long userId) {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        verifyUserPermission(strategy, userId);
 
         TradeTypeDto tradeTypeDto = TradeTypeDto.fromEntity(strategy.getTradeType());
 
@@ -243,5 +277,16 @@ public class StrategyService {
                 .tradeTypes(tradeTypes)
                 .stockTypes(stockTypes)
                 .build();
+    }
+
+    private User verifyUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
+    }
+
+    private void verifyUserPermission(Strategy strategy, Long userId) {
+        if (!strategy.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
     }
 }

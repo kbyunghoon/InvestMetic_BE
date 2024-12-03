@@ -1,8 +1,10 @@
 package com.investmetic.global.scheduler;
 
+import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.global.util.RoundUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.math3.distribution.NormalDistribution;
@@ -11,9 +13,53 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class StrategySmScoreScheduler {
+public class StrategyCalculatorScheduler {
     private final StrategyRepository strategyRepository;
     private final DailyAnalysisRepository dailyAnalysisRepository;
+
+    @Transactional
+    public void calculateKpRatio(List<DailyAnalysis> strategyDailyAnalyses, Strategy strategy) {
+        Double highProfitLossRate = 0.0;
+        Double minDrawDown = 0.0;
+        Double sumDrawDown = 0.0;
+        Long sumDrawDownPeriod = 0L;
+
+        for (DailyAnalysis strategyDailyAnalysis : strategyDailyAnalyses) {
+            Double currentProfitLossRate = strategyDailyAnalysis.getCumulativeProfitLossRate();
+
+            if (highProfitLossRate > currentProfitLossRate) {
+                // 손익률 인하되는 시점
+                sumDrawDownPeriod++;
+                if (currentProfitLossRate - highProfitLossRate < minDrawDown) {
+                    // DD 갱신
+                    minDrawDown = currentProfitLossRate - highProfitLossRate;
+                }
+            } else {
+                highProfitLossRate = currentProfitLossRate;
+                sumDrawDown += minDrawDown;
+                minDrawDown = 0.0;
+            }
+        }
+
+        long totalTradingDays = strategyDailyAnalyses.size();
+
+        double accumulatedProfitLossRate = strategyDailyAnalyses.get(strategyDailyAnalyses.size() - 1)
+                .getCumulativeProfitLossRate();
+
+        if (sumDrawDown == 0 || sumDrawDownPeriod == 0) {
+            strategy.setKpRatio(0.0);
+            return;
+        }
+        if (Math.sqrt((double) sumDrawDownPeriod / totalTradingDays) == 0) {
+            strategy.setKpRatio(0.0);
+            return;
+        }
+
+        Double kpRatio = accumulatedProfitLossRate / (sumDrawDown * -1 * Math.sqrt(
+                (double) sumDrawDownPeriod / totalTradingDays));
+
+        strategy.setKpRatio(RoundUtil.roundToFifth(kpRatio));
+    }
 
     @Transactional
     public void calculateSmScores() {
@@ -61,13 +107,11 @@ public class StrategySmScoreScheduler {
 
         strategiesList.forEach(strategy -> {
             if (standardDeviation == 0.0) {
-                strategy.setZScore(0.0);
-                strategy.setSmScore(0.0); // 기본값 설정
+                strategy.setSmScore(100.0);
             } else {
                 double zScore = (strategy.getKpRatio() - mean) / standardDeviation;
-                strategy.setZScore(zScore);
                 double cdfValue = standardNormal.cumulativeProbability(zScore);
-                strategy.setSmScore(cdfValue * 100); // 백분율로 저장
+                strategy.setSmScore(RoundUtil.roundToFifth(cdfValue * 100));
             }
         });
     }
