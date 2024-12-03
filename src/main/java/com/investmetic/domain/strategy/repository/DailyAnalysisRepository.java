@@ -88,4 +88,16 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     boolean existsByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
 
     void deleteByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
+
+    @Query("""
+        SELECT d
+        FROM DailyAnalysis d
+        WHERE d.strategy.strategyId = :strategyId
+        AND d.dailyDate = (
+            SELECT MAX(d2.dailyDate)
+            FROM DailyAnalysis d2
+            WHERE d2.strategy.strategyId = :strategyId
+        )
+    """)
+    DailyAnalysis findLatestStrategy(@Param("strategyId") Long strategyId);
 }
