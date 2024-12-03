@@ -74,6 +74,7 @@ public enum ErrorCode {
     ACCOUNT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 3030, "해당 실계좌 인증 이미지가 존재하지 않습니다."),
     EXCEL_CREATE_ERROR(HttpStatus.NOT_FOUND, 3031, "Excel 생성 중 오류가 발생했습니다."),
     EXCEL_DOWNLOAD_ERROR(HttpStatus.NOT_FOUND, 3032, "Excel 다운로드 중 오류가 발생했습니다."),
+    SELF_SUBSCRIPTION_NOT_ALLOWED(HttpStatus.FORBIDDEN,3033,"본인 전략에는 구독할 수 없습니다." ),
 
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다."),
     CANNOT_REVIEW_OWN_STRATEGY(HttpStatus.FORBIDDEN, 3302, "본인전략에는 리뷰를 달 수 없습니다."),
