@@ -39,11 +39,17 @@ public class SubscriptionService {
         }
     }
 
+    /**
+     * 전략 구독
+     */
     private void handleUnsubscribe(Subscription subscription, Strategy strategy) {
         strategy.minusSubscriptionCount();
         subscriptionRepository.delete(subscription);
     }
 
+    /**
+     * 구독 취소
+     */
     private void handleSubscribe(User user, Strategy strategy) {
         strategy.plusSubscriptionCount();
         Subscription subscription = Subscription.builder()
