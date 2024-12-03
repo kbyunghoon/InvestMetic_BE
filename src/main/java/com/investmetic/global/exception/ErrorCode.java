@@ -43,6 +43,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2501, "Refresh token is missing."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2502, "Refresh token has expired."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
+    AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN,2504,"권한이 없습니다."),
 
 
     // 전략 관련 오류
@@ -74,8 +75,9 @@ public enum ErrorCode {
     EXCEL_DOWNLOAD_ERROR(HttpStatus.NOT_FOUND, 3032, "Excel 다운로드 중 오류가 발생했습니다."),
 
     // 전략리뷰 관련오류(3300번대 );
-    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND,3301,"해당 전략의 리뷰를 찾을 수 없습니다."),
-
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다."),
+    CANNOT_REVIEW_OWN_STRATEGY(HttpStatus.FORBIDDEN,3302,"본인전략에는 리뷰를 달 수 없습니다."),
+    DUPLICATE_REVIEW(HttpStatus.FORBIDDEN,3303,"리뷰는 한번만 가능합니다."),
 
 
     //문의 관련 오류(5000번대 );

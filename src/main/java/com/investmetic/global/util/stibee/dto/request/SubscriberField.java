@@ -18,18 +18,17 @@ public class SubscriberField {
     private LocalDateTime termDate; // 약관 동의일
 
     @JsonProperty("$ad_agreed")
-    private final String adAgreed;
+    private final String adAgreed ="Y";
 
 
-    private SubscriberField(String email, String name, String adAgreed) {
+    private SubscriberField(String email, String name) {
         this.email = email;
         this.name = name;
-        this.adAgreed = adAgreed;
     }
 
-    public static SubscriberField create(String email, String name, String adAgreed){
+    public static SubscriberField create(String email, String name){
 
-        return new SubscriberField(email, name, adAgreed);
+        return new SubscriberField(email, name);
     }
 
     //약관 날짜 설정.

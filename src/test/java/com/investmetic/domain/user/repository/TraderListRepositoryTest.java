@@ -3,13 +3,13 @@ package com.investmetic.domain.user.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.strategy.model.IsApproved;
 import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
-import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.dto.object.TraderListSort;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.Role;
@@ -18,8 +18,7 @@ import com.investmetic.domain.user.model.entity.User;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -29,9 +28,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @TestInstance(Lifecycle.PER_CLASS)
+@Transactional
 class TraderListRepositoryTest {
 
     private static final List<Role> roles = new ArrayList<>(
@@ -41,18 +42,16 @@ class TraderListRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private StrategyRepository strategyRepository;
-    @Autowired
-    private SubscriptionRepository subscriptionRepository;
 
     @Autowired
     private TradeTypeRepository tradeTypeRepository;
 
     // 트레이더 생성.... 더 자세하게 보려면 데이터가 필요하겠네요.
-    @BeforeAll
+    @BeforeEach
     void createUsers50() {
         Strategy strategy1 = null;
         Strategy strategy2 = null;
-        TradeType tradeType = new TradeType(1L, "Test", true, "asdf.jpg");
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
 
         tradeTypeRepository.save(tradeType);
 
@@ -66,7 +65,7 @@ class TraderListRepositoryTest {
                     .email("jlwoo0925" + i + "@gmail.com")
                     .password("asdf" + i)
                     .imageUrl("jrw_projectS3/profile/정룡우.img")
-                    .phone("010123456" + dc.format(i))
+                    .phone("010789789" + dc.format(i))
                     .birthDate("000925")
                     .ipAddress("127.0.0.1")
                     .infoAgreement(Boolean.FALSE)
@@ -101,15 +100,6 @@ class TraderListRepositoryTest {
                 strategyRepository.save(strategy1);
             }
         }
-    }
-
-    @AfterAll
-    void deleteAll() {
-        //constraint -> 연관 관계 순서대로
-        subscriptionRepository.deleteAll();
-        strategyRepository.deleteAll();
-        tradeTypeRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
 
@@ -176,8 +166,6 @@ class TraderListRepositoryTest {
                 // 현재 순서의 트레이너 전략수 대입.
                 bigger = traderProfileDto.getStrategyCount();
             }
-            System.out.println(page.getContent().size());
-
             if (i == page.getTotalPages()) {
                 break;
             }
@@ -208,6 +196,9 @@ class TraderListRepositoryTest {
         for (int i = 1; i <= page.getTotalPages(); i++) {
 
             for (TraderProfileDto traderProfileDto : page.getContent()) {
+                System.out.println(traderProfileDto);
+
+
 
                 // 앞순서의 트레이너의 구독자 수보다 작거나 같아야함.
                 assertThat(traderProfileDto.getTotalSubCount()).isLessThanOrEqualTo(bigger);
@@ -226,7 +217,7 @@ class TraderListRepositoryTest {
 
             // 페이지 증가시키면서 확인.
             Pageable nextPage = PageRequest.of(i, pagesize);
-            page = userRepository.getTraderListPage(sort, null, nextPage);
+            page = userRepository.getTraderListPage(sort, keyword, nextPage);
         }
     }
 
