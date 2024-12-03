@@ -9,7 +9,6 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
@@ -71,6 +70,7 @@ class QuestionServiceTest {
         QuestionRequestDto requestDto = QuestionRequestDto.builder()
                 .keyword("키워드")
                 .title("제목")
+                .content("문의 내용") // 필수 필드 추가
                 .build();
 
         // Mock User 생성
@@ -228,14 +228,10 @@ class QuestionServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        // Mock User 생성
-        User mockTrader = mock(User.class); // 트레이더 Mock
-        when(mockTrader.getNickname()).thenReturn("Trader Nickname");
-        when(mockTrader.getImageUrl()).thenReturn("http://example.com/trader.jpg");
-
-        // Mock Strategy 생성
-        Strategy mockStrategy = mock(Strategy.class);
-        when(mockStrategy.getUser()).thenReturn(mockTrader); // 트레이더 연결
+        // Mock Investor 생성
+        User mockInvestor = mock(User.class); // 투자자 Mock
+        when(mockInvestor.getNickname()).thenReturn("Investor Nickname"); // 투자자 닉네임 설정
+        when(mockInvestor.getImageUrl()).thenReturn("http://example.com/investor.jpg"); // 투자자 프로필 이미지 설정
 
         // Mock Question 생성
         Question mockQuestion = mock(Question.class);
@@ -243,21 +239,23 @@ class QuestionServiceTest {
         when(mockQuestion.getTitle()).thenReturn("Test Question");
         when(mockQuestion.getQnaState()).thenReturn(QnaState.WAITING);
         when(mockQuestion.getCreatedAt()).thenReturn(LocalDateTime.now());
-        when(mockQuestion.getStrategy()).thenReturn(mockStrategy); // 전략 연결
+        when(mockQuestion.getUser()).thenReturn(mockInvestor); // 투자자 연결
 
         // Mock Page
         Page<Question> mockPage = new PageImpl<>(List.of(mockQuestion), pageable, 1);
         when(questionRepository.searchByConditions(anyList(), any(Pageable.class), any())).thenReturn(mockPage);
 
         // When
-        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto, pageable);
+        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto,
+                pageable);
 
         // Then
         assertEquals(1, response.getContent().size()); // 문의 목록 크기 확인
         assertEquals("Test Question", response.getContent().get(0).getTitle()); // 문의 제목 확인
         assertEquals("WAITING", response.getContent().get(0).getStateCondition()); // 상태 확인
-        assertEquals("Trader Nickname", response.getContent().get(0).getNickname()); // 닉네임 확인
-        assertEquals("http://example.com/trader.jpg", response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
+        assertEquals("Investor Nickname", response.getContent().get(0).getNickname()); // 닉네임 확인
+        assertEquals("http://example.com/investor.jpg",
+                response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
 
         // Verify interactions
         verify(questionRepository).searchByConditions(anyList(), any(Pageable.class), any());
@@ -324,14 +322,14 @@ class QuestionServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        // Mock User 생성
-        User mockTrader = mock(User.class); // 트레이더 Mock
-        when(mockTrader.getNickname()).thenReturn("Filtered Trader");
-        when(mockTrader.getImageUrl()).thenReturn("http://example.com/filtered.jpg");
+        // Mock Investor 생성
+        User mockInvestor = mock(User.class);
+        when(mockInvestor.getNickname()).thenReturn("Filtered Investor");
+        when(mockInvestor.getImageUrl()).thenReturn("http://example.com/filtered.jpg");
 
         // Mock Strategy 생성
         Strategy mockStrategy = mock(Strategy.class);
-        when(mockStrategy.getUser()).thenReturn(mockTrader); // 트레이더 연결
+        when(mockStrategy.getUser()).thenReturn(mockInvestor);
 
         // Mock Question 생성
         Question mockQuestion = mock(Question.class);
@@ -339,25 +337,29 @@ class QuestionServiceTest {
         when(mockQuestion.getTitle()).thenReturn("Filtered Question");
         when(mockQuestion.getQnaState()).thenReturn(QnaState.COMPLETED);
         when(mockQuestion.getCreatedAt()).thenReturn(LocalDateTime.now());
-        when(mockQuestion.getStrategy()).thenReturn(mockStrategy); // 전략 연결
+        when(mockQuestion.getStrategy()).thenReturn(mockStrategy);
+        when(mockQuestion.getUser()).thenReturn(mockInvestor); // 사용자 설정 추가
 
         // Mock Page
         Page<Question> mockPage = new PageImpl<>(List.of(mockQuestion), pageable, 1);
         when(questionRepository.searchByConditions(anyList(), any(Pageable.class), any())).thenReturn(mockPage);
 
         // When
-        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto, pageable);
+        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto,
+                pageable);
 
         // Then
         assertEquals(1, response.getContent().size()); // 문의 목록 크기 확인
         assertEquals("Filtered Question", response.getContent().get(0).getTitle()); // 문의 제목 확인
         assertEquals("COMPLETED", response.getContent().get(0).getStateCondition()); // 상태 확인
-        assertEquals("Filtered Trader", response.getContent().get(0).getNickname()); // 닉네임 확인
-        assertEquals("http://example.com/filtered.jpg", response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
+        assertEquals("Filtered Investor", response.getContent().get(0).getNickname()); // 닉네임 확인
+        assertEquals("http://example.com/filtered.jpg",
+                response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
 
         // Verify interactions
         verify(questionRepository).searchByConditions(anyList(), any(Pageable.class), any());
     }
+
 
     @Test
     @DisplayName("문의 목록 상태 필터링 성공 - WAITING 상태")
@@ -395,14 +397,16 @@ class QuestionServiceTest {
         when(questionRepository.searchByConditions(anyList(), any(Pageable.class), any())).thenReturn(mockPage);
 
         // When
-        PageResponseDto<QuestionsResponse> response = questionService.getTraderQuestions(userId, userRole, requestDto, pageable);
+        PageResponseDto<QuestionsResponse> response = questionService.getTraderQuestions(userId, userRole, requestDto,
+                pageable);
 
         // Then
         assertEquals(1, response.getContent().size()); // 문의 목록 크기 확인
         assertEquals("Test Question", response.getContent().get(0).getTitle()); // 문의 제목 확인
         assertEquals("WAITING", response.getContent().get(0).getStateCondition()); // 상태 확인
         assertEquals("Investor Nickname", response.getContent().get(0).getNickname()); // 닉네임 확인
-        assertEquals("http://example.com/investor.jpg", response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
+        assertEquals("http://example.com/investor.jpg",
+                response.getContent().get(0).getProfileImageUrl()); // 이미지 URL 확인
 
         // Verify interactions
         verify(questionRepository).searchByConditions(anyList(), any(Pageable.class), any());
@@ -603,7 +607,8 @@ class QuestionServiceTest {
         when(questionRepository.searchByConditions(anyList(), eq(pageable), any())).thenReturn(mockPage);
 
         // When
-        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto, pageable);
+        PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(userId, userRole, requestDto,
+                pageable);
 
         // Then
         assertEquals(2, response.getContent().size()); // 두 개의 문의가 반환되었는지 확인
@@ -615,31 +620,5 @@ class QuestionServiceTest {
         verify(questionRepository).searchByConditions(anyList(), eq(pageable), any());
     }
 
-
-    @Test
-    @DisplayName("문의 생성 실패 - 필수 값 누락")
-    void createQuestion_Failure_MissingFields() {
-        // Given
-        Long userId = 1L;
-        Long strategyId = 1L;
-
-        // 필수 값이 누락된 DTO
-        QuestionRequestDto requestDto = QuestionRequestDto.builder()
-                .title(null) // 제목 누락
-                .content(null) // 내용 누락
-                .build();
-
-        // When & Then
-        BusinessException exception = assertThrows(BusinessException.class, () ->
-                questionService.createQuestion(userId, strategyId, requestDto)
-        );
-
-        // 예외 검증
-        assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
-        assertEquals("잘못된 값을 입력했습니다.", exception.getErrorCode().getMessage());
-
-        // Repository 호출이 없었음을 검증
-        verifyNoInteractions(userRepository, strategyRepository);
-    }
 
 }

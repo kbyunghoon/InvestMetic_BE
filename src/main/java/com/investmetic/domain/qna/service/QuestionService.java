@@ -45,14 +45,16 @@ public class QuestionService {
     @Transactional
     public void createQuestion(Long userId, Long strategyId, QuestionRequestDto questionRequestDto) {
 
+        User user = findUserById(userId);
+        Strategy strategy = findStrategyById(strategyId);
+
         if (questionRequestDto.getTitle() == null || questionRequestDto.getTitle().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
         if (questionRequestDto.getContent() == null || questionRequestDto.getContent().isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
         }
-        User user = findUserById(userId);
-        Strategy strategy = findStrategyById(strategyId);
+
         Question question = Question.from(user, strategy, questionRequestDto);
         questionRepository.save(question);
     }
