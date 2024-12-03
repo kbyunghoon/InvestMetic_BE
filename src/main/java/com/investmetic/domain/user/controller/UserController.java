@@ -129,6 +129,7 @@ public class UserController {
     @PatchMapping("/reissue/password")
     public ResponseEntity<BaseResponse<String>> resetPassword(
             @RequestBody UserModifyDto userModifyDto) {
+
         userMyPageService.changeUserInfo(userModifyDto, userModifyDto.getEmail());
         return BaseResponse.success(SuccessCode.OK);
     }
