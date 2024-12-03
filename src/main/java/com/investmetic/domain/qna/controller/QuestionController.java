@@ -136,34 +136,21 @@ public class QuestionController {
     }
 
     /**
-     * 투자자 문의 상세 조회
+     * 문의 상세 조회
      *
      * @param questionId 상세 조회할 문의 ID
-     * @param userId     투자자 ID (추후 시큐리티 적용 시 Authentication에서 추출 예정)
+     * @param userId     사용자 ID (투자자/트레이더 공통)
+     * @param userRole   사용자 역할 (INVESTOR/TRADER)
      * @return 문의 상세 정보
      */
-    @GetMapping("/investor/questions/{questionId}")
-    public ResponseEntity<BaseResponse<QuestionsDetailResponse>> getInvestorQuestionDetail(
+    @GetMapping("/questions/{questionId}")
+    public ResponseEntity<BaseResponse<QuestionsDetailResponse>> getQuestionDetail(
             @PathVariable Long questionId,
-            @RequestParam Long userId) {
+            @RequestParam Long userId,
+            @RequestParam Role userRole) {
 
-        QuestionsDetailResponse response = questionService.getQuestionDetail(questionId, userId, Role.INVESTOR);
-        return BaseResponse.success(response);
-    }
-
-    /**
-     * 트레이더 문의 상세 조회
-     *
-     * @param questionId 상세 조회할 문의 ID
-     * @param userId     트레이더 ID (추후 시큐리티 적용 시 Authentication에서 추출 예정)
-     * @return 문의 상세 정보
-     */
-    @GetMapping("/trader/questions/{questionId}")
-    public ResponseEntity<BaseResponse<QuestionsDetailResponse>> getTraderQuestionDetail(
-            @PathVariable Long questionId,
-            @RequestParam Long userId) {
-
-        QuestionsDetailResponse response = questionService.getQuestionDetail(questionId, userId, Role.TRADER);
+        // 사용자 역할에 따라 처리
+        QuestionsDetailResponse response = questionService.getQuestionDetail(questionId, userId, userRole);
         return BaseResponse.success(response);
     }
 
