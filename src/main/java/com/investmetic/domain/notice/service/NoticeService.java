@@ -9,7 +9,12 @@ import com.investmetic.domain.notice.model.entity.Notice;
 import com.investmetic.domain.notice.model.entity.NoticeFile;
 import com.investmetic.domain.notice.repository.NoticeFileRepository;
 import com.investmetic.domain.notice.repository.NoticeRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
+import com.investmetic.global.exception.BusinessException;
+import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.util.ArrayList;
@@ -29,6 +34,7 @@ public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final NoticeFileRepository noticeFileRepository;
     private final S3FileService s3FileService;
+    private final UserRepository userRepository;
 
     public List<String> saveNotice(NoticeRegistDto noticeRegistDto) {
         List<String> noticePresignedUrls = new ArrayList<>();
@@ -76,5 +82,17 @@ public class NoticeService {
 
     private Page<NoticeListDto> getNoticeList(String keyword, Pageable pageable) {
         return noticeRepository.findNoticelist(keyword, pageable);
+    }
+
+    public void deleteNotice(Long noticeId, Long adminId){
+
+         User user = userRepository.findById(adminId).orElseThrow(
+                ()->new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
+        if(Role.isAdmin(user.getRole())){
+            noticeRepository.deleteById(noticeId);
+        }else{
+            throw new BusinessException(ErrorCode.AUTHORIZATION_DENIED);
+        }
     }
 }
