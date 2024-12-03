@@ -142,8 +142,8 @@ public class StrategyService {
     }
 
     private void deleteS3Files(Strategy strategy) {
-        // 전략 제안서 파일 삭제
-        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+        // 전략 폴더 전부 삭제
+        s3FileService.deleteStrategyFolder(strategy.getStrategyId());
 
         // 계좌 인증 파일 삭제
         List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
