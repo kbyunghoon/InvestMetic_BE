@@ -74,6 +74,11 @@ public class S3FileService {
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
+    public String getS3StrategyPath(FilePath filePath, Long strategyId, String fileName, int size) {
+        validateFile(filePath, fileName, size);
+        return prefixFilePath(filePath.getStrategyPath(strategyId), createUUID8() + fileName);
+    }
+
     /**
      * 파일 검증 로직
      */
@@ -122,15 +127,15 @@ public class S3FileService {
      */
     private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String bucket, String s3Key) {
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, s3Key)
-                .withMethod(HttpMethod.PUT) // Put에 대한 메서드로 presigned URL생성
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket,
+                s3Key).withMethod(HttpMethod.PUT) // Put에 대한 메서드로 presigned URL생성
 //                .withKey() //s3객체의 Key도 설정 가능함.
                 .withExpiration(getPreSignedUrlExpiration()); // default 15분
 
         // 업로드 정책을 Bucket Policy로 강제해 주면 acl 조건을 강제하여 업로드 하도록 가능하다고 함.
         // https://www.wisen.co.kr/pages/blog/blog-detail.html?idx=12022
-        generatePresignedUrlRequest.addRequestParameter(
-                Headers.S3_CANNED_ACL, // "x-amz-acl" S3 객체의 액세스 제어 목록 에 대한 조건 (canned acl)
+        generatePresignedUrlRequest.addRequestParameter(Headers.S3_CANNED_ACL,
+                // "x-amz-acl" S3 객체의 액세스 제어 목록 에 대한 조건 (canned acl)
                 CannedAccessControlList.PublicRead.toString() // public-read을 acl 파라미터로 정의.
         );
 
@@ -171,22 +176,16 @@ public class S3FileService {
     /**
      * s3내 폴더 삭제. AWS CLI나 S3 Batch Operations이 비용이 적다고함.
      *
-     * @param folderKey ex- strategy/{strategyId}/
+     * @param strategyId ex- strategy/{strategyId}/
      * @see <a href = "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html"> deleteObjects </a>
      */
-    public void deleteStrategyFolder(String folderKey) {
-
-        ObjectListing objectListing = new ObjectListing();
+    public void deleteStrategyFolder(Long strategyId) {
 
         // folderKey와 매칭되는 하위경로 객체 최대 1000개까지의 반환.
-        try {
-            objectListing = amazonS3.listObjects(bucketName, folderKey);
-        } catch (SdkClientException e) {
-            log.error("Loading error in S3 : {}", folderKey);
-        }
+        ObjectListing objectListing = getObjectListing(FilePath.getS3StrategyKey(strategyId));
 
+        // key 하위의 객체가 없다면 return
         if (objectListing.getObjectSummaries().isEmpty()) {
-            // key 하위의 객체가 없다면 return;
             return;
         }
 
@@ -194,7 +193,7 @@ public class S3FileService {
             // key와 version을 받을 수 있는 객체 리스트 생성.
             List<KeyVersion> keysToDelete = new ArrayList<>();
 
-            // s3로부터 S3ObjectSummary를가져옴(key, version)
+            // s3로부터 S3ObjectSummary를 가져옴(key, version)
             for (S3ObjectSummary s3ObjectSummary : objectListing.getObjectSummaries()) {
                 // 모든 객체키를 알고있다면 s3에 요청 안보내도 될 것으로 보임.
                 keysToDelete.add(new KeyVersion(s3ObjectSummary.getKey()));
@@ -202,19 +201,16 @@ public class S3FileService {
 
             if (!keysToDelete.isEmpty()) {
                 // 해당 s3객체key 리스트를 포함하도록 함.
-                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName)
-                        .withKeys(keysToDelete);
+                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName).withKeys(keysToDelete);
 
                 try {
                     // s3에서 해당 key리스트 모두 삭제. - 요청 1번.
                     amazonS3.deleteObjects(deleteObjectsRequest);
                 } catch (SdkClientException e) {
-                    // MultiObjectDeleteException, AmazonServiceException -> SdkClientException
                     // 삭제 오류
-                    log.error("Not deleted folder in S3 : {}", folderKey);
-                    throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+                    log.error("Folder Not Deleted in S3 : strategy/{}/", strategyId);
+                    throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
                 }
-
             }
 
             // 해당 key경로에 1000개보다 더 많은 객체가 있다면 한번더 요청.
@@ -224,7 +220,18 @@ public class S3FileService {
                 break;
             }
         }
+    }
 
+    /**
+     * 해당 s3Key 하위 경로의 모든 객체 조회.
+     */
+    private ObjectListing getObjectListing(String folderKey) {
+        try {
+            return amazonS3.listObjects(bucketName, folderKey);
+        } catch (SdkClientException e) {
+            log.error("Loading error in S3 : {}", folderKey);
+            throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+        }
     }
 
     /**
