@@ -15,4 +15,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT COUNT(r) > 0 FROM Review r WHERE r.strategy.strategyId = :strategyId AND r.user.userId = :userId")
     Boolean existMyReview(@Param("strategyId") Long strategyId, @Param("userId") Long userId);
+
+    void deleteAllByStrategy(Strategy strategy);
 }

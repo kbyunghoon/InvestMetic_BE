@@ -14,9 +14,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,108 +45,23 @@ public class S3FileService {
     @Value("${cloud.aws.s3.defaultImgPath}")
     private String bucketPath;
 
-    private static final HashSet<String> imgExtensionSet;
-    private static final HashSet<String> excelExtensionSet;
-    private static final HashSet<String> docsExtensionSet;
-
-    static {
-        imgExtensionSet = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
-        excelExtensionSet = new HashSet<>(Arrays.asList("xls", "xlsx"));
-        docsExtensionSet = new HashSet<>(Arrays.asList("doc", "docx", "pptx", "ppt"));
-    }
-
     public S3FileService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
 
 
-    /**
-     * S3상에서 UserProfile이미지가 저장될 경로를 반환.
-     * <br>
-     * ex) "https://{버킷이름}.s3.{region}.amazonaws.com/userProfile/testImage1.jpg"
-     *
-     * @param fileName 사용자가 저장하려고 하는 image의 이름   ex) testImage1.jpg (확장자 포함)
-     * @param size     사용자가 저장하려고 하는 image의 size (file.size시 byte값이 기본)
-     * @return DB에 저장될 S3경로.
-     */
     public String getS3Path(FilePath filePath, String fileName, int size) {
-
-        //전략 엑셀.
-        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
-            //확장자가 틀리거나 500MB이상 인지 확인
-            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-            //전략 이미지, 유저 프로필 사진
-        } else if (filePath.equals(FilePath.STRATEGY_IMAGE) || filePath.equals(FilePath.USER_PROFILE)) {
-            //확장자가 틀리거나 2MB이상인지 확인
-            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-            //공지사항.
-        } else if (filePath.equals(FilePath.NOTICE)) {
-            //확장자가 틀리거나 5MB이상인지 확인
-            if (!filterNoticeExtension(fileName) || size >= 1024 * 1024 * 5) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-        } else {
-
-            // 아무것도 아닌경우. - 이럴 일은 없겠지만...
-            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-        }
-
-        //객체 URL 경로 반환.(도메인 경로 포함)
+        validateFile(filePath, fileName, size);
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
-
     /**
-     * 현재 파일의 확장자가 imgExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
+     * 파일 검증 로직
      */
-    private boolean filterImageExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환.
-        return imgExtensionSet.contains(extension);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 excelExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
-     */
-    private boolean filterExcelExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환. O(n)이지만 가독성을 위해...
-        return excelExtensionSet.contains(extension);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 imgExtensionList나 docsExtensionList에 해당하는지 확인.
-     *
-     * @param filename 확장자가 붙은 파일 이름.
-     */
-    private boolean filterNoticeExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        //공치사항에 올릴 파일이 이미지 확장자에 해당하는지 검증.
-        if (filterImageExtension(extension)) {
-            return true;
+    private void validateFile(FilePath filePath, String fileName, int size) {
+        if (!filePath.isValidExtension(fileName) || size >= filePath.getMaxSize()) {
+            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
         }
-
-        //공지사항헤 올릴 파일이 doc이나 ppt 종류에 해당하는지 검증.
-        return docsExtensionSet.contains(extension);
-
     }
 
     /**
@@ -160,7 +73,6 @@ public class S3FileService {
     private String prefixFilePath(String filePath, String fileName) {
         return String.format("%s%s%s", bucketPath, filePath, fileName);
     }
-
 
     /**
      * AWS에게서 presigned url을 요청한다.
@@ -180,7 +92,6 @@ public class S3FileService {
 
         return URLDecoder.decode(url.toString(), StandardCharsets.UTF_8);
     }
-
 
     /**
      * 파일 업로드용(PUT) presigned url request 생성
@@ -206,7 +117,6 @@ public class S3FileService {
         return generatePresignedUrlRequest;
     }
 
-
     /**
      * presignedUrl의 유효기간 설정
      */
@@ -217,7 +127,6 @@ public class S3FileService {
         expiration.setTime(expTimeMillis); //현재 시간 + 1분 까지 유효
         return expiration;
     }
-
 
     /**
      * 서버에서 이미지 삭제
@@ -233,7 +142,7 @@ public class S3FileService {
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
         } catch (Exception e) {
             //실패시
-            throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
+            throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
         }
     }
 
@@ -246,7 +155,6 @@ public class S3FileService {
         // S3에서 파일 가져오기
         return amazonS3.getObject(bucketName, path.substring(1));
     }
-
 
     /**
      * 파일 고유 ID를 생성 return : 8자리의 UUID

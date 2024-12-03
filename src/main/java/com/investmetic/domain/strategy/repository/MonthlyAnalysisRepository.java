@@ -18,4 +18,6 @@ public interface MonthlyAnalysisRepository extends JpaRepository<MonthlyAnalysis
     List<MonthlyAnalysis> findByStrategyStrategyId(Long strategyId);
 
     Optional<MonthlyAnalysis> findByStrategyAndMonthlyDate(Strategy strategy, LocalDate monthlyDate);
+
+    void deleteAllByStrategy(Strategy strategy);
 }
