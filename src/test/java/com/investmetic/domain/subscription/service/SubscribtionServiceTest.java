@@ -3,10 +3,16 @@ package com.investmetic.domain.subscription.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.model.IsPublic;
+import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
+import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.strategy.service.StrategyService;
 import com.investmetic.domain.subscription.model.entity.Subscription;
 import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.Role;
@@ -33,9 +39,20 @@ public class SubscribtionServiceTest {
     private SubscriptionRepository subscriptionRepository;
     @Autowired
     private TradeTypeRepository tradeTypeRepository;
+    @Autowired
+    private StockTypeGroupRepository stockTypeGroupRepository;
+    @Autowired
+    private DailyAnalysisRepository dailyAnalysisRepository;
+    @Autowired
+    private MonthlyAnalysisRepository monthlyAnalysisRepository;
 
     @BeforeEach
     public void setUp() {
+        stockTypeGroupRepository.deleteAll();
+        dailyAnalysisRepository.deleteAll();
+        subscriptionRepository.deleteAll();
+        monthlyAnalysisRepository.deleteAll();
+        strategyRepository.deleteAll();
         User user = User.builder()
                 .userName("testUser")
                 .nickname("testNickname")
@@ -47,7 +64,6 @@ public class SubscribtionServiceTest {
                 .infoAgreement(true)
                 .build();
         userRepository.save(user);
-        Long strategyId = 1L;
 
         TradeType tradetype = TradeType.builder()
                 .tradeTypeName("Sample_Trade1")
@@ -56,7 +72,6 @@ public class SubscribtionServiceTest {
         tradeTypeRepository.save(tradetype);
         Strategy strategy = Strategy.builder()
                 .user(user)
-                .strategyId(strategyId)
                 .isPublic(IsPublic.PUBLIC)
                 .tradeType(tradetype)
                 .build();
