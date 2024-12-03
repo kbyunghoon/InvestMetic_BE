@@ -12,7 +12,7 @@ public enum FilePath {
     STRATEGY_EXCEL("strategy/excel/", 1024 * 1024 * 500, Arrays.asList("xls", "xlsx")),
     STRATEGY_PROPOSAL("strategy/proposal/", 1024 * 1024 * 500, Arrays.asList("xls", "xlsx")),
     STRATEGY_IMAGE("strategy/image/", 1024 * 1024 * 2, Arrays.asList("jpg", "jpeg", "png")),
-    NOTICE("notice/", 1024 * 1024 * 5, Arrays.asList("doc", "docx", "pptx", "ppt"));
+    NOTICE("notice/", 1024 * 1024 * 5, Arrays.asList("jpg", "jpeg", "png", "doc", "docx", "pptx", "ppt"));
 
     private final String path;
     private final int maxSize;
