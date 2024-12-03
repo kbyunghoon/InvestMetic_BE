@@ -108,8 +108,6 @@ public class UserMyPageService {
 
     @Transactional
     public void resetPassword(UserModifyDto userModifyDto, String email) {
-        String s3Path = null;
-
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
