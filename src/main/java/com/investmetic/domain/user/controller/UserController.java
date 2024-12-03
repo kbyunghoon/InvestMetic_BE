@@ -1,7 +1,6 @@
 package com.investmetic.domain.user.controller;
 
 import com.investmetic.domain.user.dto.object.TraderListSort;
-import com.investmetic.domain.user.dto.request.EmailRequestDto;
 import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.request.UserSignUpDto;
 import com.investmetic.domain.user.dto.response.AvaliableDto;
@@ -96,6 +95,7 @@ public class UserController {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
     }
+
     // 전화번호를 통한 이메일 찾기
     @Operation(summary = "휴대번호를 통한 이메일 찾기",
             description = "<a href='https://www.notion.so/68f9f0bcdde94776a29155b7358b450f' target='_blank'>API 명세서</a>")
@@ -103,26 +103,6 @@ public class UserController {
     public ResponseEntity<BaseResponse<FoundEmailDto>> findEmailByPhone(@RequestParam String phone) {
 
         return BaseResponse.success(userService.findEmailByPhone(phone));
-    }
-
-
-    //비밀번호 재설정 이메일 인증코드 전송
-    @GetMapping("/reissue/password")
-    public ResponseEntity<BaseResponse<String>> sendPasswordResetCode(
-            @RequestParam String email) {
-
-        String result = userService.sendAuthenticationCodeForPassword(email);
-        return BaseResponse.success(result);
-    }
-
-    //비밀번호 재설정 아메일 인증코드 검증
-    @PostMapping("/reissue/password")
-    public ResponseEntity<BaseResponse<Void>> verifyPasswordResetCode(
-            @RequestBody EmailRequestDto requestDto) {
-
-        userService.verifyEmailCode(requestDto.getEmail(), requestDto.getCode());
-        return BaseResponse.success(SuccessCode.OK);
-
     }
 
     //비밀번호 재설정

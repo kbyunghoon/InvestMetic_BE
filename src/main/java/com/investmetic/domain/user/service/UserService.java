@@ -203,7 +203,6 @@ public class UserService {
         String codeFoundByEmail = redisUtil.getData(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_FAILED));
 
-
         // 입력코드된 인증코드가 저장된 인증코드와 다를때.
         if (!codeFoundByEmail.equals(code)) {
             throw new BusinessException(ErrorCode.VERIFICATION_FAILED);
@@ -256,11 +255,4 @@ public class UserService {
     private interface ValidationFunction {
         boolean exists(String value);
     }
-
-    //비밀번호 찾기 이메일에 인증코드 전송
-    public String sendAuthenticationCodeForPassword(String email) {
-        sendAuthenticationCode(email);
-        return "이메일 전송 완료";
-    }
-
 }

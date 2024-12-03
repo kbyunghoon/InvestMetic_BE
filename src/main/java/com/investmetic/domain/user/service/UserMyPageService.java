@@ -82,9 +82,9 @@ public class UserMyPageService {
 
         //비밀 번호가 있으면 암호화 하여 저장.
         if (userModifyDto.getPassword() != null) {
-//            if (passwordEncoder.matches(userModifyDto.getPassword(), user.getPassword())) { //기존 비밀번호와 같다면 예외처리
-//                throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
-//            }
+            if (passwordEncoder.matches(userModifyDto.getPassword(), user.getPassword())) { //기존 비밀번호와 같다면 예외처리
+                throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
+            }
             user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
         }
 
