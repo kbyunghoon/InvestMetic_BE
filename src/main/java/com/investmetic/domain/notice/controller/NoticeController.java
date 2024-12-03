@@ -3,14 +3,18 @@ package com.investmetic.domain.notice.controller;
 import com.investmetic.domain.notice.dto.request.ImageRegistDto;
 import com.investmetic.domain.notice.dto.request.NoticeRegistDto;
 import com.investmetic.domain.notice.dto.response.ImageResponseDto;
+import com.investmetic.domain.notice.dto.response.NoticeListDto;
 import com.investmetic.domain.notice.service.NoticeService;
+import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +43,26 @@ public class NoticeController {
     @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<ImageResponseDto>> addImage(@RequestParam ImageRegistDto imageRegistDto) {
         return BaseResponse.success(noticeService.saveImage(imageRegistDto));
+    }
+
+
+    @GetMapping("/notices")
+    @Operation(summary = "공지사항 조회 기능",
+            description = "<a href='https://www.notion.so/ed6092e34cd44c08a2ae3427ff126cd6' target='_blank'>API 명세서</a>")
+    public ResponseEntity<BaseResponse<PageResponseDto<NoticeListDto>>> getNotices(Pageable pageable) {
+
+        return BaseResponse.success(noticeService.getUserNoticeList(pageable));
+    }
+
+    @GetMapping("/admin/notices")
+    @Operation(summary = "관리자 공지사항 조회 기능",
+            description = "<a href='https://www.notion.so/ed6092e34cd44c08a2ae3427ff126cd6' target='_blank'>API 명세서</a>")
+    @PreAuthorize("hasAnyRole('ROLE_INVESTOR_ADMIN', 'ROLE_TRADER_ADMIN')")
+    public ResponseEntity<BaseResponse<PageResponseDto<NoticeListDto>>> getNotices(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+
+        return BaseResponse.success(noticeService.getAdminNoticeList(keyword, pageable));
     }
 
 }
