@@ -2,6 +2,8 @@ package com.investmetic.domain.strategy.service;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -52,6 +54,7 @@ public class StrategyService {
     private final SubscriptionRepository subscriptionRepository;
     private final ReviewRepository reviewRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
+    private final AccountVerificationRepository accountVerificationRepository;
 
 
     @Transactional
@@ -114,17 +117,10 @@ public class StrategyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
         verifyUserPermission(strategy, userId);
 
-        // S3 파일 삭제
-        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+        // 종속 데이터 및 관련 파일 삭제
+        deleteAssociatedData(strategy);
 
-        // 종속된 데이터 삭제
-        stockTypeGroupRepository.deleteAllByStrategy(strategy);
-        dailyAnalysisRepository.deleteAllByStrategy(strategy);
-        monthlyAnalysisRepository.deleteAllByStrategy(strategy);
-        subscriptionRepository.deleteAllByStrategy(strategy);
-        reviewRepository.deleteAllByStrategy(strategy);
-
-        // strategyStatistics가 존재하는 경우 삭제
+        // 전략 통계 삭제 (존재 여부 확인)
         if (strategy.getStrategyStatistics() != null) {
             strategyStatisticsRepository.deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
         }
@@ -133,6 +129,28 @@ public class StrategyService {
         strategyRepository.deleteById(strategyId);
     }
 
+    private void deleteAssociatedData(Strategy strategy) {
+        // S3 파일 삭제
+        deleteS3Files(strategy);
+
+        // 종속된 데이터 삭제
+        stockTypeGroupRepository.deleteAllByStrategy(strategy);
+        dailyAnalysisRepository.deleteAllByStrategy(strategy);
+        monthlyAnalysisRepository.deleteAllByStrategy(strategy);
+        subscriptionRepository.deleteAllByStrategy(strategy);
+        reviewRepository.deleteAllByStrategy(strategy);
+    }
+
+    private void deleteS3Files(Strategy strategy) {
+        // 전략 제안서 파일 삭제
+        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+
+        // 계좌 인증 파일 삭제
+        List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
+        for (AccountVerification accountVerification : accountVerifications) {
+            s3FileService.deleteFromS3(accountVerification.getAccountVerificationUrl());
+        }
+    }
 
     @Transactional
     public PresignedUrlResponseDto registerStrategy(

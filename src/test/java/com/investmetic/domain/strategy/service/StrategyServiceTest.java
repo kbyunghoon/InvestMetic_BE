@@ -14,6 +14,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
+import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -97,6 +99,9 @@ class StrategyServiceTest {
 
     @Mock
     private StrategyStatisticsRepository strategyStatisticsRepository;
+
+    @Mock
+    private AccountVerificationRepository accountVerificationRepository;
 
     private StrategyRegisterRequestDto requestDto;
     private User user;
@@ -223,32 +228,42 @@ class StrategyServiceTest {
         Long strategyId = strategy.getStrategyId();
         Long userId = user.getUserId();
 
+        List<AccountVerification> accountVerifications = List.of(
+                AccountVerification.builder()
+                        .accountVerificationUrl("s3://bucket/accounts/account1.png")
+                        .build(),
+                AccountVerification.builder()
+                        .accountVerificationUrl("s3://bucket/accounts/account2.png")
+                        .build()
+        );
+
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(accountVerificationRepository.findByStrategy(strategy)).thenReturn(accountVerifications);
 
         strategyService.deleteStrategy(strategyId, userId);
 
-        verify(s3FileService, times(1)).deleteFromS3(strategy.getProposalFilePath());
-        verify(stockTypeGroupRepository, times(1)).deleteAllByStrategy(strategy);
-        verify(dailyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
-        verify(monthlyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
-        verify(subscriptionRepository, times(1)).deleteAllByStrategy(strategy);
-        verify(reviewRepository, times(1)).deleteAllByStrategy(strategy);
+        verify(strategyRepository).findById(strategyId);
+        verify(stockTypeGroupRepository).deleteAllByStrategy(strategy);
+        verify(dailyAnalysisRepository).deleteAllByStrategy(strategy);
+        verify(monthlyAnalysisRepository).deleteAllByStrategy(strategy);
+        verify(subscriptionRepository).deleteAllByStrategy(strategy);
+        verify(reviewRepository).deleteAllByStrategy(strategy);
 
         if (strategy.getStrategyStatistics() != null) {
-            verify(strategyStatisticsRepository, times(1))
-                    .deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
+            verify(strategyStatisticsRepository).deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
         }
 
-        verify(strategyRepository, times(1)).deleteById(strategyId);
+        verify(strategyRepository).deleteById(strategyId);
+
+        verify(s3FileService).deleteFromS3(strategy.getProposalFilePath());
     }
 
     @Test
     @DisplayName("전략 삭제 - 실패 (전략 ID가 존재하지 않을 때)")
     void 전략_삭제_테스트_2() {
-        Long strategyId = strategy.getStrategyId();
+        Long strategyId = 1L;
         Long userId = user.getUserId();
 
-        // 전략 조회가 실패하도록 설정
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(
@@ -256,17 +271,9 @@ class StrategyServiceTest {
                 () -> strategyService.deleteStrategy(strategyId, userId)
         );
 
-        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode()); // 올바른 에러 코드 반환 확인
-        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
-        verifyNoInteractions(
-                stockTypeGroupRepository,
-                dailyAnalysisRepository,
-                monthlyAnalysisRepository,
-                subscriptionRepository,
-                reviewRepository,
-                strategyStatisticsRepository,
-                s3FileService
-        ); // 다른 리포지토리 및 S3 서비스 호출 없음 확인
+        assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
+        verify(strategyRepository).findById(strategyId);
+        verifyNoInteractions(stockTypeGroupRepository, dailyAnalysisRepository, s3FileService);
     }
 
     @Test
@@ -283,8 +290,8 @@ class StrategyServiceTest {
         );
 
         assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
-        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
-        verifyNoInteractions(stockTypeGroupRepository, dailyAnalysisRepository, s3FileService); // 다른 호출 없음 확인
+        verify(strategyRepository).findById(strategyId);
+        verifyNoInteractions(stockTypeGroupRepository, dailyAnalysisRepository, s3FileService);
     }
 
     @Test
