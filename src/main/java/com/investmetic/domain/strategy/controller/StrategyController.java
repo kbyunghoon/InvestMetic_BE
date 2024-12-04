@@ -197,7 +197,7 @@ public class StrategyController {
                 strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "나의 전략 일간분석 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}/daily-analysis")
@@ -207,7 +207,7 @@ public class StrategyController {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
-    @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "나의 전략 상세정보 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}")
