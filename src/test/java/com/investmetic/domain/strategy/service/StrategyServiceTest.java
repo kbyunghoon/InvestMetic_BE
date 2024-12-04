@@ -256,7 +256,7 @@ class StrategyServiceTest {
 
         verify(strategyRepository).deleteById(strategyId);
 
-        verify(s3FileService).deleteFromS3(strategy.getProposalFilePath());
+        verify(s3FileService).deleteStrategyFolder(strategyId);
     }
 
     @Test

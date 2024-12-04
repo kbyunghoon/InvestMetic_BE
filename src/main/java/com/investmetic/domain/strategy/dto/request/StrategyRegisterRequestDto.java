@@ -3,6 +3,10 @@ package com.investmetic.domain.strategy.dto.request;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.global.dto.ProposalFileDto;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,12 +16,27 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class StrategyRegisterRequestDto {
-    private String strategyName; // 전략명
-    private Long tradeTypeId; // 매매유형 ID
-    private OperationCycle operationCycle; // 운용주기
-    private List<Long> stockTypeIds; // 종목 유형 ID 리스트
-    private MinimumInvestmentAmount minimumInvestmentAmount; // 최소운용금액
-    private ProposalFileDto proposalFile; // 제안서 파일 정보
+    @NotNull(message = "전략명을 입력해주세요.")
+    @NotBlank(message = "전략명은 비어 있을 수 없습니다.")
+    private String strategyName;
+
+    @NotNull(message = "매매 유형을 선택해주세요.")
+    private Long tradeTypeId;
+
+    @NotNull(message = "운용 주기를 입력해주세요.")
+    private OperationCycle operationCycle;
+
+    @NotEmpty(message = "종목 유형을 선택해주세요.")
+    private List<Long> stockTypeIds;
+
+    @NotNull(message = "최소 운용 금액을 입력해주세요.")
+    private MinimumInvestmentAmount minimumInvestmentAmount;
+
+    @NotNull(message = "제안서 파일를 업로드 해주세요.")
+    private ProposalFileDto proposalFile;
+
+    @NotNull(message = "전략 소개를 입력해주세요.")
+    @NotBlank(message = "전략 소개는 비어 있을 수 없습니다.")
     private String description;
 
     @Builder

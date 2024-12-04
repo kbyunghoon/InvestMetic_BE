@@ -8,8 +8,13 @@ import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
+import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
@@ -38,12 +43,27 @@ public class AdminStrategyServiceTest {
     private StrategyRepository strategyRepository;
     @Autowired
     private TradeTypeRepository tradeTypeRepository;
+    @Autowired
+    private DailyAnalysisRepository dailyAnalysisRepository;
+    @Autowired
+    private StockTypeRepository stockTypeRepository;
+    @Autowired
+    private MonthlyAnalysisRepository monthlyAnalysisRepository;
+    @Autowired
+    private StockTypeGroupRepository stockTypeGroupRepository;
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
 
     User user;
     Strategy strategy;
 
     @BeforeEach
     void init() {
+        stockTypeGroupRepository.deleteAll();
+        dailyAnalysisRepository.deleteAll();
+        subscriptionRepository.deleteAll();
+        monthlyAnalysisRepository.deleteAll();
+        strategyRepository.deleteAll();
         // 더미 데이터 입력
         user = TestEntityFactory.createTestUser();
         userRepository.save(user);
