@@ -38,16 +38,16 @@ class UserCommonLogicTest {
     private EntityManager em;
 
     /*
-    * MockDB위주로 설정.
-    * */
+     * MockDB위주로 설정.
+     * */
     @Test
     @DisplayName("회원 Trader 삭제 확인")
-    void deleteUserTest1(){
+    void deleteUserTest1() {
         User trader = userRepository.findById(1L).orElse(null);
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        if(trader != null && Role.isTrader(trader.getRole())){
+        if (trader != null && Role.isTrader(trader.getRole())) {
 
             // when
             userCommonLogic.deleteUser(trader);
@@ -58,6 +58,8 @@ class UserCommonLogicTest {
             // 해당 트레이더의 전략이 없어야함.
             assertThat(strategyListingService.getMyStrategies(trader.getUserId(), pageable).getContent())
                     .isEmpty();
+
+            //  strategyService.deleteStrategy()에서 test 검증 했으므로 일간, 월간 분석 Data등은 통과.
 
             // 해당 트레이더가 구독한 전략이 없어야함.
             assertThat(strategyListingService.getSubscribedStrategies(trader.getUserId(), pageable).getContent())
@@ -78,7 +80,7 @@ class UserCommonLogicTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        if(investor != null && Role.isTrader(investor.getRole())){
+        if (investor != null && Role.isTrader(investor.getRole())) {
 
             // 해당 회원이 구독한 전략이 있음을 확인.
             assertThat(strategyListingService.getSubscribedStrategies(investor.getUserId(), pageable).getContent())
@@ -98,14 +100,11 @@ class UserCommonLogicTest {
             // 자신이 남긴 리뷰가 없어야함.
             assertThat(reviewRepository.findAllByUserUserId(investor.getUserId()))
                     .isEmpty();
+
         }
 
 
-
     }
-
-
-
 
 
 }

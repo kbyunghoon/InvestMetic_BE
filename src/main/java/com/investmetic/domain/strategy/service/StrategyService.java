@@ -147,6 +147,10 @@ public class StrategyService {
 
         // 계좌 인증 파일 삭제
         List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
+
+        // 해당 전략의 실계좌 인증 삭제.
+        accountVerificationRepository.deleteAllInBatch(accountVerifications);
+
         for (AccountVerification accountVerification : accountVerifications) {
             s3FileService.deleteFromS3(accountVerification.getAccountVerificationUrl());
         }
