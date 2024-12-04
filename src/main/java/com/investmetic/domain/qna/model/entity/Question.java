@@ -17,12 +17,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@AllArgsConstructor
 public class Question extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,14 +55,14 @@ public class Question extends BaseEntity {
     private QnaState qnaState; // 답변 상태
 
     public static Question from(User user, Strategy strategy, QuestionRequestDto request) {
-        Question question = new Question();
-        question.user = user;
-        question.strategy = strategy;
-        question.targetName = strategy.getUser().getNickname();
-        question.title = request.getTitle();
-        question.qnaState = QnaState.WAITING;
-        question.content = request.getContent();
-        return question;
+        return Question.builder()
+                .user(user)
+                .strategy(strategy)
+                .targetName(strategy.getUser().getNickname())
+                .title(request.getTitle())
+                .qnaState(QnaState.WAITING)
+                .content(request.getContent())
+                .build();
     }
 
 
