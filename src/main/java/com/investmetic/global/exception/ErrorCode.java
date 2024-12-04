@@ -21,6 +21,7 @@ public enum ErrorCode {
     INVALID_DATE(HttpStatus.BAD_REQUEST, 1008, "날짜 형식을 확인해주세요."),
     EMPTY_PATH_VARIABLE(HttpStatus.BAD_REQUEST, 1008, "필수 경로 변수가 누락되었습니다. 요청 경로에 올바른 값을 입력해 주세요."),
     NOT_SUPPORTED_TYPE(HttpStatus.BAD_REQUEST, 1009, "잘못된 형식 파일입니다."),
+    FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 1010, "파일 삭제 중 오류가 발생했습니다."),
 
     //사용자 관련 오류
     USER_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, 2001, "해당 회원의 정보를 찾을 수 없습니다."),
@@ -43,7 +44,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, 2501, "Refresh token is missing."),
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2502, "Refresh token has expired."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
-    AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN,2504,"권한이 없습니다."),
+    AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN, 2504, "권한이 없습니다."),
     SAME_AS_OLD_PASSWORD(HttpStatus.OK, 2208, "기존 비밀번호와 동일합니다!"),
 
 
@@ -71,14 +72,23 @@ public enum ErrorCode {
 
     STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 종목이 존재하지 않습니다."),
     TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3022, "해당 매매 유형이 존재하지 않습니다."),
+    DUPLICATE_DATE_IN_REQUEST(HttpStatus.BAD_REQUEST, 3023, "중복된 날짜의 요청이 존재합니다."),
     ACCOUNT_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, 3030, "해당 실계좌 인증 이미지가 존재하지 않습니다."),
     EXCEL_CREATE_ERROR(HttpStatus.NOT_FOUND, 3031, "Excel 생성 중 오류가 발생했습니다."),
     EXCEL_DOWNLOAD_ERROR(HttpStatus.NOT_FOUND, 3032, "Excel 다운로드 중 오류가 발생했습니다."),
+    SELF_SUBSCRIPTION_NOT_ALLOWED(HttpStatus.FORBIDDEN, 3033, "본인 전략에는 구독할 수 없습니다."),
+
 
     // 전략리뷰 관련오류(3300번대 );
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, 3301, "해당 전략의 리뷰를 찾을 수 없습니다."),
-    CANNOT_REVIEW_OWN_STRATEGY(HttpStatus.FORBIDDEN,3302,"본인전략에는 리뷰를 달 수 없습니다."),
-    DUPLICATE_REVIEW(HttpStatus.FORBIDDEN,3303,"리뷰는 한번만 가능합니다.");
+    CANNOT_REVIEW_OWN_STRATEGY(HttpStatus.FORBIDDEN, 3302, "본인전략에는 리뷰를 달 수 없습니다."),
+    DUPLICATE_REVIEW(HttpStatus.FORBIDDEN, 3303, "리뷰는 한번만 가능합니다."),
+
+    //문의 관련 오류(5000번대 );
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "해당 문의를 찾을 수 없습니다."),
+    INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, 5002, "정렬 조건이 잘못되었습니다."),
+    EMPTY_QUESTION_LIST(HttpStatus.NOT_FOUND, 5003, "조회 가능한 문의가 없습니다."),
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, 5004, "해당 답변을 찾을 수 없습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드

@@ -4,8 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.investmetic.domain.strategy.dto.request.StockTypeRequestDTO;
 import com.investmetic.domain.strategy.dto.response.StockTypeResponseDTO;
+import com.investmetic.domain.strategy.model.entity.MonthlyAnalysis;
 import com.investmetic.domain.strategy.model.entity.StockType;
+import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
+import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
@@ -28,11 +35,26 @@ class StockTypeServiceTest {
     @Autowired
     private S3FileService s3FileService;
     @Autowired
+    private DailyAnalysisRepository dailyAnalysisRepository;
+    @Autowired
     private StockTypeRepository stockTypeRepository;
+    @Autowired
+    private StrategyRepository strategyRepository;
+    @Autowired
+    private MonthlyAnalysisRepository monthlyAnalysisRepository;
+    @Autowired
+    private StockTypeGroupRepository stockTypeGroupRepository;
+    @Autowired
+    private SubscriptionRepository subscriptionRepository;
 
     @BeforeEach
     void setUp() {
         stockTypeRequestList = new ArrayList<StockTypeRequestDTO>();
+        stockTypeGroupRepository.deleteAll();
+        dailyAnalysisRepository.deleteAll();
+        subscriptionRepository.deleteAll();
+        monthlyAnalysisRepository.deleteAll();
+        strategyRepository.deleteAll();
         stockTypeRepository.deleteAll();
 
         for (int i = 1; i <= 5; i++) {
