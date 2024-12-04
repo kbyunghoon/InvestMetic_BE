@@ -9,6 +9,7 @@ import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,9 +31,11 @@ class StrategyStatisticsSchedulerTest {
 
     private List<DailyAnalysis> dailyAnalyses;
 
+    private Strategy testStrategy;
+
     @BeforeEach
     void setUp() {
-        Strategy testStrategy = Strategy.builder()
+        testStrategy = Strategy.builder()
                 .strategyId(1L) // 테스트용 전략 ID
                 .build();
 
@@ -108,4 +111,39 @@ class StrategyStatisticsSchedulerTest {
 
     }
 
+    @DisplayName("통계가 존재할때 새로운 통계가 생성되지 않음")
+    @Test
+    void 통계존재_테스트1(){
+        // Given
+        Mockito.when(strategyStatisticsRepository.findById(testStrategy.getStrategyId()))
+                .thenReturn(Optional.empty()); // 통계가 없는 경우
+
+        // 계산
+        strategyStatisticsScheduler.calculateStatistics(dailyAnalyses);
+
+        // save 1번 호출
+        Mockito.verify(strategyStatisticsRepository, Mockito.times(1))
+                .save(Mockito.any(StrategyStatistics.class));
+
+    }
+
+    @DisplayName("통계가 존재하지않을때 통계가 새로 생성됨")
+    @Test
+    void 통계존재_테스트2(){
+        // 이미 통계 존재
+        StrategyStatistics existingStatistics = StrategyStatistics.builder()
+                .strategyStatisticsId(1L)
+                .build();
+
+        Mockito.when(strategyStatisticsRepository.findById(testStrategy.getStrategyId()))
+                .thenReturn(Optional.of(existingStatistics)); // 통계가 있는 경우
+
+        // 계산
+        strategyStatisticsScheduler.calculateStatistics(dailyAnalyses);
+
+        // 통계가 없어서 save 호출x
+        Mockito.verify(strategyStatisticsRepository, Mockito.times(0))
+                .save(Mockito.any(StrategyStatistics.class));
+
+    }
 }
