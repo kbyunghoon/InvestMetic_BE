@@ -105,21 +105,6 @@ public class UserService {
 
 
     public AvaliableDto checkNicknameDuplicate(String nickname) {
-        if (nickname == null || nickname.trim().isEmpty()) {
-            return AvaliableDto.builder()
-                    .isAvailable(false)
-                    .message("닉네임을 입력해주세요.") // 적절한 에러 메시지
-                    .build();
-        }
-
-        String nicknamePattern = "^[a-zA-Z가-힣0-9._-]{2,10}$";
-
-        if (!nickname.matches(nicknamePattern)) {
-            return AvaliableDto.builder()
-                    .isAvailable(false)
-                    .message("닉네임은 2~10자 이내로 설정해야 하며, 특수문자는 ., _, -만 사용할 수 있습니다.")
-                    .build();
-        }
 
         boolean isDuplicate = userRepository.existsByNickname(nickname);
 
@@ -137,12 +122,6 @@ public class UserService {
     }
 
     public AvaliableDto checkEmailDuplicate(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return AvaliableDto.builder()
-                    .isAvailable(false)
-                    .message("이메일을 입력해주세요.")
-                    .build();
-        }
 
         boolean isDuplicate = userRepository.existsByEmail(email);
 
@@ -160,12 +139,6 @@ public class UserService {
     }
 
     public AvaliableDto checkPhoneDuplicate(String phone) {
-        if (phone == null || phone.trim().isEmpty()) {
-            return AvaliableDto.builder()
-                    .isAvailable(false)
-                    .message("휴대번호를 입력해주세요.")
-                    .build();
-        }
 
         boolean isDuplicate = userRepository.existsByPhone(phone);
 
