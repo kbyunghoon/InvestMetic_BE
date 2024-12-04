@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubscribeController {
     private final SubscriptionService subscriptionService;
 
-    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "전략 구독, 구독 취소 상태 관리 기능",
             description = "<a href='https://www.notion.so/dfae7b994dd94761a77f70869bf9d479' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}/subscribe")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     public ResponseEntity<BaseResponse<Void>> subscribe(
             @PathVariable Long strategyId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
