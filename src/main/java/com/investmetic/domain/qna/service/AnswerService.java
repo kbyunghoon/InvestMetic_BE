@@ -106,9 +106,7 @@ public class AnswerService {
      * @param traderId 트레이더 ID
      */
     private void validateTraderAuthorization(Question question, Long traderId) {
-        if (question.getStrategy() == null ||
-                question.getStrategy().getUser() == null ||
-                !question.getStrategy().getUser().getUserId().equals(traderId)) {
+        if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }

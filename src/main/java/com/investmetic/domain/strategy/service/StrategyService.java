@@ -142,8 +142,8 @@ public class StrategyService {
     }
 
     private void deleteS3Files(Strategy strategy) {
-        // 전략 제안서 파일 삭제
-        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+        // 전략 폴더 전부 삭제
+        s3FileService.deleteStrategyFolder(strategy.getStrategyId());
 
         // 계좌 인증 파일 삭제
         List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
@@ -160,25 +160,27 @@ public class StrategyService {
         TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
 
-        String proposalFilePath = s3FileService.getS3Path(
-                FilePath.STRATEGY_PROPOSAL,
-                requestDto.getProposalFile().getProposalFileName(),
-                requestDto.getProposalFile().getProposalFileSize()
-        );
-
-        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
-
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
                 .tradeType(tradeType)
                 .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
-                .proposalFilePath(proposalFilePath)
                 .strategyDescription(requestDto.getDescription())
                 .build();
 
-        strategyRepository.save(strategy);
+        Long strategyId = strategyRepository.save(strategy).getStrategyId();
+
+        String proposalFilePath = s3FileService.getS3StrategyPath(
+                FilePath.STRATEGY_PROPOSAL,
+                strategyId,
+                requestDto.getProposalFile().getProposalFileName(),
+                requestDto.getProposalFile().getProposalFileSize()
+        );
+
+        strategy.modifyStrategyProposalFilePath(proposalFilePath);
+
+        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
         requestDto.getStockTypeIds().forEach(stockTypeId -> {
             StockType stockType = stockTypeRepository.findById(stockTypeId)
@@ -207,8 +209,9 @@ public class StrategyService {
         verifyUserPermission(strategy, userId);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
-            String proposalFilePath = s3FileService.getS3Path(
+            String proposalFilePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_PROPOSAL,
+                    strategyId,
                     requestDto.getProposalFile().getProposalFileName(),
                     requestDto.getProposalFile().getProposalFileSize()
             );
