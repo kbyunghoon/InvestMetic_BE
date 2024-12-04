@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -108,7 +109,7 @@ class AccountVerificationServiceTest {
     @Test
     void 실계좌_인증_이미지_등록_성공_테스트() {
         when(strategyRepository.findById(1L)).thenReturn(Optional.of(strategy));
-        when(s3FileService.getS3Path(eq(FilePath.STRATEGY_IMAGE), anyString(), anyInt()))
+        when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_IMAGE), anyLong(), anyString(), anyInt()))
                 .thenReturn("s3://bucket/path/to/image");
         when(s3FileService.getPreSignedUrl("s3://bucket/path/to/image"))
                 .thenReturn("https://presigned.url");
