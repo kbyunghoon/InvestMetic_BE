@@ -36,4 +36,8 @@ public class Notice extends BaseEntity {
         this.title = title;
         this.content = content;
     }
+
+    public void modifyUser(User user) {
+        this.user = user;
+    }
 }

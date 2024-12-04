@@ -38,4 +38,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         return PageableExecutionUtils.getPage(content, pageable, () -> total);
     }
 
+    List<Question> findAllByUserUserId(Long userId);
+
 }

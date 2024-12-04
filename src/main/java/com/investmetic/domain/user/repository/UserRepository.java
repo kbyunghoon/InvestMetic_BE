@@ -20,4 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
     @Query("select u.email from User u where u.phone = :phone")
     Optional<String> findEmailByPhone(@Param("phone") String phone);
+
+    @Query("select u from User u  where u.role = 'SUPER_ADMIN' order by u.userId limit 1")
+    User findSuperAdminUser();
+
+
 }
