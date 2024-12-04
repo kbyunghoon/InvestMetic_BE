@@ -107,10 +107,10 @@ public class UserController {
 
     //비밀번호 재설정
     @PatchMapping("/reissue/password")
-    public ResponseEntity<BaseResponse<String>> resetPassword(
+    public ResponseEntity<BaseResponse<Void>> resetPassword(
             @RequestBody UserModifyDto userModifyDto) {
 
         userMyPageService.resetPassword(userModifyDto, userModifyDto.getEmail());
-        return BaseResponse.success(SuccessCode.OK);
+        return BaseResponse.success();
     }
 }
