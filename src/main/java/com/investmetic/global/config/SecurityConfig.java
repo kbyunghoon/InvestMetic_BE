@@ -9,7 +9,9 @@ import com.investmetic.global.security.service.CustomUserDetailService;
 import com.investmetic.global.util.JWTUtil;
 import com.investmetic.global.util.RedisUtil;
 import java.util.List;
+import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -23,7 +25,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -38,6 +44,11 @@ public class SecurityConfig {
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
     private final UserRepository userRepository;
+    private final CustomUserDetailService customUserDetailService;
+
+    @Autowired
+    DataSource dataSource; //yml에 정의한 데이터 소스를 가져오는 객체
+
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -58,6 +69,22 @@ public class SecurityConfig {
                         ROLE_INVESTOR_ADMIN > ROLE_INVESTOR
                 """);
     }
+//
+//    @Bean
+//    public PersistentTokenBasedRememberMeServices persistentTokenBasedRememberMeServices() {
+//        PersistentTokenBasedRememberMeServices rememberMeServices =
+//                new PersistentTokenBasedRememberMeServices(
+//                        "security", // 키 값
+//                        customUserDetailService, // CustomUserDetailService 주입
+//                        persistentTokenRepository() // PersistentTokenRepository 설정
+//                );
+//        rememberMeServices.setAlwaysRemember(true);
+//        rememberMeServices.setTokenValiditySeconds(3600); // 1시간
+//        rememberMeServices.setCookieName("remember-me");
+//        return rememberMeServices;
+//    }
+//    // PersistentRepository 토큰정보 객체 - 빈 등록
+
 
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, CorsProperties corsProperties)
@@ -93,6 +120,11 @@ public class SecurityConfig {
                         .requestMatchers("/profile").authenticated() // /profile은 인증 필요
                         .anyRequest().permitAll() // 모든 요청 허용
                 );
+        http
+                .rememberMe(httpSecurityRememberMeConfigurer -> httpSecurityRememberMeConfigurer
+//                        .rememberMeServices(rememberMeServices(persistentTokenRepository(), customUserDetailService))
+                        .key("security"));
+
 
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration));
         loginFilter.setAuthenticationSuccessHandler(successHandler); // 성공 핸들러 설정
@@ -107,5 +139,22 @@ public class SecurityConfig {
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource); // DataSource 설정
+        return tokenRepository;
+    }
+
+    @Bean
+    public RememberMeServices rememberMeServices(PersistentTokenRepository ptr) {
+        PersistentTokenBasedRememberMeServices rememberMeServices = new
+                PersistentTokenBasedRememberMeServices("security",
+                customUserDetailService, ptr);
+        rememberMeServices.setAlwaysRemember(true);
+        rememberMeServices.setParameter("remember-me");
+        rememberMeServices.setCookieName("remember-me");
+        return rememberMeServices;
     }
 }

@@ -12,12 +12,10 @@ import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
-import com.investmetic.domain.user.repository.UserRepositoryCustomImpl;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.RedisUtil;
-import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -36,10 +34,8 @@ public class UserService {
 
 
     private final UserRepository userRepository;
-    private final UserRepositoryCustomImpl userRepositoryCustom;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final StibeeEmailService emailService;
-    private final S3FileService s3FileService;
     private final RedisUtil redisUtil;
     private final SecureRandom secureRandom = new SecureRandom();
     private final TaskScheduler taskScheduler;

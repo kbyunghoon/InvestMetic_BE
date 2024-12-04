@@ -6,4 +6,5 @@ import lombok.Getter;
 public class LoginRequestDto {
     String email;
     String password;
+    Boolean remember; // remember 필드 추가
 }

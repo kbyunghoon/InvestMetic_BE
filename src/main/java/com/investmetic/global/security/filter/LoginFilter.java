@@ -24,6 +24,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         String email = null;
         String password = null;
+        Boolean rememberMe = null;
+
 
         try {
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
@@ -33,6 +35,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(email, password);
+
+            authToken.setDetails(rememberMe);
 
             return authenticationManager.authenticate(authToken);
 

@@ -11,10 +11,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +26,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Lazy
+    private final RememberMeServices rememberMeServices;
+
 
     @Value("${jwt.expiration.access}")
     private Long accessExpiration;
@@ -53,6 +59,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         // 응답 헤더와 JSON 설정
         response.setHeader("access-token", "Bearer " + access);
         response.addCookie(createCookie("refresh-token", refresh, refreshExpiration));
+
+//        rememberMeServices.loginSuccess(request, response, authentication);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
