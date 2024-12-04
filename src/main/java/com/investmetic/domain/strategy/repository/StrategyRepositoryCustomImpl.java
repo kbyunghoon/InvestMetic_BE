@@ -40,13 +40,10 @@ import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -297,35 +294,6 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 : strategyStatistics.cumulativeProfitRate.desc();
     }
 
-    // 수익률 그래프 데이터 조회 배치 쿼리
-    @Override
-    public Map<Long, List<Tuple>> findProfitRateDataMap(List<Long> strategyIds) {
-        // 최신 데이터 20개를 가져오기
-        List<Tuple> fetchedData = queryFactory
-                .select(dailyAnalysis.strategy.strategyId,
-                        dailyAnalysis.dailyDate.stringValue(),
-                        dailyAnalysis.cumulativeProfitLossRate)
-                .from(dailyAnalysis)
-                .where(dailyAnalysis.strategy.strategyId.in(strategyIds))
-                .orderBy(dailyAnalysis.dailyDate.desc()) // 최신 데이터 기준으로 정렬
-                .limit(20) // 최신 데이터 20개만
-                .fetch();
-
-        // 날짜 오름차순으로 정렬
-        return fetchedData.stream()
-                .collect(Collectors.groupingBy(
-                        tuple -> tuple.get(dailyAnalysis.strategy.strategyId), // Strategy ID로 그룹화
-                        Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                list -> list.stream()
-                                        .sorted(Comparator.comparing(
-                                                tuple -> LocalDate.parse(tuple.get(
-                                                        dailyAnalysis.dailyDate.stringValue())))) // 날짜 오름차순 정렬
-                                        .toList()
-                        )
-                ));
-    }
-
     // 종목 아이콘목록 조회 배치 쿼리
     @Override
     public Map<Long, StockTypeInfo> findStockTypeInfoMap(List<Long> strategyIds) {
@@ -402,9 +370,11 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .where(strategy.strategyId.eq(strategyId))
                 .fetch();
     }
+
     @Override
-    public Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord, IsApproved isApproved){
-        List<AdminStrategyResponseDto> strategies=queryFactory
+    public Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord,
+                                                              IsApproved isApproved) {
+        List<AdminStrategyResponseDto> strategies = queryFactory
                 .select(new QAdminStrategyResponseDto(
                         strategy.createdAt,
                         strategy.strategyId,
@@ -414,7 +384,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.isApproved
                 ))
                 .from(strategy)
-                .where(applySearchWordFilter(searchWord),applyIsApprovedFilter(isApproved))
+                .where(applySearchWordFilter(searchWord), applyIsApprovedFilter(isApproved))
                 .orderBy(strategy.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

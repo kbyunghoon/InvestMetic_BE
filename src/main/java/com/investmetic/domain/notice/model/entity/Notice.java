@@ -31,7 +31,9 @@ public class Notice extends BaseEntity {
     @Column(length = 3000)
     private String content; //공지사항내용
 
-    @Column(length = 1000)
-    private String fileUrl; //파일경로
-
+    public Notice(User user, String title, String content) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+    }
 }
