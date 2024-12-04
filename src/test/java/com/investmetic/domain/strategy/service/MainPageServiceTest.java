@@ -18,9 +18,5 @@ public class MainPageServiceTest {
     @Test
     @DisplayName("대표 통합 지표 조회 테스트")
     public void test() {
-        TotalStrategyMetricsResponseDto dto =mainPageService.getMetricsByDateRange();
-        System.out.println(dto.getData());
-        System.out.println(dto.getDates());
-        System.out.println(dto.getDates().size());
     }
 }
