@@ -80,7 +80,7 @@ public class UserController {
     @GetMapping("/check/phone")
     public ResponseEntity<BaseResponse<AvaliableDto>> checkPhoneDuplicate(
             @RequestParam
-            @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "유효하지 않은 전화번호 형식입니다.")
+            @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "유효하지 않은 휴대번호 형식입니다.")
             String phone) {
 
         AvaliableDto response = userService.checkPhoneDuplicate(phone);
