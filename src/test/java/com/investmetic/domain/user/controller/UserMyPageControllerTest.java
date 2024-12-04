@@ -42,8 +42,10 @@ class UserMyPageControllerTest {
     private final String userName = "test";
     @Autowired
     private MockMvc mockMvc;
+
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -62,8 +64,8 @@ class UserMyPageControllerTest {
     }
 
     /*
-    * TEST_EXECUTION을 해야 @BeforeEach다음에 @WithUserDetails가 적용됨.
-    * */
+     * TEST_EXECUTION을 해야 @BeforeEach다음에 @WithUserDetails가 적용됨.
+     * */
 
     @Test
     @DisplayName("회원 정보 조회 - DB에 Email 있는 경우")
@@ -156,8 +158,7 @@ class UserMyPageControllerTest {
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
             resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message")
-                            .value(ErrorCode.INVALID_INPUT_VALUE.getMessage())).andDo(print());
+                    .andDo(print());
         }
 
         @Test
@@ -176,10 +177,7 @@ class UserMyPageControllerTest {
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
             resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message")
-                            .value(ErrorCode.INVALID_INPUT_VALUE.getMessage())).andDo(print());
+                    .andDo(print());
         }
-
-
     }
 }

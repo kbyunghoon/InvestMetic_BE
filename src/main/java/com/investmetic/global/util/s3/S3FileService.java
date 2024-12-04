@@ -1,12 +1,17 @@
 package com.investmetic.global.util.s3;
 
 import com.amazonaws.HttpMethod;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import java.net.URI;
@@ -14,10 +19,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +35,7 @@ import org.springframework.stereotype.Service;
  * <br>
  * image metadata 받아오는 파라미터가 달라질 수 있음.(content-type)
  */
+@Slf4j
 @Service
 public class S3FileService {
 
@@ -47,15 +54,6 @@ public class S3FileService {
     @Value("${cloud.aws.s3.defaultImgPath}")
     private String bucketPath;
 
-    private static final HashSet<String> imgExtensionSet;
-    private static final HashSet<String> excelExtensionSet;
-    private static final HashSet<String> docsExtensionSet;
-
-    static {
-        imgExtensionSet = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
-        excelExtensionSet = new HashSet<>(Arrays.asList("xls", "xlsx"));
-        docsExtensionSet = new HashSet<>(Arrays.asList("doc", "docx", "pptx", "ppt"));
-    }
 
     public S3FileService(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
@@ -72,83 +70,23 @@ public class S3FileService {
      * @return DB에 저장될 S3경로.
      */
     public String getS3Path(FilePath filePath, String fileName, int size) {
-
-        //전략 엑셀.
-        if (filePath.equals(FilePath.STRATEGY_EXCEL) || filePath.equals(FilePath.STRATEGY_PROPOSAL)) {
-            //확장자가 틀리거나 500MB이상 인지 확인
-            if (!filterExcelExtension(fileName) || size >= 1024 * 1024 * 500) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-            //전략 이미지, 유저 프로필 사진
-        } else if (filePath.equals(FilePath.STRATEGY_IMAGE) || filePath.equals(FilePath.USER_PROFILE)) {
-            //확장자가 틀리거나 2MB이상인지 확인
-            if (!filterImageExtension(fileName) || size >= 1024 * 1024 * 2) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-            //공지사항.
-        } else if (filePath.equals(FilePath.NOTICE)) {
-            //확장자가 틀리거나 5MB이상인지 확인
-            if (!filterNoticeExtension(fileName) || size >= 1024 * 1024 * 5) {
-                throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-            }
-
-        } else {
-
-            // 아무것도 아닌경우. - 이럴 일은 없겠지만...
-            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
-        }
-
-        //객체 URL 경로 반환.(도메인 경로 포함)
+        validateFile(filePath, fileName, size);
         return prefixFilePath(filePath.getPath(), createUUID8() + fileName);
     }
 
 
-    /**
-     * 현재 파일의 확장자가 imgExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
-     */
-    private boolean filterImageExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환.
-        return imgExtensionSet.contains(extension);
+    public String getS3StrategyPath(FilePath filePath, Long strategyId, String fileName, int size) {
+        validateFile(filePath, fileName, size);
+        return prefixFilePath(filePath.getStrategyPath(strategyId), createUUID8() + fileName);
     }
 
-
     /**
-     * 현재 파일의 확장자가 excelExtensionList에 해당하는지 확인
-     *
-     * @param filename 확장자가 붙은 파일 이름
+     * 파일 검증 로직
      */
-    private boolean filterExcelExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        // 해당하는 확장자가 있으면 true 반환. O(n)이지만 가독성을 위해...
-        return excelExtensionSet.contains(extension);
-    }
-
-
-    /**
-     * 현재 파일의 확장자가 imgExtensionList나 docsExtensionList에 해당하는지 확인.
-     *
-     * @param filename 확장자가 붙은 파일 이름.
-     */
-    private boolean filterNoticeExtension(String filename) {
-
-        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-
-        //공치사항에 올릴 파일이 이미지 확장자에 해당하는지 검증.
-        if (filterImageExtension(extension)) {
-            return true;
+    private void validateFile(FilePath filePath, String fileName, int size) {
+        if (!filePath.isValidExtension(fileName) || size >= filePath.getMaxSize()) {
+            throw new BusinessException(ErrorCode.NOT_SUPPORTED_TYPE);
         }
-
-        //공지사항헤 올릴 파일이 doc이나 ppt 종류에 해당하는지 검증.
-        return docsExtensionSet.contains(extension);
-
     }
 
     /**
@@ -160,7 +98,6 @@ public class S3FileService {
     private String prefixFilePath(String filePath, String fileName) {
         return String.format("%s%s%s", bucketPath, filePath, fileName);
     }
-
 
     /**
      * AWS에게서 presigned url을 요청한다.
@@ -191,15 +128,15 @@ public class S3FileService {
      */
     private GeneratePresignedUrlRequest getGeneratePreSignedUrlRequest(String bucket, String s3Key) {
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, s3Key)
-                .withMethod(HttpMethod.PUT) // Put에 대한 메서드로 presigned URL생성
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket,
+                s3Key).withMethod(HttpMethod.PUT) // Put에 대한 메서드로 presigned URL생성
 //                .withKey() //s3객체의 Key도 설정 가능함.
                 .withExpiration(getPreSignedUrlExpiration()); // default 15분
 
         // 업로드 정책을 Bucket Policy로 강제해 주면 acl 조건을 강제하여 업로드 하도록 가능하다고 함.
         // https://www.wisen.co.kr/pages/blog/blog-detail.html?idx=12022
-        generatePresignedUrlRequest.addRequestParameter(
-                Headers.S3_CANNED_ACL, // "x-amz-acl" S3 객체의 액세스 제어 목록 에 대한 조건 (canned acl)
+        generatePresignedUrlRequest.addRequestParameter(Headers.S3_CANNED_ACL,
+                // "x-amz-acl" S3 객체의 액세스 제어 목록 에 대한 조건 (canned acl)
                 CannedAccessControlList.PublicRead.toString() // public-read을 acl 파라미터로 정의.
         );
 
@@ -233,7 +170,68 @@ public class S3FileService {
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
         } catch (Exception e) {
             //실패시
-            throw new RuntimeException("파일을 삭제하는데 실패했습니다.");
+            throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+        }
+    }
+
+    /**
+     * s3내 폴더 삭제. AWS CLI나 S3 Batch Operations이 비용이 적다고함.
+     *
+     * @param strategyId ex- strategy/{strategyId}/
+     * @see <a href = "https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html"> deleteObjects </a>
+     */
+    public void deleteStrategyFolder(Long strategyId) {
+
+        // folderKey와 매칭되는 하위경로 객체 최대 1000개까지의 반환.
+        ObjectListing objectListing = getObjectListing(FilePath.getS3StrategyKey(strategyId));
+
+        // key 하위의 객체가 없다면 return
+        if (objectListing.getObjectSummaries().isEmpty()) {
+            return;
+        }
+
+        while (true) {
+            // key와 version을 받을 수 있는 객체 리스트 생성.
+            List<KeyVersion> keysToDelete = new ArrayList<>();
+
+            // s3로부터 S3ObjectSummary를 가져옴(key, version)
+            for (S3ObjectSummary s3ObjectSummary : objectListing.getObjectSummaries()) {
+                // 모든 객체키를 알고있다면 s3에 요청 안보내도 될 것으로 보임.
+                keysToDelete.add(new KeyVersion(s3ObjectSummary.getKey()));
+            }
+
+            if (!keysToDelete.isEmpty()) {
+                // 해당 s3객체key 리스트를 포함하도록 함.
+                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName).withKeys(keysToDelete);
+
+                try {
+                    // s3에서 해당 key리스트 모두 삭제. - 요청 1번.
+                    amazonS3.deleteObjects(deleteObjectsRequest);
+                } catch (SdkClientException e) {
+                    // 삭제 오류
+                    log.error("Folder Not Deleted in S3 : strategy/{}/", strategyId);
+                    throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+                }
+            }
+
+            // 해당 key경로에 1000개보다 더 많은 객체가 있다면 한번더 요청.
+            if (objectListing.isTruncated()) {
+                objectListing = amazonS3.listNextBatchOfObjects(objectListing);
+            } else {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 해당 s3Key 하위 경로의 모든 객체 조회.
+     */
+    private ObjectListing getObjectListing(String folderKey) {
+        try {
+            return amazonS3.listObjects(bucketName, folderKey);
+        } catch (SdkClientException e) {
+            log.error("Loading error in S3 : {}", folderKey);
+            throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
         }
     }
 

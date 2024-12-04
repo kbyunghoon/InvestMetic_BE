@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
+    Long countByRole(Role role);
 
     @Query("select u.role from User u where u.userId = :userId")
     Optional<Role> findRoleByUserUserId(@Param("userId") Long userId);

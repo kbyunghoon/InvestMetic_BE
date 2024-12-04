@@ -21,6 +21,7 @@ import com.investmetic.global.exception.SuccessCode;
 import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -59,7 +60,7 @@ public class StrategyController {
     @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
-            @RequestBody StrategyRegisterRequestDto requestDto,
+            @RequestBody @Valid StrategyRegisterRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         return BaseResponse.success(SuccessCode.CREATED,
@@ -90,7 +91,7 @@ public class StrategyController {
     @Operation(summary = "전략 수정", description = "<a href='https://field-sting-eff.notion.site/cec6a33cd3ba4d598fd31793c6d086cc?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> modifyStrategyInfo(
             @PathVariable Long strategyId,
-            @RequestBody StrategyModifyRequestDto requestDto,
+            @RequestBody @Valid StrategyModifyRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
 
@@ -103,7 +104,7 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 일간 분석 등록 기능", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> createStrategyDailyAnalysis(
             @PathVariable Long strategyId,
-            @RequestBody List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos,
+            @RequestBody @Valid List<TraderDailyAnalysisRequestDto> dailyAnalysisRequestDtos,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisRequestDtos,
@@ -117,7 +118,7 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 일간 분석 수정 기능", description = "<a href='https://field-sting-eff.notion.site/c9db716164ad405f8f4d4c622476e9f6?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> modifyStrategyDailyAnalysis(
             @PathVariable Long strategyId,
-            @RequestBody TraderDailyAnalysisRequestDto dailyAnalysisRequestDto,
+            @RequestBody @Valid TraderDailyAnalysisRequestDto dailyAnalysisRequestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
         strategyAnalysisService.modifyDailyAnalysis(strategyId, dailyAnalysisRequestDto, customUserDetails.getUserId());

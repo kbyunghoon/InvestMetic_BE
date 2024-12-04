@@ -2,6 +2,9 @@ package com.investmetic.domain.strategy.service;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
@@ -13,10 +16,14 @@ import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.FileDownloadResponseDto;
@@ -42,6 +49,12 @@ public class StrategyService {
     private final StockTypeRepository stockTypeRepository;
     private final UserRepository userRepository;
     private final StockTypeGroupRepository stockTypeGroupRepository;
+    private final DailyAnalysisRepository dailyAnalysisRepository;
+    private final MonthlyAnalysisRepository monthlyAnalysisRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final ReviewRepository reviewRepository;
+    private final StrategyStatisticsRepository strategyStatisticsRepository;
+    private final AccountVerificationRepository accountVerificationRepository;
 
 
     @Transactional
@@ -99,16 +112,45 @@ public class StrategyService {
 
     @Transactional
     public void deleteStrategy(Long strategyId, Long userId) {
+        // 전략 조회 및 권한 확인
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
-
         verifyUserPermission(strategy, userId);
 
-        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+        // 종속 데이터 및 관련 파일 삭제
+        deleteAssociatedData(strategy);
 
+        // 전략 통계 삭제 (존재 여부 확인)
+        if (strategy.getStrategyStatistics() != null) {
+            strategyStatisticsRepository.deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
+        }
+
+        // 전략 삭제
         strategyRepository.deleteById(strategyId);
     }
 
+    private void deleteAssociatedData(Strategy strategy) {
+        // S3 파일 삭제
+        deleteS3Files(strategy);
+
+        // 종속된 데이터 삭제
+        stockTypeGroupRepository.deleteAllByStrategy(strategy);
+        dailyAnalysisRepository.deleteAllByStrategy(strategy);
+        monthlyAnalysisRepository.deleteAllByStrategy(strategy);
+        subscriptionRepository.deleteAllByStrategy(strategy);
+        reviewRepository.deleteAllByStrategy(strategy);
+    }
+
+    private void deleteS3Files(Strategy strategy) {
+        // 전략 폴더 전부 삭제
+        s3FileService.deleteStrategyFolder(strategy.getStrategyId());
+
+        // 계좌 인증 파일 삭제
+        List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
+        for (AccountVerification accountVerification : accountVerifications) {
+            s3FileService.deleteFromS3(accountVerification.getAccountVerificationUrl());
+        }
+    }
 
     @Transactional
     public PresignedUrlResponseDto registerStrategy(
@@ -118,25 +160,27 @@ public class StrategyService {
         TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
 
-        String proposalFilePath = s3FileService.getS3Path(
-                FilePath.STRATEGY_PROPOSAL,
-                requestDto.getProposalFile().getProposalFileName(),
-                requestDto.getProposalFile().getProposalFileSize()
-        );
-
-        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
-
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
                 .tradeType(tradeType)
                 .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
-                .proposalFilePath(proposalFilePath)
                 .strategyDescription(requestDto.getDescription())
                 .build();
 
-        strategyRepository.save(strategy);
+        Long strategyId = strategyRepository.save(strategy).getStrategyId();
+
+        String proposalFilePath = s3FileService.getS3StrategyPath(
+                FilePath.STRATEGY_PROPOSAL,
+                strategyId,
+                requestDto.getProposalFile().getProposalFileName(),
+                requestDto.getProposalFile().getProposalFileSize()
+        );
+
+        strategy.modifyStrategyProposalFilePath(proposalFilePath);
+
+        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
         requestDto.getStockTypeIds().forEach(stockTypeId -> {
             StockType stockType = stockTypeRepository.findById(stockTypeId)
@@ -165,8 +209,9 @@ public class StrategyService {
         verifyUserPermission(strategy, userId);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
-            String proposalFilePath = s3FileService.getS3Path(
+            String proposalFilePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_PROPOSAL,
+                    strategyId,
                     requestDto.getProposalFile().getProposalFileName(),
                     requestDto.getProposalFile().getProposalFileSize()
             );

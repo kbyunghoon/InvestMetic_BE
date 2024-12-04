@@ -38,6 +38,7 @@ public class SecurityConfig {
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
     private final UserRepository userRepository;
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -59,11 +60,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, CorsProperties corsProperties)
+            throws Exception {
         http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000"));
+                    config.setAllowedOrigins(corsProperties.getAllowedOrigins());
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     config.setAllowCredentials(true);
                     config.addExposedHeader("access-token");
@@ -97,9 +99,9 @@ public class SecurityConfig {
         loginFilter.setAuthenticationFailureHandler(failureHandler); // 실패 핸들러 설정
         loginFilter.setFilterProcessesUrl("/api/users/login"); // 로그인 엔드포인트 변경
 
-
         http
-                .addFilterBefore(new JWTFilter(jwtUtil,new CustomUserDetailService(userRepository)), LoginFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil, new CustomUserDetailService(userRepository)),
+                        LoginFilter.class);
 
         http
                 .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);

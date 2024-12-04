@@ -7,12 +7,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.investmetic.domain.TestEntity.TestEntityFactory;
+import com.investmetic.domain.accountverification.model.entity.AccountVerification;
+import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
 import com.investmetic.domain.strategy.dto.request.StrategyModifyRequestDto;
@@ -26,10 +31,14 @@ import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.StockTypeGroup;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.model.entity.TradeType;
+import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.PresignedUrlResponseDto;
@@ -76,6 +85,24 @@ class StrategyServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private DailyAnalysisRepository dailyAnalysisRepository;
+
+    @Mock
+    private MonthlyAnalysisRepository monthlyAnalysisRepository;
+
+    @Mock
+    private SubscriptionRepository subscriptionRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private StrategyStatisticsRepository strategyStatisticsRepository;
+
+    @Mock
+    private AccountVerificationRepository accountVerificationRepository;
 
     private StrategyRegisterRequestDto requestDto;
     private User user;
@@ -201,21 +228,41 @@ class StrategyServiceTest {
     void 전략_삭제_테스트_1() {
         Long strategyId = strategy.getStrategyId();
         Long userId = user.getUserId();
-        String proposalFileName = strategy.getProposalFilePath();
+
+        List<AccountVerification> accountVerifications = List.of(
+                AccountVerification.builder()
+                        .accountVerificationUrl("s3://bucket/accounts/account1.png")
+                        .build(),
+                AccountVerification.builder()
+                        .accountVerificationUrl("s3://bucket/accounts/account2.png")
+                        .build()
+        );
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
+        when(accountVerificationRepository.findByStrategy(strategy)).thenReturn(accountVerifications);
 
         strategyService.deleteStrategy(strategyId, userId);
 
-        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
-        verify(s3FileService, times(1)).deleteFromS3(proposalFileName); // S3 파일 삭제 확인
-        verify(strategyRepository, times(1)).deleteById(strategyId); // 전략 삭제 호출 확인
+        verify(strategyRepository).findById(strategyId);
+        verify(stockTypeGroupRepository).deleteAllByStrategy(strategy);
+        verify(dailyAnalysisRepository).deleteAllByStrategy(strategy);
+        verify(monthlyAnalysisRepository).deleteAllByStrategy(strategy);
+        verify(subscriptionRepository).deleteAllByStrategy(strategy);
+        verify(reviewRepository).deleteAllByStrategy(strategy);
+
+        if (strategy.getStrategyStatistics() != null) {
+            verify(strategyStatisticsRepository).deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
+        }
+
+        verify(strategyRepository).deleteById(strategyId);
+
+        verify(s3FileService).deleteStrategyFolder(strategyId);
     }
 
     @Test
     @DisplayName("전략 삭제 - 실패 (전략 ID가 존재하지 않을 때)")
     void 전략_삭제_테스트_2() {
-        Long strategyId = strategy.getStrategyId();
+        Long strategyId = 1L;
         Long userId = user.getUserId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
@@ -226,9 +273,8 @@ class StrategyServiceTest {
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
-        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
-        verify(s3FileService, never()).deleteFromS3(anyString()); // S3 파일 삭제가 호출되지 않았는지 확인
-        verify(strategyRepository, never()).deleteById(anyLong()); // 전략 삭제가 호출되지 않았는지 확인
+        verify(strategyRepository).findById(strategyId);
+        verifyNoInteractions(stockTypeGroupRepository, dailyAnalysisRepository, s3FileService);
     }
 
     @Test
@@ -245,11 +291,9 @@ class StrategyServiceTest {
         );
 
         assertEquals(ErrorCode.FORBIDDEN_ACCESS, exception.getErrorCode());
-        verify(strategyRepository, times(1)).findById(strategyId); // 전략 조회 호출 확인
-        verify(s3FileService, never()).deleteFromS3(anyString()); // S3 파일 삭제가 호출되지 않았는지 확인
-        verify(strategyRepository, never()).deleteById(anyLong()); // 전략 삭제가 호출되지 않았는지 확인
+        verify(strategyRepository).findById(strategyId);
+        verifyNoInteractions(stockTypeGroupRepository, dailyAnalysisRepository, s3FileService);
     }
-
 
     @Test
     @DisplayName("전략 등록 - 성공")
@@ -264,15 +308,17 @@ class StrategyServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
                 Optional.of(tradeType));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
-        when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
-        when(stockTypeRepository.findById(anyLong()))
-                .thenAnswer(invocation -> stockTypeList.stream()
-                        .filter(stockType -> stockType.getStockTypeId().equals(invocation.getArgument(0)))
-                        .findFirst());
-        when(strategyRepository.save(any(Strategy.class))).thenReturn(Strategy.builder().build());
+        when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_PROPOSAL), anyLong(), eq("test.xls"), eq(1024)))
+                .thenReturn(proposalFilePath);
+        when(s3FileService.getPreSignedUrl(eq(proposalFilePath))).thenReturn(presignedUrl);
+
+        when(stockTypeRepository.findById(anyLong())).thenReturn(Optional.ofNullable(StockType.builder().build()));
+
+        when(strategyRepository.save(any(Strategy.class)))
+                .thenReturn(Strategy.builder().strategyId(Long.MAX_VALUE).build());
+
         when(stockTypeGroupRepository.save(any(StockTypeGroup.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation -> invocation.getArgument(0)); // 받은 인자를 그대로 반환
 
         PresignedUrlResponseDto responseDto = strategyService.registerStrategy(requestDto, userId);
 
@@ -321,7 +367,9 @@ class StrategyServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
                 Optional.of(tradeType));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024))
+        when(strategyRepository.save(any(Strategy.class))).thenReturn(
+                Strategy.builder().strategyId(Long.MAX_VALUE).build());
+        when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_PROPOSAL), anyLong(), eq("test.xls"), eq(1024)))
                 .thenReturn(proposalFilePath);
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
         when(stockTypeRepository.findById(1L)).thenReturn(Optional.empty());
@@ -407,7 +455,8 @@ class StrategyServiceTest {
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL,
+        when(s3FileService.getS3StrategyPath(FilePath.STRATEGY_PROPOSAL,
+                strategyId,
                 requestDtoWithProposal.getProposalFile().getProposalFileName(),
                 requestDtoWithProposal.getProposalFile().getProposalFileSize()))
                 .thenReturn(newProposalFilePath);
