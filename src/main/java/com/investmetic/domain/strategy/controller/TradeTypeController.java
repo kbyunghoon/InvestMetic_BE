@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +27,7 @@ public class TradeTypeController {
     @Operation(summary = "매매유형 전체 조회(관리자 페이지)",
             description = "<a href='https://www.notion.so/e7dee00b44c344c485cbbc7d2c69e4bb' target='_blank'>API 명세서</a>")
     @GetMapping("/trade-type")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<List<TradeTypeResponseDTO>>> getAllTradeTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
             @RequestParam boolean activateState) {
@@ -37,6 +39,7 @@ public class TradeTypeController {
     @Operation(summary = "매매유형 등록(관리자 페이지)",
             description = "<a href='https://www.notion.so/aca1735bd984421fb276e709c1725efd' target='_blank'>API 명세서</a>")
     @PostMapping("/trade-type")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> addTradeType(
             @RequestBody TradeTypeRequestDTO tradeTypeRequestDTO) {
         String preSignedURL = tradeTypeService.saveTradeType(tradeTypeRequestDTO);
@@ -50,6 +53,7 @@ public class TradeTypeController {
     @Operation(summary = "매매유형 활성화/비활성화(관리자 페이지)",
             description = "<a href='https://www.notion.so/d73831ed7a7147c29528c4dcbccb0348' target='_blank'>API 명세서</a>")
     @PatchMapping("/trade-type/{tradeTypeId}")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<Void>> updateTradeType(@PathVariable Long tradeTypeId) {
         tradeTypeService.changeActivateState(tradeTypeId);
         return BaseResponse.success(SuccessCode.UPDATED);
