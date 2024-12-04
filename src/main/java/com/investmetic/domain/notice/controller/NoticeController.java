@@ -32,13 +32,4 @@ public class NoticeController {
     public ResponseEntity<BaseResponse<List<String>>> addNotice(@RequestBody NoticeRegistDto noticeRegistDto) {
         return BaseResponse.success(noticeService.saveNotice(noticeRegistDto));
     }
-
-    @PatchMapping("/admin/notices/addImage")
-    @Operation(summary = "이미지 등록 기능",
-            description = "<a href='https://www.notion.so/18d905d3661846f897b9dc39f1a04b7a' target='_blank'>API 명세서</a>")
-    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
-    public ResponseEntity<BaseResponse<ImageResponseDto>> addImage(@RequestParam ImageRegistDto imageRegistDto) {
-        return BaseResponse.success(noticeService.saveImage(imageRegistDto));
-    }
-
 }

@@ -10,6 +10,7 @@ import com.investmetic.domain.notice.repository.NoticeFileRepository;
 import com.investmetic.domain.notice.repository.NoticeRepository;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,10 +24,10 @@ public class NoticeService {
     private final NoticeFileRepository noticeFileRepository;
     private final S3FileService s3FileService;
 
+    @Transactional
     public List<String> saveNotice(NoticeRegistDto noticeRegistDto) {
         List<String> noticePresignedUrls = new ArrayList<>();
         Notice notice = noticeRepository.save(noticeRegistDto.toEntity());
-        System.out.println(notice.getNoticeId());
         List<String> filePaths = noticeRegistDto.getFilePaths();
         List<Integer> sizes = noticeRegistDto.getSizes();
         Iterator<String> filePathIterator = filePaths.iterator();
@@ -45,14 +46,5 @@ public class NoticeService {
             );
         }
         return noticePresignedUrls;
-    }
-
-    public ImageResponseDto saveImage(ImageRegistDto imageRegistDto) {
-        String imageFilePath = s3FileService.getS3Path(FilePath.NOTICE, imageRegistDto.getImageName(),
-                imageRegistDto.getSize());
-        return ImageResponseDto.builder()
-                .imagefilePath(imageFilePath)
-                .preSignedUrl(s3FileService.getPreSignedUrl(imageFilePath))
-                .build();
     }
 }
