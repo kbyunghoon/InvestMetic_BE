@@ -74,7 +74,7 @@ public class StrategyService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        if (strategy.getIsPublic() != IsPublic.PUBLIC && !Objects.equals(strategy.getUser().getUserId(), userId)) {
+        if (strategy.getIsPublic() == IsPublic.PRIVATE && !Objects.equals(strategy.getUser().getUserId(), userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
