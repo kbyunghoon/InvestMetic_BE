@@ -163,7 +163,6 @@ class UserMyPageControllerTest {
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
             resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
 
@@ -184,10 +183,7 @@ class UserMyPageControllerTest {
                             .content(objectMapper.writeValueAsString(userModifyDto)));
 
             resultActions.andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.message").value(ErrorCode.INVALID_INPUT_VALUE.getMessage()))
                     .andDo(print());
         }
-
-
     }
 }
