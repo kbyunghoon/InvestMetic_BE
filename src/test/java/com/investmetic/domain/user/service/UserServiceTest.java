@@ -106,7 +106,7 @@ class UserServiceTest {
     @DisplayName("닉네임 중복이 없을 때")
     void checkNicknameDuplicate_NoDuplicate() {
 
-        String nickname = "newNickname"; // 존재하지 않는 닉네임
+        String nickname = "newNicknm"; // 존재하지 않는 닉네임
         // when
         AvaliableDto result = userService.checkNicknameDuplicate(nickname);
 
