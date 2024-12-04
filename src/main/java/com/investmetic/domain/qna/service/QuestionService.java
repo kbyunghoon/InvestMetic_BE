@@ -48,13 +48,6 @@ public class QuestionService {
         User user = findUserById(userId);
         Strategy strategy = findStrategyById(strategyId);
 
-        if (questionRequestDto.getTitle() == null || questionRequestDto.getTitle().isBlank()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-        }
-        if (questionRequestDto.getContent() == null || questionRequestDto.getContent().isBlank()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE);
-        }
-
         Question question = Question.from(user, strategy, questionRequestDto);
         questionRepository.save(question);
     }
@@ -65,7 +58,6 @@ public class QuestionService {
     @Transactional
     public void deleteQuestion(Long strategyId, Long questionId, Long userId) {
         Question question = findQuestionById(questionId);
-        Strategy strategy = findStrategyById(strategyId);
         User user = findUserById(userId);
         validateAccess(user, question, userId);
         questionRepository.delete(question);
@@ -76,31 +68,36 @@ public class QuestionService {
      */
     @Transactional(readOnly = true)
     public PageResponseDto<QuestionsResponse> getInvestorQuestions(Long userId, Role userRole,
-                                                                   QuestionRequestDto request,
+                                                                   String keyword,
+                                                                   SearchCondition searchCondition,
+                                                                   StateCondition stateCondition,
                                                                    Pageable pageable) {
-        validateInvestorRole(userRole);
-        return searchQuestions(userId, request, pageable, userRole);
+        return searchQuestions(userId, keyword, searchCondition, stateCondition, pageable, userRole);
     }
 
     /**
      * 트레이더 문의 목록 조회
      */
     @Transactional(readOnly = true)
-    public PageResponseDto<QuestionsResponse> getTraderQuestions(Long userId, Role userRole, QuestionRequestDto request,
+    public PageResponseDto<QuestionsResponse> getTraderQuestions(Long userId, Role userRole,
+                                                                 String keyword,
+                                                                 SearchCondition searchCondition,
+                                                                 StateCondition stateCondition,
                                                                  Pageable pageable) {
-        validateTraderRole(userRole);
-        return searchQuestions(userId, request, pageable, userRole);
+        return searchQuestions(userId, keyword, searchCondition, stateCondition, pageable, userRole);
     }
 
     /**
      * 관리자 문의 목록 조회
      */
     @Transactional(readOnly = true)
-    public PageResponseDto<QuestionsResponse> getAdminQuestions(Long userId, Role userRole, QuestionRequestDto request,
+    public PageResponseDto<QuestionsResponse> getAdminQuestions(Long userId, Role userRole,
+                                                                String keyword,
+                                                                SearchCondition searchCondition,
+                                                                StateCondition stateCondition,
                                                                 Pageable pageable) {
-        validateAdminRole(userRole);
         // 관리자 조회는 userId를 null로 전달하여 모든 데이터를 조회
-        return searchQuestions(null, request, pageable, userRole);
+        return searchQuestions(null, keyword, searchCondition, stateCondition, pageable, userRole);
     }
 
     /**
@@ -123,9 +120,6 @@ public class QuestionService {
      */
     @Transactional(readOnly = true)
     public QuestionsDetailResponse getAdminQuestionDetail(Long questionId, Role userRole) {
-        // 관리자 권한 확인
-        validateAdmin(userRole);
-
         // 문의 데이터 조회
         Question question = findQuestionById(questionId);
 
@@ -201,36 +195,6 @@ public class QuestionService {
     }
 
     /**
-     * 역할 검증
-     */
-    private void validateInvestorRole(Role role) {
-        if (!Role.isInvestor(role)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    private void validateTraderRole(Role role) {
-        if (!Role.isTrader(role)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    private void validateAdminRole(Role role) {
-        if (!Role.isAdmin(role)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    /**
-     * 관리자 역할 검증
-     */
-    private void validateAdmin(Role role) {
-        if (!Role.isAdmin(role)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    /**
      * 접근 권한 검증
      */
     private void validateAccess(User user, Question question, Long userId) {
@@ -279,14 +243,16 @@ public class QuestionService {
     }
 
 
-    public PageResponseDto<QuestionsResponse> searchQuestions(Long userId, QuestionRequestDto request,
+    public PageResponseDto<QuestionsResponse> searchQuestions(Long userId, String keyword,
+                                                              SearchCondition searchCondition,
+                                                              StateCondition stateCondition,
                                                               Pageable pageable, Role role) {
         // 검색 조건 생성
         List<BooleanExpression> conditions = buildConditions(
                 userId,
-                request.getKeyword(),
-                request.getSearchCondition(),
-                request.getStateCondition(),
+                keyword,
+                searchCondition,
+                stateCondition,
                 role
         );
 
