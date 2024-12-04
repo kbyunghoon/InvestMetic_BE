@@ -2,7 +2,13 @@ package com.investmetic.domain.user.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.investmetic.domain.TestEntity.TestEntityFactory;
+import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
+import com.investmetic.domain.strategy.model.entity.Strategy;
+import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.service.StrategyListingService;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
@@ -32,6 +38,9 @@ class UserCommonLogicTest {
     private StrategyListingService strategyListingService;
 
     @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
     private ReviewRepository reviewRepository;
 
     @Autowired
@@ -43,7 +52,22 @@ class UserCommonLogicTest {
     @Test
     @DisplayName("회원 Trader 삭제 확인")
     void deleteUserTest1() {
+
+        // given
         User trader = userRepository.findById(1L).orElse(null);
+
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
+
+        Strategy strategy = TestEntityFactory.createTestStrategy(trader, tradeType);
+
+        QuestionRequestDto dto = QuestionRequestDto.builder().title("test").content("asdf").build();
+
+        // 문의 생성.
+        Question question = Question.from(trader, strategy, dto);
+        questionRepository.save(question);
+
+        em.flush();
+        em.clear();
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -78,6 +102,19 @@ class UserCommonLogicTest {
         // 투자자
         User investor = userRepository.findById(2L).orElse(null);
 
+        User trader = userRepository.findById(1L).orElse(null);
+
+        TradeType tradeType = TestEntityFactory.createTestTradeType();
+
+        Strategy strategy = TestEntityFactory.createTestStrategy(trader, tradeType);
+
+        QuestionRequestDto dto = QuestionRequestDto.builder().title("test").content("asdf").build();
+
+        // 문의 생성.
+        Question question = Question.from(investor, strategy, dto);
+
+        question = questionRepository.save(question);
+
         Pageable pageable = PageRequest.of(0, 10);
 
         if (investor != null && Role.isTrader(investor.getRole())) {
@@ -85,6 +122,7 @@ class UserCommonLogicTest {
             // 해당 회원이 구독한 전략이 있음을 확인.
             assertThat(strategyListingService.getSubscribedStrategies(investor.getUserId(), pageable).getContent())
                     .isNotEmpty();
+            assertThat(questionRepository.existsById(question.getQuestionId())).isFalse();
 
             // when
             userCommonLogic.deleteUser(investor);
@@ -102,8 +140,6 @@ class UserCommonLogicTest {
                     .isEmpty();
 
         }
-
-
     }
 
 
