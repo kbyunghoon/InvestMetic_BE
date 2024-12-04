@@ -90,4 +90,15 @@ public class BaseResponse<T> {
     protected static <T> BaseResponse<T> fail(ErrorCode code) {
         return new BaseResponse<>(false, code.getMessage(), null, code.getCode());
     }
+
+    /**
+     * 실패 응답 생성 메서드 - 메세지 포함하여 응답
+     *
+     * @param <T>    응답 데이터 타입
+     * @param errMsg 에러 메세지
+     * @return 실패 응답 포함한 BaseResponse 객체
+     */
+    protected static <T> BaseResponse<T> fail(String errMsg) {
+        return new BaseResponse<>(false, errMsg, null, 1000);
+    }
 }

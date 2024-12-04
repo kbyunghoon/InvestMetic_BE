@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,6 +27,7 @@ public class StockTypeController {
     @Operation(summary = "종목 조회(관리자 페이지)",
             description = "<a href='https://www.notion.so/034c9ed1b0cf4b9bb598ff96bb34f57c' target='_blank'>API 명세서</a>")
     @GetMapping("/stock-type")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<PageResponseDto<StockTypeResponseDTO>>> getAllStockTypes(
             @PageableDefault(size = 10, page = 1) Pageable pageable,
             @RequestParam boolean activateState) {
@@ -37,6 +39,7 @@ public class StockTypeController {
     @Operation(summary = "종목 등록(관리자 페이지)",
             description = "<a href='https://www.notion.so/de54e885de3c4ba6bcd81f437cbcfb04' target='_blank'>API 명세서</a>")
     @PostMapping("/stock-type")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> addStockType(
             @RequestBody StockTypeRequestDTO stockType) {
         String preSignedURL = stockTypeService.saveStockType(stockType);
@@ -50,6 +53,7 @@ public class StockTypeController {
     @Operation(summary = "종목 활성화/비활성화(관리자 페이지)",
             description = "<a href='https://www.notion.so/e127e6c077bd4c4bab29d4212f3cebb9' target='_blank'>API 명세서</a>")
     @PatchMapping("stock-type/{stockTypeId}")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<Void>> updateStockType(@PathVariable Long stockTypeId) {
         stockTypeService.changeActivateState(stockTypeId);
         return BaseResponse.success(SuccessCode.UPDATED);

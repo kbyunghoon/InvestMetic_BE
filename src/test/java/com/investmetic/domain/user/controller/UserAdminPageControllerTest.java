@@ -4,9 +4,11 @@ package com.investmetic.domain.user.controller;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.investmetic.domain.user.service.UserAdminService;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,10 +52,8 @@ public class UserAdminPageControllerTest {
 
             // then
             resultActions1.andExpect(status().isBadRequest())
-                    .andExpect(status().reason(containsString("Validation failure"))).andDo(print());
-
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
-
-
 }

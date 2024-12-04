@@ -10,8 +10,11 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +30,13 @@ public class StrategyAnalysisService {
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
                                     Long userId) {
+        Set<LocalDate> dateSet = new HashSet<>();
+        for (TraderDailyAnalysisRequestDto request : analysisRequests) {
+            if (!dateSet.add(request.getDate())) {
+                throw new BusinessException(ErrorCode.DUPLICATE_DATE_IN_REQUEST);
+            }
+        }
+
         Strategy strategy = findStrategyById(strategyId);
 
         verifyUserPermission(strategy, userId);
