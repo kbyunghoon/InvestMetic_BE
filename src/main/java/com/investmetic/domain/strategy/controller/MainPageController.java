@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.controller;
 
 import com.investmetic.domain.strategy.dto.response.TotalRateDto;
 import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
+import com.investmetic.domain.strategy.dto.response.TotalStrategyMetricsResponseDto;
 import com.investmetic.domain.strategy.service.MainPageService;
 import com.investmetic.global.exception.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,6 +36,14 @@ public class MainPageController {
     public ResponseEntity<BaseResponse<List<TopRankingStrategyResponseDto>>> getTopSmScore() {
 
         return BaseResponse.success(mainPageService.getTopSmscoreStrategy());
+    }
+
+    @Operation(summary = "대표 전략 통합 지표 조회(메인 페이지)",
+    description = "<a href='https://www.notion.so/2c2cb35a42ce464a9c9645a9a3b22730' target='_blank'>API 명세서</a>")
+    @GetMapping("/total-strategies-metrics")
+    public ResponseEntity<BaseResponse<TotalStrategyMetricsResponseDto>> getTotalStrategyMetrics() {
+        return BaseResponse.success(mainPageService.getMetricsByDateRange());
+
     }
     @Operation(summary = "트레이더 수, 투자자 수, 전략 수, 구독 수",
     description = "<a href='https://www.notion.so/smscore-11cb5822050d4f6dbb5c678732c59b50' target='_blank'>API 명세서</a>")
