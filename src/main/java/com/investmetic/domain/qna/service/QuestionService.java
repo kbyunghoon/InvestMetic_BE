@@ -275,6 +275,7 @@ public class QuestionService {
                     .questionId(q.getQuestionId())
                     .title(q.getTitle())
                     .strategyName(q.getStrategy() != null ? q.getStrategy().getStrategyName() : "전략 없음")
+                    .questionContent(q.getContent())
                     .profileImageUrl(profileImageUrl != null ? profileImageUrl : "이미지 없음")
                     .nickname(nickname != null ? nickname : "닉네임 없음")
                     .stateCondition(q.getQnaState().name())
