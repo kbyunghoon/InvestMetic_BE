@@ -1,10 +1,15 @@
 package com.investmetic.domain.strategy.service;
 
+import com.investmetic.domain.strategy.dto.response.TotalRateDto;
 import com.investmetic.domain.strategy.dto.response.TopRankingStrategyResponseDto;
 import com.investmetic.domain.strategy.dto.response.TotalStrategyMetricsResponseDto;
 import com.investmetic.domain.strategy.model.entity.QStrategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.subscription.model.entity.Subscription;
+import com.investmetic.domain.subscription.repository.SubscriptionRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.querydsl.core.types.OrderSpecifier;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +24,8 @@ public class MainPageService {
 
     private final StrategyService strategyService;
     private final StrategyRepository strategyRepository;
+    private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
     private final DailyAnalysisRepository dailyAnalysisRepository;
 
     private static final int TOP_SUBSCRIBER_OFFSET = 3;
@@ -71,7 +78,16 @@ public class MainPageService {
                 .data(data)
                 .build();
     }
-    
+
+    public TotalRateDto getTotalRate() {
+        return TotalRateDto.builder()
+                .totalStrategies(strategyRepository.count())
+                .totalSubscribe(subscriptionRepository.count())
+                .totalTrader(userRepository.countByRole(Role.TRADER))
+                .totalInvester(userRepository.countByRole(Role.INVESTOR))
+                .build();
+    }
+
     private List<TopRankingStrategyResponseDto> fillProfitRateChartData(List<TopRankingStrategyResponseDto> contents) {
         contents.forEach(response -> {
             Long strategyId = response.getStrategyId();
