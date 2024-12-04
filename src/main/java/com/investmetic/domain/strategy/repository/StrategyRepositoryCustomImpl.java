@@ -90,10 +90,10 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         user.imageUrl,
                         user.nickname,
                         strategy.minimumInvestmentAmount,
-                        strategyStatistics.initialInvestment,
-                        strategyStatistics.kpRatio,
-                        strategyStatistics.smScore,
-                        strategyStatistics.finalProfitLossDate,
+                        strategyStatistics.principal, // 초기 투자금액은 원금이랑 동일
+                        strategy.kpRatio,
+                        strategy.smScore,
+                        strategyStatistics.endDate,
                         strategy.createdAt))
                 .from(strategy)
                 .leftJoin(strategy.strategyStatistics, strategyStatistics)
@@ -129,10 +129,10 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         user.imageUrl,
                         user.nickname,
                         strategy.minimumInvestmentAmount,
-                        strategyStatistics.initialInvestment,
-                        strategyStatistics.kpRatio,
-                        strategyStatistics.smScore,
-                        strategyStatistics.finalProfitLossDate,
+                        strategyStatistics.principal,
+                        strategy.kpRatio,
+                        strategy.smScore,
+                        strategyStatistics.endDate,
                         strategy.createdAt,
                         strategy.isPublic,
                         strategy.isApproved))
@@ -174,7 +174,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         tradeType.tradeTypeIconUrl,
                         tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
-                        strategyStatistics.smScore,
+                        strategy.smScore,
                         strategyStatistics.cumulativeProfitRate,
                         strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
@@ -219,7 +219,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         tradeType.tradeTypeIconUrl,
                         tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
-                        strategyStatistics.smScore,
+                        strategy.smScore,
                         strategyStatistics.cumulativeProfitRate,
                         strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
@@ -261,7 +261,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         tradeType.tradeTypeIconUrl,
                         tradeType.tradeTypeName,
                         strategyStatistics.maxDrawdown,
-                        strategyStatistics.smScore,
+                        strategy.smScore,
                         strategyStatistics.cumulativeProfitRate,
                         strategyStatistics.recentYearProfitRate,
                         strategy.subscriptionCount,
@@ -378,7 +378,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                         strategy.strategyName,
                         user.imageUrl,
                         user.nickname,
-                        strategyStatistics.smScore,
+                        strategy.smScore,
                         strategyStatistics.cumulativeProfitRate,
                         strategy.subscriptionCount,
                         strategy.averageRating,
@@ -529,7 +529,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
     // SM Score 필터
     private BooleanExpression applySmScoreRangeFilter(RangeDto smScoreRange) {
         return smScoreRange == null ? null
-                : strategyStatistics.smScore.between(smScoreRange.getMin(), smScoreRange.getMax());
+                : strategy.smScore.between(smScoreRange.getMin(), smScoreRange.getMax());
     }
 
 }
