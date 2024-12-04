@@ -45,12 +45,11 @@ public class StrategyStatisticsScheduler {
             // 기존 통계가 있으면 업데이트
             StrategyStatistics existingStatistics = optionalStrategyStatistics.get();
             existingStatistics.updateExistingStatistics(calculatedStatistics);
-        } else {
-            // 새 통계 생성 후 설정
-            strategy.setStrategyStatistics(calculatedStatistics);
-            strategyStatisticsRepository.save(calculatedStatistics);
+            return;
         }
 
+        // 새 통계 생성 후 설정
+        strategy.setStrategyStatistics(calculatedStatistics);
         strategyStatisticsRepository.save(calculatedStatistics);
 
         // mdd, 수익률표준편차, 승률 순위 업데이트 쿼리
