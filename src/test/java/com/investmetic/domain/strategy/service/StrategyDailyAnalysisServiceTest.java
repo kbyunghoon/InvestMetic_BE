@@ -100,6 +100,7 @@ class StrategyDailyAnalysisServiceTest {
                 .build();
 
         existingDailyAnalysisProceedYes = spy(DailyAnalysis.builder()
+                .dailyAnalysisId(123L)
                 .strategy(strategy)
                 .dailyDate(date)
                 .transaction(100L)
@@ -108,6 +109,7 @@ class StrategyDailyAnalysisServiceTest {
                 .build());
 
         existingDailyAnalysisProceedNo = spy(DailyAnalysis.builder()
+                .dailyAnalysisId(123L)
                 .strategy(strategy)
                 .dailyDate(date)
                 .transaction(200L)
@@ -194,7 +196,7 @@ class StrategyDailyAnalysisServiceTest {
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId, user.getUserId());
 
         verify(strategyRepository, times(1)).findById(strategyId);
         verify(dailyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
@@ -209,7 +211,7 @@ class StrategyDailyAnalysisServiceTest {
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class,
-                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId)
+                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId, user.getUserId())
         );
 
         assertEquals(ErrorCode.STRATEGY_NOT_FOUND, exception.getErrorCode());
@@ -224,7 +226,7 @@ class StrategyDailyAnalysisServiceTest {
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
 
-        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId);
+        strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId, user.getUserId());
 
         verify(strategyRepository, times(1)).findById(strategyId);
         verify(dailyAnalysisRepository, times(1)).deleteAllByStrategy(strategy);
@@ -316,13 +318,16 @@ class StrategyDailyAnalysisServiceTest {
     @DisplayName("전략 일간 분석 삭제 - 성공 테스트")
     void 전략_일간_분석_단일_삭제_테스트_1() {
         Long strategyId = strategy.getStrategyId();
-        Long analysisId = 123L;
+        Long analysisId = existingDailyAnalysisProceedNo.getDailyAnalysisId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
-                .thenReturn(true);
+        when(dailyAnalysisRepository.findByDailyAnalysisId(
+                analysisId)).thenReturn(
+                Optional.of(existingDailyAnalysisProceedNo));
+        when(dailyAnalysisRepository.findByAfterDate(strategy, existingDailyAnalysisProceedNo.getDailyDate()))
+                .thenReturn(Optional.empty());
 
-        strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId);
+        strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId, user.getUserId());
 
         verify(dailyAnalysisRepository, times(1))
                 .deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
@@ -332,14 +337,15 @@ class StrategyDailyAnalysisServiceTest {
     @DisplayName("전략 일간 분석 삭제 - 해당 일간 분석이 존재하지 않을 경우 예외 발생")
     void 전략_일간_분석_단일_삭제_테스트_2() {
         Long strategyId = strategy.getStrategyId();
-        Long analysisId = 123L;
+        Long analysisId = existingDailyAnalysisProceedNo.getDailyAnalysisId();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId))
-                .thenReturn(false);
+        when(dailyAnalysisRepository.findByDailyAnalysisId(
+                analysisId)).thenReturn(
+                Optional.empty());
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId)
+                strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, analysisId, user.getUserId())
         );
 
         assertEquals(ErrorCode.INVALID_TYPE_VALUE, exception.getErrorCode());

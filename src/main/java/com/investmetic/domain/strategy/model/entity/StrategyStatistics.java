@@ -32,7 +32,7 @@ public class StrategyStatistics extends BaseEntity {
 
     private LocalDate endDate; // 종료일
 
-    private Integer daysSincePeakUpdate; // 최고점 이후 경과일
+    private Long daysSincePeakUpdate; // 최고점 이후 경과일
 
     private Long cumulativeProfitAmount; // 누적 수익금액
 
@@ -80,14 +80,6 @@ public class StrategyStatistics extends BaseEntity {
 
     private Double winRate; // 승률
 
-    private Double smScore; // SM Score
-
-    private Double kpRatio; // KP Ratio
-
-    private Long initialInvestment; // 최초 투자금액
-
-    private LocalDate finalProfitLossDate; // 최종 손익 일자
-
     private Integer totalTradeDays; // 총 매매일수
 
     private Double dailyProfitLossStdDev; // 수익률 표준편차 (방어형 전략 알고리즘 필요)
@@ -98,4 +90,88 @@ public class StrategyStatistics extends BaseEntity {
 
     private Integer winRateRank; // 승률 순위 (방어형 전략 알고리즘 필요)
 
+    @Builder
+    public StrategyStatistics(Long strategyStatisticsId, Long balance, Integer operationPeriod,
+                              Long cumulativeTransactionAmount, LocalDate startDate,
+                              Long principal, LocalDate endDate, Long daysSincePeakUpdate,
+                              Long cumulativeProfitAmount,
+                              Double cumulativeProfitRate, Double recentYearProfitRate, Long maxCumulativeProfitAmount,
+                              Double maxCumulativeProfitRate, Long averageProfitLossAmount,
+                              Double averageProfitLossRate,
+                              Long maxDailyProfitAmount, Double maxDailyProfitRate, Long maxDailyLossAmount,
+                              Double maxDailyLossRate, Double roa, Double profitFactor, Long currentDrawdown,
+                              Double currentDrawdownRate, Long maxDrawdown, Double maxDrawdownRate,
+                              Integer currentConsecutiveProfitLossDays, Integer totalProfitableDays,
+                              Integer maxConsecutiveProfitDays, Integer totalLossDays, Integer maxConsecutiveLossDays,
+                              Double winRate, Integer totalTradeDays, Double dailyProfitLossStdDev,
+                              Integer mddRank, Integer stdDevRank, Integer winRateRank) {
+        this.strategyStatisticsId = strategyStatisticsId;
+        this.balance = balance;
+        this.operationPeriod = operationPeriod;
+        this.cumulativeTransactionAmount = cumulativeTransactionAmount;
+        this.startDate = startDate;
+        this.principal = principal;
+        this.endDate = endDate;
+        this.daysSincePeakUpdate = daysSincePeakUpdate;
+        this.cumulativeProfitAmount = cumulativeProfitAmount;
+        this.cumulativeProfitRate = cumulativeProfitRate;
+        this.recentYearProfitRate = recentYearProfitRate;
+        this.maxCumulativeProfitAmount = maxCumulativeProfitAmount;
+        this.maxCumulativeProfitRate = maxCumulativeProfitRate;
+        this.averageProfitLossAmount = averageProfitLossAmount;
+        this.averageProfitLossRate = averageProfitLossRate;
+        this.maxDailyProfitAmount = maxDailyProfitAmount;
+        this.maxDailyProfitRate = maxDailyProfitRate;
+        this.maxDailyLossAmount = maxDailyLossAmount;
+        this.maxDailyLossRate = maxDailyLossRate;
+        this.roa = roa;
+        this.profitFactor = profitFactor;
+        this.currentDrawdown = currentDrawdown;
+        this.currentDrawdownRate = currentDrawdownRate;
+        this.maxDrawdown = maxDrawdown;
+        this.maxDrawdownRate = maxDrawdownRate;
+        this.currentConsecutiveProfitLossDays = currentConsecutiveProfitLossDays;
+        this.totalProfitableDays = totalProfitableDays;
+        this.maxConsecutiveProfitDays = maxConsecutiveProfitDays;
+        this.totalLossDays = totalLossDays;
+        this.maxConsecutiveLossDays = maxConsecutiveLossDays;
+        this.winRate = winRate;
+        this.totalTradeDays = totalTradeDays;
+        this.dailyProfitLossStdDev = dailyProfitLossStdDev;
+        this.mddRank = mddRank;
+        this.stdDevRank = stdDevRank;
+        this.winRateRank = winRateRank;
+    }
+
+    public void updateExistingStatistics(StrategyStatistics updated) {
+        this.operationPeriod = updated.getOperationPeriod();
+        this.cumulativeTransactionAmount = updated.getCumulativeTransactionAmount();
+        this.startDate = updated.getStartDate();
+        this.principal = updated.getPrincipal();
+        this.endDate = updated.getEndDate();
+        this.daysSincePeakUpdate = updated.getDaysSincePeakUpdate();
+        this.cumulativeProfitAmount = updated.getCumulativeProfitAmount();
+        this.recentYearProfitRate = updated.getRecentYearProfitRate();
+        this.maxCumulativeProfitAmount = updated.getMaxCumulativeProfitAmount();
+        this.maxCumulativeProfitRate = updated.getMaxCumulativeProfitRate();
+        this.averageProfitLossAmount = updated.getAverageProfitLossAmount();
+        this.averageProfitLossRate = updated.getAverageProfitLossRate();
+        this.maxDailyProfitAmount = updated.getMaxDailyProfitAmount();
+        this.maxDailyProfitRate = updated.getMaxDailyProfitRate();
+        this.maxDailyLossRate = updated.getMaxDailyLossRate();
+        this.roa = updated.getRoa();
+        this.profitFactor = updated.getProfitFactor();
+        this.currentDrawdown = updated.getCurrentDrawdown();
+        this.currentDrawdownRate = updated.getCurrentDrawdownRate();
+        this.maxDrawdown = updated.getMaxDrawdown();
+        this.maxDrawdownRate = updated.getMaxDrawdownRate();
+        this.currentConsecutiveProfitLossDays = updated.getCurrentConsecutiveProfitLossDays();
+        this.totalProfitableDays = updated.getTotalProfitableDays();
+        this.maxConsecutiveProfitDays = updated.getMaxConsecutiveProfitDays();
+        this.totalLossDays = updated.getTotalLossDays();
+        this.maxConsecutiveLossDays = updated.getMaxConsecutiveLossDays();
+        this.winRate = updated.getWinRate();
+        this.totalTradeDays = updated.getTotalTradeDays();
+        this.dailyProfitLossStdDev = updated.getDailyProfitLossStdDev();
+    }
 }

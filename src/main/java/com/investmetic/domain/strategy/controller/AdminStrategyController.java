@@ -40,12 +40,12 @@ public class AdminStrategyController {
     }
     @Operation(summary = "관리자 페이지 전략 목록 조회 기능",
     description = "<a href='https://www.notion.so/3cf42fd2349d4a0488b0dde773058ac9' target='_blank'>API 명세서</a>")
-    @GetMapping("/")
     @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
+    @GetMapping("")
     public ResponseEntity<BaseResponse<PageResponseDto<AdminStrategyResponseDto>>> getStrategies(
             @PageableDefault(size=10, page=1) Pageable pageable,
             @RequestParam(required = false) String searchWord,
-            @RequestParam IsApproved isApproved
+            @RequestParam(required = false) IsApproved isApproved
     ) {
         return BaseResponse.success(adminStrategyService.getManageStrategies(pageable, searchWord, isApproved));
     }
