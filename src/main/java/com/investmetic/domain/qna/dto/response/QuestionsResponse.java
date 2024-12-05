@@ -2,6 +2,7 @@ package com.investmetic.domain.qna.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 @Builder
+@AllArgsConstructor
 public class QuestionsResponse {
     private final Long questionId; // 문의 ID
     private final String title; // 문의 제목
@@ -19,5 +21,4 @@ public class QuestionsResponse {
     private final String stateCondition; // 문의 상태
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime createdAt; // 문의 생성일
-
 }

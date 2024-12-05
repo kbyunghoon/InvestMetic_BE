@@ -5,6 +5,7 @@ import static com.investmetic.domain.qna.model.entity.QQuestion.question;
 import com.investmetic.domain.qna.dto.SearchCondition;
 import com.investmetic.domain.qna.dto.StateCondition;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.response.AnswerResponseDto;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsResponse;
 import com.investmetic.domain.qna.model.QnaState;
@@ -133,6 +134,8 @@ public class QuestionService {
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
         Answer answer = question.getAnswer();
 
+        User trader = answer.getUser();
+
         // 역할에 따른 정보를 설정
         String profileImageUrl = "http://default-image-url.com/default.jpg"; // 기본 이미지 URL
         String nickname;
@@ -161,7 +164,16 @@ public class QuestionService {
                 .nickname(nickname)
                 .state(question.getQnaState().name())
                 .questionCreatedAt(question.getCreatedAt())
-                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null)
+                .answerCreatedAt(answer.getCreatedAt())
+                .answer(
+                        AnswerResponseDto.builder()
+                                .answerId(answer.getAnswerId())
+                                .content(answer.getContent())
+                                .role(trader.getRole())
+                                .profileImageUrl(trader.getImageUrl())
+                                .nickname(trader.getNickname())
+                                .createdAt(answer.getCreatedAt())
+                                .build())
                 .build();
     }
 
@@ -275,6 +287,7 @@ public class QuestionService {
                     .questionId(q.getQuestionId())
                     .title(q.getTitle())
                     .strategyName(q.getStrategy() != null ? q.getStrategy().getStrategyName() : "전략 없음")
+                    .questionContent(q.getContent())
                     .profileImageUrl(profileImageUrl != null ? profileImageUrl : "이미지 없음")
                     .nickname(nickname != null ? nickname : "닉네임 없음")
                     .stateCondition(q.getQnaState().name())

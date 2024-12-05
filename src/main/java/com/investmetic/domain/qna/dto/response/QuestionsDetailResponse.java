@@ -22,5 +22,5 @@ public class QuestionsDetailResponse {
     private final LocalDateTime questionCreatedAt; // 문의 생성일
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private final LocalDateTime answerCreatedAt; // 답변 생성일
-
+    private AnswerResponseDto answer;
 }
