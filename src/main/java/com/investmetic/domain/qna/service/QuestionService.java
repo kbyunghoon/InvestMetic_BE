@@ -134,7 +134,7 @@ public class QuestionService {
      * QuestionsDetailResponse 생성
      */
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
-        Answer answer = answerRepository.findByQuestion(question).orElseThrow(() -> new RuntimeException("123"));
+        Answer answer = answerRepository.findByQuestion(question).orElse(null);
         User trader = null;
 
         if (answer != null) {
