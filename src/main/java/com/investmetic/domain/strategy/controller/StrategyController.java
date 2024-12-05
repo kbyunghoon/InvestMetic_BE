@@ -150,9 +150,12 @@ public class StrategyController {
 
 
     @GetMapping("/{strategyId}/download-proposal")
+    @PreAuthorize("hasRole('ROLE_TRADER') or hasRole('ROLE_INVESTOR')")
     @Operation(summary = "트레이더 전략 제안서 다운로드 기능", description = "<a href='https://field-sting-eff.notion.site/0b7c02614c9e485180a3f2e010773c11?pvs=4' target='_blank'>API 명세서</a>")
-    public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId) {
-        FileDownloadResponseDto fileDownloadResponse = strategyService.downloadFileFromUrl(strategyId);
+    public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId,
+                                                     @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        FileDownloadResponseDto fileDownloadResponse = strategyService.downloadFileFromUrl(strategyId,
+                customUserDetails.getUserId());
 
         String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
@@ -165,12 +168,17 @@ public class StrategyController {
     }
 
     @DeleteMapping("{strategyId}/daily-analysis")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "전략 (일간 분석) 삭제(전체 삭제 포함)", description = "<a href='https://field-sting-eff.notion.site/ca5091b0aaa54a39b94c6f1cd4a832af?pvs=4' target='_blank'>API 명세서(1개 삭제)</a><br/><a href='https://field-sting-eff.notion.site/5d021bd7410942e185d6e2025079041c?pvs=4' target='_blank'>API 명세서(전체 삭제)</a>")
-    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(@PathVariable Long strategyId,
-                                                                             @RequestParam(required = false) Optional<Long> analysisId) {
+    public ResponseEntity<BaseResponse<Void>> deleteStrategyAllDailyAnalysis(
+            @PathVariable Long strategyId,
+            @RequestParam(required = false) Optional<Long> analysisId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        Long userId = customUserDetails.getUserId();
+
         analysisId.ifPresentOrElse(
-                id -> strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, id),
-                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId)
+                id -> strategyAnalysisService.deleteStrategyDailyAnalysis(strategyId, id, userId),
+                () -> strategyAnalysisService.deleteStrategyAllDailyAnalysis(strategyId, userId)
         );
 
         return BaseResponse.success(SuccessCode.DELETED);
@@ -197,7 +205,7 @@ public class StrategyController {
                 strategyListingService.getSubscribedStrategies(customUserDetails.getUserId(), pageable));
     }
 
-    @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "나의 전략 일간분석 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}/daily-analysis")
@@ -207,7 +215,7 @@ public class StrategyController {
         return BaseResponse.success(strategyAnalysisService.getMyDailyAnalysis(strategyId, pageable));
     }
 
-    @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @PreAuthorize("hasRole('ROLE_TRADER')")
     @Operation(summary = "나의 전략 상세정보 조회(마이페이지) ",
             description = "<a href='https://www.notion.so/445709f04679440cbd729c6cabf64f0c' target='_blank'>API 명세서</a>")
     @GetMapping("/{strategyId}")

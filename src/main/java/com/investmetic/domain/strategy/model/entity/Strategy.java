@@ -159,4 +159,8 @@ public class Strategy extends BaseEntity {
     public void setIsApproved(IsApproved isApproved) {
         this.isApproved = isApproved;
     }
+
+    public void setStrategyStatistics(StrategyStatistics strategyStatistics) {
+        this.strategyStatistics = strategyStatistics;
+    }
 }

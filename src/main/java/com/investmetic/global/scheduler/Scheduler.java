@@ -19,6 +19,7 @@ public class Scheduler {
     private final DailyAnalysisScheduler dailyAnalysisScheduler;
     private final StrategyCalculatorScheduler strategyCalculatorScheduler;
     private final MonthlyAnalysisScheduler monthlyAnalysisScheduler;
+    private final StrategyStatisticsScheduler strategyStatisticsScheduler;
 
     // 매일 자정
     @Scheduled(cron = "0 * * * * *")
@@ -67,6 +68,7 @@ public class Scheduler {
             List<DailyAnalysis> specificDailyAnalyses = dailyAnalysisRepository.findByStrategyId(
                     dailyAnalysis.getStrategy().getStrategyId());
             monthlyAnalysisScheduler.calculateMonthlyAnalysis(specificDailyAnalyses);
+            strategyStatisticsScheduler.calculateStatistics(specificDailyAnalyses);
         });
     }
 }

@@ -45,6 +45,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, 2502, "Refresh token has expired."),
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
     AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN, 2504, "권한이 없습니다."),
+    SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST, 2208, "기존 비밀번호와 동일합니다."),
 
 
     // 전략 관련 오류
@@ -87,7 +88,10 @@ public enum ErrorCode {
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, 5001, "해당 문의를 찾을 수 없습니다."),
     INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, 5002, "정렬 조건이 잘못되었습니다."),
     EMPTY_QUESTION_LIST(HttpStatus.NOT_FOUND, 5003, "조회 가능한 문의가 없습니다."),
-    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, 5004, "해당 답변을 찾을 수 없습니다.");
+    ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, 5004, "해당 답변을 찾을 수 없습니다."),
+
+    // 공지사항 관련 오류(6000번대 );
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, 6001, "해당 공지사항을 찾을 수 없습니다.");
 
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드

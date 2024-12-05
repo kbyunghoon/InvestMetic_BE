@@ -6,6 +6,8 @@ import com.investmetic.domain.qna.model.entity.Answer;
 import com.investmetic.domain.qna.model.entity.Question;
 import com.investmetic.domain.qna.repository.AnswerRepository;
 import com.investmetic.domain.qna.repository.QuestionRepository;
+import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class AnswerService {
 
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
+    private final UserRepository userRepository;
 
     /**
      * 문의 답변 등록
@@ -34,11 +37,15 @@ public class AnswerService {
         // 권한 검증
         validateTraderAuthorization(question, traderId);
 
-        // 답변 생성 및 저장
+        User trader = userRepository.findById(traderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
         Answer answer = Answer.builder()
-                .question(question)
                 .content(answerRequestDto.getContent())
+                .user(trader)
+                .question(question)
                 .build();
+
         answerRepository.save(answer);
 
         // 문의 상태 업데이트
@@ -106,9 +113,7 @@ public class AnswerService {
      * @param traderId 트레이더 ID
      */
     private void validateTraderAuthorization(Question question, Long traderId) {
-        if (question.getStrategy() == null ||
-                question.getStrategy().getUser() == null ||
-                !question.getStrategy().getUser().getUserId().equals(traderId)) {
+        if (!question.getStrategy().getUser().getUserId().equals(traderId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
