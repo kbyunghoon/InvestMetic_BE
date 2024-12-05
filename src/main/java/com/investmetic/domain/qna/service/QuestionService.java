@@ -237,6 +237,24 @@ public class QuestionService {
     }
 
     /**
+     * 투자자 접근 권한 검증
+     */
+    private void validateInvestorAccess(User user, Question question, Long userId) {
+        if (!question.getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    /**
+     * 트레이더 접근 권한 검증
+     */
+    private void validateTraderAccess(User user, Question question, Long userId) {
+        if (!question.getStrategy().getUser().getUserId().equals(userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+    }
+
+    /**
      * 관리자 접근 권한 검증
      */
     private void validateAdminAccess(User user) {
