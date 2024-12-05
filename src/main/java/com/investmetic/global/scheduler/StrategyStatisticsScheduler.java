@@ -82,6 +82,7 @@ public class StrategyStatisticsScheduler {
 
         // 빌더를 이용해 객체 생성
         return StrategyStatistics.builder()
+                .balance(lastDailyAnalysis.getBalance())
                 .operationPeriod(operationPeriod)
                 .cumulativeTransactionAmount(lastDailyAnalysis.getCumulativeTransactionAmount())
                 .startDate(startDate)
@@ -89,6 +90,7 @@ public class StrategyStatisticsScheduler {
                 .endDate(endDate)
                 .daysSincePeakUpdate(lastDailyAnalysis.getDaysSincePeak())
                 .cumulativeProfitAmount(lastDailyAnalysis.getCumulativeProfitLoss())
+                .cumulativeProfitRate(lastDailyAnalysis.getCumulativeProfitLossRate())
                 .recentYearProfitRate(recentYearProfitRate)
                 .maxCumulativeProfitAmount(lastDailyAnalysis.getMaxCumulativeProfitLoss())
                 .maxCumulativeProfitRate(lastDailyAnalysis.getMaxCumulativeProfitLossRate())
@@ -96,6 +98,7 @@ public class StrategyStatisticsScheduler {
                 .averageProfitLossRate(lastDailyAnalysis.getCumulativeProfitLossRate())
                 .maxDailyProfitAmount(lastDailyAnalysis.getMaxDailyProfit())
                 .maxDailyProfitRate(lastDailyAnalysis.getMaxDailyProfitRate())
+                .maxDailyLossAmount(lastDailyAnalysis.getMaxDailyLoss())
                 .maxDailyLossRate(lastDailyAnalysis.getMaxDailyLossRate())
                 .roa(lastDailyAnalysis.getRoa())
                 .profitFactor(lastDailyAnalysis.getProfitFactor())
