@@ -133,8 +133,11 @@ public class QuestionService {
      */
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
         Answer answer = question.getAnswer();
+        User trader = null;
 
-        User trader = answer.getUser();
+        if (answer != null) {
+            trader = answer.getUser(); // 답변이 있을 경우만 트레이더 정보 설정
+        }
 
         // 역할에 따른 정보를 설정
         String profileImageUrl = "http://default-image-url.com/default.jpg"; // 기본 이미지 URL
@@ -154,26 +157,31 @@ public class QuestionService {
             nickname = question.getUser().getNickname();                    // 투자자 닉네임
         }
 
+        // 답변이 없는 경우에는 Answer 관련 필드를 적절히 처리
+        AnswerResponseDto answerResponse = null;
+        if (answer != null) {
+            answerResponse = AnswerResponseDto.builder()
+                    .answerId(answer.getAnswerId())
+                    .content(answer.getContent())
+                    .role(trader != null ? trader.getRole() : null)
+                    .profileImageUrl(trader != null ? trader.getImageUrl() : null)
+                    .nickname(trader != null ? trader.getNickname() : "Unknown") // 트레이더가 없을 경우 기본값
+                    .createdAt(answer.getCreatedAt())
+                    .build();
+        }
+
         return QuestionsDetailResponse.builder()
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
                 .questionContent(question.getContent())
-                .answerContent(answer != null ? answer.getContent() : "답변 없음")
+                .answerContent(answer != null ? answer.getContent() : "답변 없음") // 답변 없음 상태 처리
                 .strategyName(question.getStrategy() != null ? question.getStrategy().getStrategyName() : "전략 없음")
                 .profileImageUrl(profileImageUrl)
                 .nickname(nickname)
                 .state(question.getQnaState().name())
                 .questionCreatedAt(question.getCreatedAt())
-                .answerCreatedAt(answer.getCreatedAt())
-                .answer(
-                        AnswerResponseDto.builder()
-                                .answerId(answer.getAnswerId())
-                                .content(answer.getContent())
-                                .role(trader.getRole())
-                                .profileImageUrl(trader.getImageUrl())
-                                .nickname(trader.getNickname())
-                                .createdAt(answer.getCreatedAt())
-                                .build())
+                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null) // 답변이 없는 경우 null 처리
+                .answer(answerResponse) // 답변이 없는 경우 null 처리
                 .build();
     }
 
