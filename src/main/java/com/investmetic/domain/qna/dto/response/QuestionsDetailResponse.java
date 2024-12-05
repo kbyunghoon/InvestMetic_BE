@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class QuestionsDetailResponse {
     private Long questionId; // 문의 ID
     private String title; // 문의 제목
+    private Long strategyId;
     private String content; // 답변 내용
     private String strategyName; // 전략 이름
     private String profileImageUrl; // 프로필 이미지 URL
