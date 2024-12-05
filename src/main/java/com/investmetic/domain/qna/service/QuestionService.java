@@ -174,6 +174,7 @@ public class QuestionService {
 
         return QuestionsDetailResponse.builder()
                 .questionId(question.getQuestionId())
+                .strategyId(question.getStrategy().getStrategyId())
                 .title(question.getTitle())
                 .content(question.getContent())
                 .strategyName(question.getStrategy() != null ? question.getStrategy().getStrategyName() : "전략 없음")

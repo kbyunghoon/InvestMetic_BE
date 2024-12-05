@@ -47,9 +47,9 @@ public class AnswerController {
     public ResponseEntity<BaseResponse<Void>> deleteTraderAnswer(
             @PathVariable Long questionId,
             @PathVariable Long answerId,
-            @RequestParam Long userId) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        answerService.deleteTraderAnswer(answerId, questionId, userId);
+        answerService.deleteTraderAnswer(answerId, questionId, customUserDetails.getUserId());
         return BaseResponse.success(SuccessCode.DELETED);
     }
 
