@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,10 +25,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Lazy
     private final RememberMeServices rememberMeServices;
-
 
     @Value("${jwt.expiration.access}")
     private Long accessExpiration;
@@ -37,12 +33,17 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @Value("${jwt.expiration.refresh}")
     private Long refreshExpiration;
 
-
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
         String email = authentication.getName();
+        Boolean rememberMe = (Boolean) authentication.getDetails();
+
+        // "로그인 유지하기" 옵션이 선택된 경우에만 RememberMeServices 호출
+        if (Boolean.TRUE.equals(rememberMe)) {
+            rememberMeServices.loginSuccess(request, response, authentication);
+        }
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -55,12 +56,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String refresh = jwtUtil.createJwt("refresh", email, role, refreshExpiration);
 
         redisUtil.saveRefreshToken(email, refresh, refreshExpiration);
+//        rememberMeServices.loginSuccess(request, response, authentication);
 
         // 응답 헤더와 JSON 설정
         response.setHeader("access-token", "Bearer " + access);
         response.addCookie(createCookie("refresh-token", refresh, refreshExpiration));
-
-//        rememberMeServices.loginSuccess(request, response, authentication);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
@@ -82,6 +82,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         cookie.setHttpOnly(true);
         return cookie;
     }
+
     private void deleteOldRefreshCookie(HttpServletResponse response) {
         Cookie oldRefreshCookie = new Cookie("refresh", null);
         oldRefreshCookie.setPath("/");

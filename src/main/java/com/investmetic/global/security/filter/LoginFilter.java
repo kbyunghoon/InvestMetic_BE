@@ -24,8 +24,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         String email = null;
         String password = null;
-        Boolean rememberMe = null;
-
 
         try {
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
@@ -33,10 +31,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             email = loginRequestDto.getEmail();
             password = loginRequestDto.getPassword();
 
+            //Spring Security에서 인증 정보를 담는 객체
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(email, password);
-
-            authToken.setDetails(rememberMe);
+            authToken.setDetails(loginRequestDto.getRemember()); //인증 요청에 필요한 추가 정보를 담을 수 있도록 설계된 메서드입니다.
 
             return authenticationManager.authenticate(authToken);
 
