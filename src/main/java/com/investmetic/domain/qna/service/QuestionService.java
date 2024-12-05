@@ -237,24 +237,6 @@ public class QuestionService {
     }
 
     /**
-     * 투자자 접근 권한 검증
-     */
-    private void validateInvestorAccess(User user, Question question, Long userId) {
-        if (!question.getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    /**
-     * 트레이더 접근 권한 검증
-     */
-    private void validateTraderAccess(User user, Question question, Long userId) {
-        if (!question.getStrategy().getUser().getUserId().equals(userId)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
-        }
-    }
-
-    /**
      * 관리자 접근 권한 검증
      */
     private void validateAdminAccess(User user) {
@@ -279,30 +261,53 @@ public class QuestionService {
 
         // DTO 변환
         Page<Question> questions = questionRepository.searchByConditions(conditions, pageable, queryFactory);
-        return new PageResponseDto<>(questions.map(q -> {
-            // 프로필 이미지 URL 및 닉네임 설정
-            String profileImageUrl = null;
-            String nickname = null;
+        return new PageResponseDto<>(questions.map(q ->
+                filterQuestions(q, role)
+        ));
+    }
 
-            if (role == Role.TRADER && q.getStrategy() != null && q.getStrategy().getUser() != null) {
-                profileImageUrl = q.getStrategy().getUser().getImageUrl(); // 전략의 유저 이미지
-                nickname = q.getStrategy().getUser().getNickname();        // 전략의 유저 닉네임
-            } else if (q.getUser() != null) {
-                profileImageUrl = q.getUser().getImageUrl();              // 문의 작성자 이미지
-                nickname = q.getUser().getNickname();                    // 문의 작성자 닉네임
+    private QuestionsResponse filterQuestions(Question question, Role role) {
+        return switch (role) {
+            case TRADER -> filterTraderQuestions(question);
+            case INVESTOR -> filterInvestorQuestions(question);
+            default -> {
+                if (isAdminRole(role)) {
+                    yield filterAdminQuestions(question);
+                }
+                throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
             }
+        };
+    }
 
-            return QuestionsResponse.builder()
-                    .questionId(q.getQuestionId())
-                    .title(q.getTitle())
-                    .strategyName(q.getStrategy() != null ? q.getStrategy().getStrategyName() : "전략 없음")
-                    .questionContent(q.getContent())
-                    .profileImageUrl(profileImageUrl != null ? profileImageUrl : "이미지 없음")
-                    .nickname(nickname != null ? nickname : "닉네임 없음")
-                    .stateCondition(q.getQnaState().name())
-                    .createdAt(q.getCreatedAt())
-                    .build();
-        }));
+    private boolean isAdminRole(Role role) {
+        return role == Role.INVESTOR_ADMIN || role == Role.TRADER_ADMIN || role == Role.SUPER_ADMIN;
+    }
+
+    private QuestionsResponse filterInvestorQuestions(Question question) {
+        Answer answer = answerRepository.findByQuestion(question).orElse(null);
+
+        if (answer != null) {
+            User trader = answer.getUser();
+            return QuestionsResponse.forAdmin(question, trader);
+        } else {
+            return QuestionsResponse.forTrader(question);
+        }
+    }
+
+    private QuestionsResponse filterTraderQuestions(Question question) {
+        return QuestionsResponse.forTrader(question);
+
+    }
+
+    private QuestionsResponse filterAdminQuestions(Question question) {
+        Answer answer = answerRepository.findByQuestion(question).orElse(null);
+
+        if (answer != null) {
+            User trader = answer.getUser();
+            return QuestionsResponse.forAdmin(question, trader);
+        } else {
+            return QuestionsResponse.forTrader(question);
+        }
     }
 
 
