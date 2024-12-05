@@ -36,5 +36,14 @@ public class Notice extends BaseEntity {
     @Column(length = 10000)
     private String content; //공지사항내용
 
+    public Notice(User user, String title, String content) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+    }
 
+    public void modifyUser(User user) {
+        this.user = user;
+    }
 }
+

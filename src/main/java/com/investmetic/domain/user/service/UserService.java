@@ -108,11 +108,16 @@ public class UserService {
 
         boolean isDuplicate = userRepository.existsByNickname(nickname);
 
-        // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return AvaliableDto.builder()
+                    .isAvailable(false)
+                    .message("이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.")
+                    .build();
         } else {
-            return new AvaliableDto(true);
+            return AvaliableDto.builder()
+                    .isAvailable(true)
+                    .message("사용 가능한 닉네임입니다.")
+                    .build();
         }
     }
 
@@ -120,11 +125,16 @@ public class UserService {
 
         boolean isDuplicate = userRepository.existsByEmail(email);
 
-        // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return AvaliableDto.builder()
+                    .isAvailable(false)
+                    .message("이미 사용 중인 이메일입니다. 다른 이메일을 입력해주세요.")
+                    .build();
         } else {
-            return new AvaliableDto(true);
+            return AvaliableDto.builder()
+                    .isAvailable(true)
+                    .message("사용 가능한 이메일입니다.")
+                    .build();
         }
     }
 
@@ -132,11 +142,16 @@ public class UserService {
 
         boolean isDuplicate = userRepository.existsByPhone(phone);
 
-        // 중복 여부에 따라 DTO 생성
         if (isDuplicate) {
-            return new AvaliableDto(false);
+            return AvaliableDto.builder()
+                    .isAvailable(false)
+                    .message("이미 사용 중인 휴대번호입니다. 다른 휴대번호를 입력해주세요.")
+                    .build();
         } else {
-            return new AvaliableDto(true);
+            return AvaliableDto.builder()
+                    .isAvailable(true)
+                    .message("사용 가능한 휴대번호입니다.")
+                    .build();
         }
     }
 
@@ -241,12 +256,14 @@ public class UserService {
 
     //이메일 마스킹 처리
     private String emailMasking(String email) {
-
-        String localPart = email.substring(0, email.indexOf('@'));
+        int atIndex = email.indexOf('@');
+        String localPart = email.substring(0, atIndex);
+        String domainPart = email.substring(atIndex); // @와 뒷부분
 
         if (localPart.length() > 3) {
-            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3);
+            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3) + domainPart;
         }
+
         return email;
     }
 
@@ -255,5 +272,4 @@ public class UserService {
     private interface ValidationFunction {
         boolean exists(String value);
     }
-
 }

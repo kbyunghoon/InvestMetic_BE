@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,6 +32,7 @@ public class AdminStrategyController {
     @Operation(summary = "전략 승인, 승인 거부 상태 관리 기능",
             description = "<a href='https://www.notion.so/a0c8e8de1b264278a44dedda4b4d4ca0' target='_blank'>API 명세서</a>")
     @PatchMapping("/{strategyId}")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId,
                                                              IsApproved isApproved) {
         adminStrategyService.manageAproveState(strategyId, isApproved);
@@ -38,11 +40,12 @@ public class AdminStrategyController {
     }
     @Operation(summary = "관리자 페이지 전략 목록 조회 기능",
     description = "<a href='https://www.notion.so/3cf42fd2349d4a0488b0dde773058ac9' target='_blank'>API 명세서</a>")
-    @GetMapping("/")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
+    @GetMapping("")
     public ResponseEntity<BaseResponse<PageResponseDto<AdminStrategyResponseDto>>> getStrategies(
             @PageableDefault(size=10, page=1) Pageable pageable,
             @RequestParam(required = false) String searchWord,
-            @RequestParam IsApproved isApproved
+            @RequestParam(required = false) IsApproved isApproved
     ) {
         return BaseResponse.success(adminStrategyService.getManageStrategies(pageable, searchWord, isApproved));
     }

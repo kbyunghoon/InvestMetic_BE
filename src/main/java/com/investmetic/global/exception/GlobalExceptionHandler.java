@@ -1,10 +1,13 @@
 package com.investmetic.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.BindException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -57,17 +60,31 @@ public class GlobalExceptionHandler {
                 .body(BaseResponse.fail(ErrorCode.INVALID_DATE));
     }
 
-    /**
-     * @Valid 또는 @Validated로 유효성 검사 실패 시 발생하는 예외 처리
-     * @RequestBody 또는 @RequestPart 사용 시 발생
-     */
-    @ExceptionHandler({MethodArgumentNotValidException.class, HandlerMethodValidationException.class})
-    protected ResponseEntity<BaseResponse<String>> handleMethodArgumentNotValidException(
-            MethodArgumentNotValidException e) {
-        log.error("MethodArgumentNotValidException 예외 처리 : {}", e.getMessage(), e);
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.fail(ErrorCode.INVALID_INPUT_VALUE));
+    // Valid 실패 (개별)
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<BaseResponse<String>> handleValidationException(HandlerMethodValidationException e) {
+        // Validation 실패 메시지 추출
+        String errorMessage = e.getAllErrors()
+                .stream()
+                .findFirst()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .orElse("입력한 값의 형식이 유효하지 않습니다.");
+
+        // 에러 응답 반환
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(BaseResponse.fail(errorMessage));
+    }
+
+    // @Valid 실패
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<BaseResponse<String>> handleValidationException(MethodArgumentNotValidException e) {
+        // 첫 번째 FieldError 추출
+        FieldError firstError = e.getBindingResult().getFieldErrors().get(0);
+        String errorMessage = firstError.getDefaultMessage();
+
+        System.out.println(errorMessage);
+        // 첫 번째 에러 메시지 반환
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(BaseResponse.fail(errorMessage));
     }
 
     /**

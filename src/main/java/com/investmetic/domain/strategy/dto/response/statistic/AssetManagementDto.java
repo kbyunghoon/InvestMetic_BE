@@ -14,7 +14,7 @@ public class AssetManagementDto {
     private final int operationPeriod; // 운용 기간
     private final LocalDate startDate; // 시작일
     private final LocalDate endDate; // 종료일
-    private final int daysSincePeakUpdate; // 최고점 이후 경과일
+    private final long daysSincePeakUpdate; // 최고점 이후 경과일
 
     public static AssetManagementDto from(StrategyStatistics stats) {
         return new AssetManagementDto(

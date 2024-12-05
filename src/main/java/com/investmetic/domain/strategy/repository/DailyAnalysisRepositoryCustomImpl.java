@@ -66,7 +66,7 @@ public class DailyAnalysisRepositoryCustomImpl implements DailyAnalysisRepositor
         for (Tuple result : results) {
             dates.add(result.get(dailyAnalysis.dailyDate.stringValue()));
             firstYAxis.add(result.get(findByOption(option1)));
-            secondYAxis.add(result.get(findByOption(option1)));
+            secondYAxis.add(result.get(findByOption(option2)));
         }
 
         // 응답 데이터 매핑

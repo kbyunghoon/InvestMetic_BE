@@ -83,7 +83,6 @@ class AdminPageUserRepositoryTest {
             //when
             Page<UserProfileDto> users = userRepository.getAdminUsersPage(requestDto, pageable);
 
-
             long higher = Long.MAX_VALUE;
             //최신순으로 정렬되어있는지 확인.
             for (UserProfileDto user : users) {
@@ -332,7 +331,7 @@ class AdminPageUserRepositoryTest {
             em.flush();
             em.clear();
 
-            Optional<Role> role = userRepository.findRoleByEmail(user.getEmail());
+            Optional<Role> role = userRepository.findRoleByUserUserId(user.getUserId());
 
             assert role.isPresent();
 

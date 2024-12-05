@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +17,10 @@ import static org.mockito.Mockito.when;
 import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
+import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -47,6 +52,7 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -102,6 +108,12 @@ class StrategyServiceTest {
 
     @Mock
     private AccountVerificationRepository accountVerificationRepository;
+
+    @Mock
+    private QuestionRepository questionRepository;
+
+    @Mock
+    private AnswerRepository answerRepository;
 
     private StrategyRegisterRequestDto requestDto;
     private User user;
@@ -236,9 +248,17 @@ class StrategyServiceTest {
                         .accountVerificationUrl("s3://bucket/accounts/account2.png")
                         .build()
         );
+        QuestionRequestDto dto = QuestionRequestDto.builder()
+                .title("title")
+                .content("content")
+                .build();
+
+        Question question = Question.from(user,strategy,dto);
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
         when(accountVerificationRepository.findByStrategy(strategy)).thenReturn(accountVerifications);
+        when(questionRepository.findAllByStrategyStrategyId(strategyId))
+                .thenReturn(new ArrayList<>(List.of(question)));
 
         strategyService.deleteStrategy(strategyId, userId);
 
@@ -249,13 +269,14 @@ class StrategyServiceTest {
         verify(subscriptionRepository).deleteAllByStrategy(strategy);
         verify(reviewRepository).deleteAllByStrategy(strategy);
 
+
         if (strategy.getStrategyStatistics() != null) {
             verify(strategyStatisticsRepository).deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());
         }
 
         verify(strategyRepository).deleteById(strategyId);
 
-        verify(s3FileService).deleteFromS3(strategy.getProposalFilePath());
+        verify(s3FileService).deleteStrategyFolder(strategyId);
     }
 
     @Test
@@ -307,15 +328,17 @@ class StrategyServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
                 Optional.of(tradeType));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024)).thenReturn(proposalFilePath);
-        when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
-        when(stockTypeRepository.findById(anyLong()))
-                .thenAnswer(invocation -> stockTypeList.stream()
-                        .filter(stockType -> stockType.getStockTypeId().equals(invocation.getArgument(0)))
-                        .findFirst());
-        when(strategyRepository.save(any(Strategy.class))).thenReturn(Strategy.builder().build());
+        when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_PROPOSAL), anyLong(), eq("test.xls"), eq(1024)))
+                .thenReturn(proposalFilePath);
+        when(s3FileService.getPreSignedUrl(eq(proposalFilePath))).thenReturn(presignedUrl);
+
+        when(stockTypeRepository.findById(anyLong())).thenReturn(Optional.ofNullable(StockType.builder().build()));
+
+        when(strategyRepository.save(any(Strategy.class)))
+                .thenReturn(Strategy.builder().strategyId(Long.MAX_VALUE).build());
+
         when(stockTypeGroupRepository.save(any(StockTypeGroup.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation -> invocation.getArgument(0)); // 받은 인자를 그대로 반환
 
         PresignedUrlResponseDto responseDto = strategyService.registerStrategy(requestDto, userId);
 
@@ -364,7 +387,9 @@ class StrategyServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(tradeTypeId)).thenReturn(
                 Optional.of(tradeType));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL, "test.xls", 1024))
+        when(strategyRepository.save(any(Strategy.class))).thenReturn(
+                Strategy.builder().strategyId(Long.MAX_VALUE).build());
+        when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_PROPOSAL), anyLong(), eq("test.xls"), eq(1024)))
                 .thenReturn(proposalFilePath);
         when(s3FileService.getPreSignedUrl(proposalFilePath)).thenReturn(presignedUrl);
         when(stockTypeRepository.findById(1L)).thenReturn(Optional.empty());
@@ -450,7 +475,8 @@ class StrategyServiceTest {
                 .build();
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
-        when(s3FileService.getS3Path(FilePath.STRATEGY_PROPOSAL,
+        when(s3FileService.getS3StrategyPath(FilePath.STRATEGY_PROPOSAL,
+                strategyId,
                 requestDtoWithProposal.getProposalFile().getProposalFileName(),
                 requestDtoWithProposal.getProposalFile().getProposalFileSize()))
                 .thenReturn(newProposalFilePath);
