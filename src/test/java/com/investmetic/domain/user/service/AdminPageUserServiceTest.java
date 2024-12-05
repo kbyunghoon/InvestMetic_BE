@@ -15,8 +15,10 @@ import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.domain.user.service.logic.UserCommonLogic;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,9 @@ public class AdminPageUserServiceTest {
     @Mock
     private StibeeEmailService stibeeEmailService;
 
+    @Mock
+    private UserCommonLogic userCommonLogic;
+
 
     @Nested
     @DisplayName("회원 목록 조회")
@@ -68,7 +73,7 @@ public class AdminPageUserServiceTest {
             List<UserProfileDto> list = new ArrayList<>();
             list.add(UserProfileDto.builder().build());
 
-            when(userRepository.getAdminUsersPage(requestDto, pageable)).thenReturn(new PageImpl<UserProfileDto>(list));
+            when(userRepository.getAdminUsersPage(requestDto, pageable)).thenReturn(new PageImpl<>(list));
 
             // when, then
             assertThatCode(() -> userAdminService.getUserList(requestDto, pageable)).doesNotThrowAnyException();
@@ -102,7 +107,7 @@ public class AdminPageUserServiceTest {
             List<UserProfileDto> list = new ArrayList<>();
             list.add(UserProfileDto.builder().build());
 
-            when(userRepository.getAdminUsersPage(requestDto, pageable)).thenReturn(new PageImpl<UserProfileDto>(list));
+            when(userRepository.getAdminUsersPage(requestDto, pageable)).thenReturn(new PageImpl<>(list));
 
             // when, then
             assertThatCode(() -> userAdminService.getUserList(requestDto, pageable)).doesNotThrowAnyException();
@@ -134,7 +139,7 @@ public class AdminPageUserServiceTest {
 
             // content가 null 인 경우.
             when(userRepository.getAdminUsersPage(requestDto, pageable)).thenReturn(
-                    new PageImpl<UserProfileDto>(new ArrayList<UserProfileDto>()));
+                    new PageImpl<>(new ArrayList<>()));
 
             assertThatThrownBy(() -> userAdminService.getUserList(requestDto, pageable)).isInstanceOf(
                     BusinessException.class).hasMessage(ErrorCode.USERS_NOT_FOUND.getMessage());
@@ -186,7 +191,7 @@ public class AdminPageUserServiceTest {
             when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
             if (roleCondition == RoleCondition.ADMIN) {
                 when(stibeeEmailService.assignGroup(anyString())).thenReturn(true);
-            }else{
+            } else {
                 when(stibeeEmailService.releaseGroup(anyString())).thenReturn(true);
             }
 
@@ -224,13 +229,14 @@ public class AdminPageUserServiceTest {
         void adminDeleteUserTest1(Role role) {
 
             // given - 하나 만들기.
-            User user = User.builder().build();
+            User user = User.builder().userId(Long.MAX_VALUE).role(role).build();
 
-            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.ofNullable(role));
+            when(userRepository.findRoleByUserUserId(anyLong())).thenReturn(Optional.ofNullable(role));
             when(userRepository.findById(anyLong())).thenReturn(Optional.ofNullable(user));
 
             // when, then
-            assertThatCode(() -> userAdminService.deleteUser(1L, "email")).doesNotThrowAnyException();
+            assertThatCode(
+                    () -> userAdminService.deleteUser(1L, new CustomUserDetails(user))).doesNotThrowAnyException();
 
         }
 
@@ -241,10 +247,13 @@ public class AdminPageUserServiceTest {
         void adminDeleteUserTest2(Role role) {
 
             // given
-            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.ofNullable(role));
+            User user = User.builder().userId(Long.MAX_VALUE).build();
+
+            when(userRepository.findRoleByUserUserId(anyLong())).thenReturn(Optional.ofNullable(role));
 
             // when, then
-            assertThatThrownBy(() -> userAdminService.deleteUser(1L, "email")).isInstanceOf(BusinessException.class)
+            assertThatThrownBy(() -> userAdminService.deleteUser(1L, new CustomUserDetails(user))).isInstanceOf(
+                            BusinessException.class)
                     .hasMessage(ErrorCode.PERMISSION_DENIED.getMessage());
 
         }
@@ -255,11 +264,14 @@ public class AdminPageUserServiceTest {
         void adminDeleteUserTest3() {
 
             // given
-            when(userRepository.findRoleByEmail(anyString())).thenReturn(Optional.of(Role.TRADER_ADMIN));
+            User user = User.builder().userId(Long.MAX_VALUE).role(Role.TRADER_ADMIN).build();
+
+            when(userRepository.findRoleByUserUserId(anyLong())).thenReturn(Optional.of(Role.TRADER_ADMIN));
             when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
             // when, then
-            assertThatThrownBy(() -> userAdminService.deleteUser(1L, "email")).isInstanceOf(BusinessException.class)
+            assertThatThrownBy(() -> userAdminService.deleteUser(1L, new CustomUserDetails(user))).isInstanceOf(
+                            BusinessException.class)
                     .hasMessage(ErrorCode.USERS_NOT_FOUND.getMessage());
 
         }

@@ -4,6 +4,10 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.qna.model.QnaState;
+import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
+import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -34,7 +38,9 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -55,6 +61,8 @@ public class StrategyService {
     private final ReviewRepository reviewRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
     private final AccountVerificationRepository accountVerificationRepository;
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
 
     @Transactional
@@ -68,12 +76,17 @@ public class StrategyService {
     }
 
     @Transactional(readOnly = true)
-    public FileDownloadResponseDto downloadFileFromUrl(Long strategyId) {
+    public FileDownloadResponseDto downloadFileFromUrl(Long strategyId, Long userId) {
         // 전략 조회 및 유효성 검사
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
+        if (strategy.getIsPublic() == IsPublic.PRIVATE && !Objects.equals(strategy.getUser().getUserId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
         String proposalFilePath = strategy.getProposalFilePath();
+
         if (proposalFilePath == null || proposalFilePath.isBlank()) {
             throw new BusinessException(ErrorCode.PROPOSAL_NOT_FOUND);
         }
@@ -139,14 +152,35 @@ public class StrategyService {
         monthlyAnalysisRepository.deleteAllByStrategy(strategy);
         subscriptionRepository.deleteAllByStrategy(strategy);
         reviewRepository.deleteAllByStrategy(strategy);
+        deleteAllQnA(strategy.getStrategyId());
+    }
+
+    private void deleteAllQnA(Long strategyId){
+        List<Question> questionList = questionRepository.findAllByStrategyStrategyId(strategyId);
+        List<Question> completeQuestionList = new ArrayList<>();
+
+        if (!questionList.isEmpty()) {
+            for (Question question : questionList) {
+                if (QnaState.COMPLETED.equals(question.getQnaState())) {
+                    completeQuestionList.add(question);
+                }
+            }
+            // 답변 먼저 삭제.
+            answerRepository.deleteByQuestions(completeQuestionList);
+            questionRepository.deleteAllInBatch(questionList);
+        }
     }
 
     private void deleteS3Files(Strategy strategy) {
-        // 전략 제안서 파일 삭제
-        s3FileService.deleteFromS3(strategy.getProposalFilePath());
+        // 전략 폴더 전부 삭제
+        s3FileService.deleteStrategyFolder(strategy.getStrategyId());
 
         // 계좌 인증 파일 삭제
         List<AccountVerification> accountVerifications = accountVerificationRepository.findByStrategy(strategy);
+
+        // 해당 전략의 실계좌 인증 삭제.
+        accountVerificationRepository.deleteAllInBatch(accountVerifications);
+
         for (AccountVerification accountVerification : accountVerifications) {
             s3FileService.deleteFromS3(accountVerification.getAccountVerificationUrl());
         }
@@ -160,25 +194,27 @@ public class StrategyService {
         TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
 
-        String proposalFilePath = s3FileService.getS3Path(
-                FilePath.STRATEGY_PROPOSAL,
-                requestDto.getProposalFile().getProposalFileName(),
-                requestDto.getProposalFile().getProposalFileSize()
-        );
-
-        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
-
         Strategy strategy = Strategy.builder()
                 .user(user)
                 .strategyName(requestDto.getStrategyName())
                 .tradeType(tradeType)
                 .operationCycle(requestDto.getOperationCycle())
                 .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
-                .proposalFilePath(proposalFilePath)
                 .strategyDescription(requestDto.getDescription())
                 .build();
 
-        strategyRepository.save(strategy);
+        Long strategyId = strategyRepository.save(strategy).getStrategyId();
+
+        String proposalFilePath = s3FileService.getS3StrategyPath(
+                FilePath.STRATEGY_PROPOSAL,
+                strategyId,
+                requestDto.getProposalFile().getProposalFileName(),
+                requestDto.getProposalFile().getProposalFileSize()
+        );
+
+        strategy.modifyStrategyProposalFilePath(proposalFilePath);
+
+        String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
         requestDto.getStockTypeIds().forEach(stockTypeId -> {
             StockType stockType = stockTypeRepository.findById(stockTypeId)
@@ -207,8 +243,9 @@ public class StrategyService {
         verifyUserPermission(strategy, userId);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
-            String proposalFilePath = s3FileService.getS3Path(
+            String proposalFilePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_PROPOSAL,
+                    strategyId,
                     requestDto.getProposalFile().getProposalFileName(),
                     requestDto.getProposalFile().getProposalFileSize()
             );

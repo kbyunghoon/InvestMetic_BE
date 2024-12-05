@@ -10,8 +10,11 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +30,13 @@ public class StrategyAnalysisService {
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
                                     Long userId) {
+        Set<LocalDate> dateSet = new HashSet<>();
+        for (TraderDailyAnalysisRequestDto request : analysisRequests) {
+            if (!dateSet.add(request.getDate())) {
+                throw new BusinessException(ErrorCode.DUPLICATE_DATE_IN_REQUEST);
+            }
+        }
+
         Strategy strategy = findStrategyById(strategyId);
 
         verifyUserPermission(strategy, userId);
@@ -79,11 +89,10 @@ public class StrategyAnalysisService {
     }
 
     @Transactional
-    public void deleteStrategyAllDailyAnalysis(Long strategyId) {
+    public void deleteStrategyAllDailyAnalysis(Long strategyId, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        // TODO : 유저 권한 확인 로직 추가 예정
-        verifyUserPermission(strategy, 1L);
+        verifyUserPermission(strategy, userId);
 
         strategy.resetStrategyDailyAnalysis();
 
@@ -91,30 +100,30 @@ public class StrategyAnalysisService {
     }
 
     @Transactional
-    public void deleteStrategyDailyAnalysis(Long strategyId, Long analysisId) {
+    public void deleteStrategyDailyAnalysis(Long strategyId, Long analysisId, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        // TODO : 유저 권한 확인 로직 추가 예정
-        verifyUserPermission(strategy, 1L);
+        verifyUserPermission(strategy, userId);
 
-        // 존재 여부 확인
-        boolean exists = dailyAnalysisRepository.existsByStrategyAndDailyAnalysisId(strategy, analysisId);
-        if (!exists) {
-            throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
-        }
+        DailyAnalysis dailyAnalysis = dailyAnalysisRepository.findByDailyAnalysisId(analysisId)
+                .orElseThrow(() -> new BusinessException((ErrorCode.INVALID_TYPE_VALUE)));
+
+        LocalDate dailyDate = dailyAnalysis.getDailyDate();
+        Optional<DailyAnalysis> nextDailyAnalysis = dailyAnalysisRepository.findByAfterDate(strategy, dailyDate);
+        nextDailyAnalysis.ifPresent(analysis -> analysis.setProceed(Proceed.NO));
 
         dailyAnalysisRepository.deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
-    }
-
-    private Strategy findStrategyById(Long strategyId) {
-        return strategyRepository.findById(strategyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
     public PageResponseDto<DailyAnalysisResponse> getMyDailyAnalysis(Long strategyId, Pageable pageable) {
         Page<DailyAnalysisResponse> myDailyAnalysis = dailyAnalysisRepository.findMyDailyAnalysis(strategyId, pageable);
         return new PageResponseDto<>(myDailyAnalysis);
+    }
+
+    private Strategy findStrategyById(Long strategyId) {
+        return strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
     }
 
     private void verifyUserPermission(Strategy strategy, Long userId) {

@@ -44,8 +44,6 @@ public class UserMyPageService {
         // S3Path 받을 변수 설정.
         String s3Path = null;
 
-        // TODO : jwt, securityContext 에서 email 가져오기.
-
         // dto에 담긴 email과 토큰상의 email이 같은지 확인.
         if (!userModifyDto.getEmail().equals(email)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
@@ -79,9 +77,11 @@ public class UserMyPageService {
 
             // 2.2 기존의 프로필 사진이 없다면 그대로 통과 (s3Path 값을 가지고 있음)
         }
-
         //비밀 번호가 있으면 암호화 하여 저장.
         if (userModifyDto.getPassword() != null) {
+            if (passwordEncoder.matches(userModifyDto.getPassword(), user.getPassword())) { //기존 비밀번호와 같다면 예외처리
+                throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
+            }
             user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
         }
 
@@ -104,4 +104,15 @@ public class UserMyPageService {
         }
     }
 
+    @Transactional
+    public void resetPassword(UserModifyDto userModifyDto, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
+        //비밀 번호가 있으면 암호화 하여 저장.
+        if (passwordEncoder.matches(userModifyDto.getPassword(), user.getPassword())) { //기존 비밀번호와 같다면 예외처리
+            throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
+        }
+        user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
+    }
 }

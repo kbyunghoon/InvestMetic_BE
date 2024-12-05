@@ -1,11 +1,15 @@
 package com.investmetic.domain.notice.repository;
 
-
 import static com.investmetic.domain.notice.model.entity.QNotice.notice;
+import static com.investmetic.domain.notice.model.entity.QNoticeFile.noticeFile;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
 import com.investmetic.domain.notice.dto.object.QNoticeOwnerDto;
+import com.investmetic.domain.notice.dto.response.NoticeDetailResponseDto;
+import com.investmetic.domain.notice.dto.response.NoticeFileResponseDto;
 import com.investmetic.domain.notice.dto.response.NoticeListDto;
+import com.investmetic.domain.notice.dto.response.QNoticeDetailResponseDto;
+import com.investmetic.domain.notice.dto.response.QNoticeFileResponseDto;
 import com.investmetic.domain.notice.dto.response.QNoticeListDto;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
@@ -19,8 +23,30 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 @RequiredArgsConstructor
 public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
-
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public NoticeDetailResponseDto findByNoticeId(Long noticeId) {
+        List<NoticeFileResponseDto> files = queryFactory
+                .select(new QNoticeFileResponseDto(noticeFile.noticeFileId, noticeFile.fileName))
+                .from(noticeFile)
+                .where(noticeFile.notice.noticeId.eq(noticeId))
+                .fetch();
+
+        NoticeDetailResponseDto noticeDetail = queryFactory
+                .select(new QNoticeDetailResponseDto(
+                        notice.title,
+                        notice.content,
+                        notice.createdAt
+                ))
+                .from(notice)
+                .where(notice.noticeId.eq(noticeId))
+                .fetchOne();
+
+        noticeDetail.updateFiles(files);
+
+        return noticeDetail;
+    }
 
     @Override
     public Page<NoticeListDto> findNoticelist(String keyword, Pageable pageable) {
@@ -40,6 +66,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .from(notice)
                 .join(notice.user, user)
                 .where(titleKeyword(keyword))
+                .orderBy(notice.noticeId.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -60,5 +87,3 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
         return null;
     }
 }
-
-
