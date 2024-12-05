@@ -40,12 +40,12 @@ public class AnswerService {
         User trader = userRepository.findById(traderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
 
-        // 답변 생성 및 저장
         Answer answer = Answer.builder()
-                .question(question)
                 .content(answerRequestDto.getContent())
                 .user(trader)
+                .question(question)
                 .build();
+
         answerRepository.save(answer);
 
         // 문의 상태 업데이트
