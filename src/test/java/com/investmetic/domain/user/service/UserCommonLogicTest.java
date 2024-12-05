@@ -151,35 +151,35 @@ class UserCommonLogicTest {
 
 
 
-//    @Test
-//    @DisplayName("회원 Trader 삭제 확인")
-//    void deleteUserTest1() {
-//
-//        // given
-//        User trader = userRepository.findByEmail(traderEmail).orElse(null);
-//        assertThat(trader).isNotNull();
-//
-//        em.flush();
-//        em.clear();
-//
-//        Pageable pageable = PageRequest.of(0, 10);
-//
-//        // when
-//        userCommonLogic.deleteUser(trader);
-//        em.flush();
-//        em.clear();
-//
-//        // then
-//        // 해당 트레이더의 전략이 없어야함.
-//        assertThat(strategyListingService.getMyStrategies(trader.getUserId(), pageable).getContent())
-//                .isEmpty();
-//
-//        //  strategyService.deleteStrategy()에서 test 검증 했으므로 일간, 월간 분석 Data등은 통과.
-//
-//        // 해당 트레이더가 남긴 문의 답변이 없어야함.
-//        Optional<Answer> answer = answerRepository.findByQuestion(question);
-//        assertThat(answer).isNotPresent();
-//    }
+    @Test
+    @DisplayName("회원 Trader 삭제 확인")
+    void deleteUserTest1() {
+
+        // given
+        User trader = userRepository.findByEmail(traderEmail).orElse(null);
+        assertThat(trader).isNotNull();
+
+        em.flush();
+        em.clear();
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // when
+        userCommonLogic.deleteUser(trader);
+        em.flush();
+        em.clear();
+
+        // then
+        // 해당 트레이더의 전략이 없어야함.
+        assertThat(strategyListingService.getMyStrategies(trader.getUserId(), pageable).getContent())
+                .isEmpty();
+
+        //  strategyService.deleteStrategy()에서 test 검증 했으므로 일간, 월간 분석 Data등은 통과.
+
+        // 해당 트레이더가 남긴 문의 답변이 없어야함.
+        Optional<Answer> answer = answerRepository.findByQuestion(question);
+        assertThat(answer).isNotPresent();
+    }
 
     @Test
     @DisplayName("회원 Investor 삭제 확인")

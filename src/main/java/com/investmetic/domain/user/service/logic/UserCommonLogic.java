@@ -82,7 +82,7 @@ public class UserCommonLogic {
                     completeQustionList.add(question);
                 }
             }
-            //문의 먼저 삭제.
+            //답변 먼저 삭제.
             answerRepository.deleteByQuestions(completeQustionList);
             questionRepository.deleteAllInBatch(questionList);
         }

@@ -4,6 +4,10 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.qna.model.QnaState;
+import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
+import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -34,6 +38,7 @@ import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +61,8 @@ public class StrategyService {
     private final ReviewRepository reviewRepository;
     private final StrategyStatisticsRepository strategyStatisticsRepository;
     private final AccountVerificationRepository accountVerificationRepository;
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
 
 
     @Transactional
@@ -145,6 +152,23 @@ public class StrategyService {
         monthlyAnalysisRepository.deleteAllByStrategy(strategy);
         subscriptionRepository.deleteAllByStrategy(strategy);
         reviewRepository.deleteAllByStrategy(strategy);
+        deleteAllQnA(strategy.getStrategyId());
+    }
+
+    private void deleteAllQnA(Long strategyId){
+        List<Question> questionList = questionRepository.findAllByStrategyStrategyId(strategyId);
+        List<Question> completeQuestionList = new ArrayList<>();
+
+        if (!questionList.isEmpty()) {
+            for (Question question : questionList) {
+                if (QnaState.COMPLETED.equals(question.getQnaState())) {
+                    completeQuestionList.add(question);
+                }
+            }
+            // 답변 먼저 삭제.
+            answerRepository.deleteByQuestions(completeQuestionList);
+            questionRepository.deleteAllInBatch(questionList);
+        }
     }
 
     private void deleteS3Files(Strategy strategy) {
