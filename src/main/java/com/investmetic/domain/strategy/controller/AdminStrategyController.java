@@ -42,7 +42,7 @@ public class AdminStrategyController {
     description = "<a href='https://www.notion.so/3cf42fd2349d4a0488b0dde773058ac9' target='_blank'>API 명세서</a>")
     @GetMapping("")
     public ResponseEntity<BaseResponse<PageResponseDto<AdminStrategyResponseDto>>> getStrategies(
-            @PageableDefault(size=10, page=0) Pageable pageable,
+            @PageableDefault(size=10, page=1) Pageable pageable,
             @RequestParam(required = false) String searchWord,
             @RequestParam(required = false) IsApproved isApproved
     ) {

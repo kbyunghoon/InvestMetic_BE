@@ -76,8 +76,7 @@ class UserMyPageServiceTest {
 
     @Nested
     @DisplayName("회원 비밀번호 검증(개인 정보 수정 페이지)")
-    class
-    PasswordCheck {
+    class PasswordCheck {
 
         @Test
         @DisplayName("정상 응답")
