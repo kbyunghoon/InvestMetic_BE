@@ -120,6 +120,8 @@ public class UserController {
     }
 
     //비밀번호 재설정
+    @Operation(summary = "비밀번호 재설정",
+            description = "<a href='https://www.notion.so/07310bcb25374550a8c0c3596e1251a6' target='_blank'>API 명세서</a>")
     @PatchMapping("/reissue/password")
     public ResponseEntity<BaseResponse<Void>> resetPassword(
             @RequestBody UserModifyDto userModifyDto) {
