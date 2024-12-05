@@ -10,12 +10,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class Notice extends BaseEntity {
 
     @Id
@@ -28,7 +33,7 @@ public class Notice extends BaseEntity {
 
     private String title; //공지사항제목
 
-    @Column(length = 3000)
+    @Column(length = 10000)
     private String content; //공지사항내용
 
     public Notice(User user, String title, String content) {
@@ -37,3 +42,4 @@ public class Notice extends BaseEntity {
         this.content = content;
     }
 }
+
