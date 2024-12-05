@@ -1,5 +1,6 @@
 package com.investmetic.domain.qna.model.entity;
 
+import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +31,9 @@ public class Answer extends BaseEntity {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(length = 5000)
     private String content; // 답변내용
