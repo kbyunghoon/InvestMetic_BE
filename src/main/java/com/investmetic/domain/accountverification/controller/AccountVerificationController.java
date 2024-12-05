@@ -42,7 +42,7 @@ public class AccountVerificationController {
     @Operation(summary = "트레이더 전략 실계좌 인증 조회 기능", description = "<a href='https://field-sting-eff.notion.site/57b368c56b1340b1bd9c72ca52090c51?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PageResponseDto<AccountImagesResponseDto>>> fetchAccountImages(
             @PathVariable Long strategyId,
-            @PageableDefault(size = 5, sort = "createdAt", direction = Direction.DESC) Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) Pageable pageable
     ) {
         return BaseResponse.success(accountVerificationService.getAccountImagesByStrategyId(strategyId, pageable));
     }
