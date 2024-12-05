@@ -66,6 +66,7 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
                 .from(notice)
                 .join(notice.user, user)
                 .where(titleKeyword(keyword))
+                .orderBy(notice.noticeId.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
