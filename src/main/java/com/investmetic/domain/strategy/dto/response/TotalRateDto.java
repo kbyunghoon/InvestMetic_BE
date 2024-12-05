@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 public class TotalRateDto {
-    Long totalInvester;
+    Long totalInvestor;
     Long totalTrader;
     Long totalStrategies;
     Long totalSubscribe;

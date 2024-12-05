@@ -5,11 +5,13 @@ import static com.investmetic.domain.qna.model.entity.QQuestion.question;
 import com.investmetic.domain.qna.dto.SearchCondition;
 import com.investmetic.domain.qna.dto.StateCondition;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.dto.response.AnswerResponseDto;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsResponse;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.qna.model.entity.Answer;
 import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
 import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
@@ -38,6 +40,7 @@ public class QuestionService {
     private final UserRepository userRepository;
     private final StrategyRepository strategyRepository;
     private final JPAQueryFactory queryFactory;
+    private final AnswerRepository answerRepository;
 
     /**
      * 문의 등록
@@ -131,7 +134,12 @@ public class QuestionService {
      * QuestionsDetailResponse 생성
      */
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
-        Answer answer = question.getAnswer();
+        Answer answer = answerRepository.findByQuestion(question).orElse(null);
+        User trader = null;
+
+        if (answer != null) {
+            trader = answer.getUser(); // 답변이 있을 경우만 트레이더 정보 설정
+        }
 
         // 역할에 따른 정보를 설정
         String profileImageUrl = "http://default-image-url.com/default.jpg"; // 기본 이미지 URL
@@ -151,17 +159,29 @@ public class QuestionService {
             nickname = question.getUser().getNickname();                    // 투자자 닉네임
         }
 
+        // 답변이 없는 경우에는 Answer 관련 필드를 적절히 처리
+        AnswerResponseDto answerResponse = null;
+        if (answer != null) {
+            answerResponse = AnswerResponseDto.builder()
+                    .answerId(answer.getAnswerId())
+                    .content(answer.getContent())
+                    .role(trader != null ? trader.getRole() : null)
+                    .profileImageUrl(trader != null ? trader.getImageUrl() : null)
+                    .nickname(trader != null ? trader.getNickname() : "Unknown") // 트레이더가 없을 경우 기본값
+                    .createdAt(answer.getCreatedAt())
+                    .build();
+        }
+
         return QuestionsDetailResponse.builder()
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
-                .questionContent(question.getContent())
-                .answerContent(answer != null ? answer.getContent() : "답변 없음")
+                .content(question.getContent())
                 .strategyName(question.getStrategy() != null ? question.getStrategy().getStrategyName() : "전략 없음")
                 .profileImageUrl(profileImageUrl)
                 .nickname(nickname)
                 .state(question.getQnaState().name())
-                .questionCreatedAt(question.getCreatedAt())
-                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null)
+                .createdAt(question.getCreatedAt())
+                .answer(answerResponse) // 답변이 없는 경우 null 처리
                 .build();
     }
 
@@ -275,6 +295,7 @@ public class QuestionService {
                     .questionId(q.getQuestionId())
                     .title(q.getTitle())
                     .strategyName(q.getStrategy() != null ? q.getStrategy().getStrategyName() : "전략 없음")
+                    .questionContent(q.getContent())
                     .profileImageUrl(profileImageUrl != null ? profileImageUrl : "이미지 없음")
                     .nickname(nickname != null ? nickname : "닉네임 없음")
                     .stateCondition(q.getQnaState().name())

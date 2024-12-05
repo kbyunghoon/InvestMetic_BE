@@ -35,6 +35,7 @@ import com.investmetic.global.util.s3.S3FileService;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
@@ -68,12 +69,17 @@ public class StrategyService {
     }
 
     @Transactional(readOnly = true)
-    public FileDownloadResponseDto downloadFileFromUrl(Long strategyId) {
+    public FileDownloadResponseDto downloadFileFromUrl(Long strategyId, Long userId) {
         // 전략 조회 및 유효성 검사
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
+        if (strategy.getIsPublic() == IsPublic.PRIVATE && !Objects.equals(strategy.getUser().getUserId(), userId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
         String proposalFilePath = strategy.getProposalFilePath();
+
         if (proposalFilePath == null || proposalFilePath.isBlank()) {
             throw new BusinessException(ErrorCode.PROPOSAL_NOT_FOUND);
         }

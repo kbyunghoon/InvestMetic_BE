@@ -178,4 +178,8 @@ public class DailyAnalysis extends BaseEntity {
         this.transaction = transaction;
         this.dailyProfitLoss = dailyProfitLoss;
     }
+
+    public void setProceed(Proceed proceed) {
+        this.proceed = proceed;
+    }
 }
