@@ -84,7 +84,7 @@ public class MainPageService {
                 .totalStrategies(strategyRepository.count())
                 .totalSubscribe(subscriptionRepository.count())
                 .totalTrader(userRepository.countByRole(Role.TRADER))
-                .totalInvester(userRepository.countByRole(Role.INVESTOR))
+                .totalInvestor(userRepository.countByRole(Role.INVESTOR))
                 .build();
     }
 
