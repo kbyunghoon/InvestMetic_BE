@@ -134,6 +134,8 @@ public class QuestionService {
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
         Answer answer = question.getAnswer();
 
+        User trader = answer.getUser();
+
         // 역할에 따른 정보를 설정
         String profileImageUrl = "http://default-image-url.com/default.jpg"; // 기본 이미지 URL
         String nickname;
@@ -162,7 +164,16 @@ public class QuestionService {
                 .nickname(nickname)
                 .state(question.getQnaState().name())
                 .questionCreatedAt(question.getCreatedAt())
-                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null)
+                .answerCreatedAt(answer.getCreatedAt())
+                .answer(
+                        AnswerResponseDto.builder()
+                                .answerId(answer.getAnswerId())
+                                .content(answer.getContent())
+                                .role(trader.getRole())
+                                .profileImageUrl(trader.getImageUrl())
+                                .nickname(trader.getNickname())
+                                .createdAt(answer.getCreatedAt())
+                                .build())
                 .build();
     }
 
@@ -272,10 +283,6 @@ public class QuestionService {
                 nickname = q.getUser().getNickname();                    // 문의 작성자 닉네임
             }
 
-            Answer answer = q.getAnswer();
-
-            User trader = answer.getUser();
-
             return QuestionsResponse.builder()
                     .questionId(q.getQuestionId())
                     .title(q.getTitle())
@@ -285,16 +292,6 @@ public class QuestionService {
                     .nickname(nickname != null ? nickname : "닉네임 없음")
                     .stateCondition(q.getQnaState().name())
                     .createdAt(q.getCreatedAt())
-                    .answerResponseDto(
-                            AnswerResponseDto.builder()
-                                    .answerId(answer.getAnswerId())
-                                    .content(answer.getContent())
-                                    .role(trader.getRole())
-                                    .profileImageUrl(trader.getImageUrl())
-                                    .nickname(trader.getNickname())
-                                    .createdAt(answer.getCreatedAt())
-                                    .build()
-                    )
                     .build();
         }));
     }
