@@ -47,9 +47,6 @@ public class Question extends BaseEntity {
     @Column(length = 5000)
     private String content;     //문의내용
 
-    @OneToOne(mappedBy = "question", fetch = FetchType.LAZY)
-    private Answer answer;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private QnaState qnaState; // 답변 상태

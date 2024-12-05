@@ -11,6 +11,7 @@ import com.investmetic.domain.qna.dto.response.QuestionsResponse;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.qna.model.entity.Answer;
 import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
 import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
@@ -39,6 +40,7 @@ public class QuestionService {
     private final UserRepository userRepository;
     private final StrategyRepository strategyRepository;
     private final JPAQueryFactory queryFactory;
+    private final AnswerRepository answerRepository;
 
     /**
      * 문의 등록
@@ -132,7 +134,7 @@ public class QuestionService {
      * QuestionsDetailResponse 생성
      */
     private QuestionsDetailResponse createQuestionsDetailResponse(Question question, Role role) {
-        Answer answer = question.getAnswer();
+        Answer answer = answerRepository.findByQuestion(question).orElseThrow(() -> new RuntimeException("123"));
         User trader = null;
 
         if (answer != null) {
@@ -173,14 +175,12 @@ public class QuestionService {
         return QuestionsDetailResponse.builder()
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
-                .questionContent(question.getContent())
-                .answerContent(answer != null ? answer.getContent() : "답변 없음") // 답변 없음 상태 처리
+                .content(question.getContent())
                 .strategyName(question.getStrategy() != null ? question.getStrategy().getStrategyName() : "전략 없음")
                 .profileImageUrl(profileImageUrl)
                 .nickname(nickname)
                 .state(question.getQnaState().name())
-                .questionCreatedAt(question.getCreatedAt())
-                .answerCreatedAt(answer != null ? answer.getCreatedAt() : null) // 답변이 없는 경우 null 처리
+                .createdAt(question.getCreatedAt())
                 .answer(answerResponse) // 답변이 없는 경우 null 처리
                 .build();
     }
