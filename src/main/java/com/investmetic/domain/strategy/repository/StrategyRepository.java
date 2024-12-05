@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface StrategyRepository extends JpaRepository<Strategy, Long>, StrategyRepositoryCustom {
+
+    List<Strategy> findAllByUserUserId(Long userId);
+
     Boolean existsByStrategyId(Long StrategyId);
 
     @Query(value = """
