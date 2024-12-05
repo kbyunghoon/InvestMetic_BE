@@ -3,7 +3,6 @@ package com.investmetic.domain.user.service.logic;
 import com.investmetic.domain.notice.model.entity.Notice;
 import com.investmetic.domain.notice.repository.NoticeRepository;
 import com.investmetic.domain.qna.model.QnaState;
-import com.investmetic.domain.qna.model.entity.Answer;
 import com.investmetic.domain.qna.model.entity.Question;
 import com.investmetic.domain.qna.repository.AnswerRepository;
 import com.investmetic.domain.qna.repository.QuestionRepository;
@@ -75,16 +74,16 @@ public class UserCommonLogic {
     private void deleteAllQnA(Long userId) {
         // 문의 삭제
         List<Question> questionList = questionRepository.findAllByUserUserId(userId);
-        List<Answer> answerList = new ArrayList<>();
+        List<Question> completeQustionList = new ArrayList<>();
 
         if (!questionList.isEmpty()) {
             for (Question question : questionList) {
                 if (QnaState.COMPLETED.equals(question.getQnaState())) {
-                    answerList.add(question.getAnswer());
+                    completeQustionList.add(question);
                 }
             }
             //문의 먼저 삭제.
-            answerRepository.deleteAllInBatch(answerList);
+            answerRepository.deleteByQuestions(completeQustionList);
             questionRepository.deleteAllInBatch(questionList);
         }
     }
