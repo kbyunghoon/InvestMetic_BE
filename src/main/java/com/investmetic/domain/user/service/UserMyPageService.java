@@ -1,5 +1,9 @@
 package com.investmetic.domain.user.service;
 
+import static com.investmetic.domain.user.dto.object.ColumnCondition.NICKNAME;
+import static com.investmetic.domain.user.dto.object.ColumnCondition.PHONE;
+
+import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.request.UserModifyDto;
 import com.investmetic.domain.user.dto.response.UserProfileDto;
 import com.investmetic.domain.user.model.entity.User;
@@ -40,6 +44,9 @@ public class UserMyPageService {
      */
     @Transactional
     public String changeUserInfo(UserModifyDto userModifyDto, String email) {
+
+        // 중복 다시 확인 (핸드폰 번호, 닉네임)
+        modifyValid(userModifyDto);
 
         // S3Path 받을 변수 설정.
         String s3Path = null;
@@ -114,5 +121,36 @@ public class UserMyPageService {
             throw new BusinessException(ErrorCode.SAME_AS_OLD_PASSWORD);
         }
         user.changePassword(passwordEncoder.encode(userModifyDto.getPassword()));
+    }
+
+    private void modifyValid(UserModifyDto userModifyDto) {
+        if (userModifyDto.getPhone() != null) {
+            validateDuplicate(PHONE, userModifyDto.getPhone(), userRepository::existsByPhone);
+        }
+        if (userModifyDto.getNickname() != null) {
+            validateDuplicate(NICKNAME, userModifyDto.getNickname(), userRepository::existsByNickname);
+        }
+    }
+
+
+    // 중복 검증 공통 로직
+    private void validateDuplicate(ColumnCondition columnName, String value, ValidationFunction validationFunction) {
+        if (validationFunction.exists(value)) {
+            throw new BusinessException(getErrorCodeForField(columnName));
+        }
+    }
+
+    private ErrorCode getErrorCodeForField(ColumnCondition columnName) {
+        return switch (columnName) {
+            case NICKNAME -> ErrorCode.INVALID_NICKNAME;
+            case EMAIL -> ErrorCode.INVALID_EMAIL;
+            case PHONE -> ErrorCode.INVALID_PHONE;
+            default -> throw new BusinessException(ErrorCode.INVALID_TYPE_VALUE);
+        };
+    }
+
+    @FunctionalInterface
+    private interface ValidationFunction {
+        boolean exists(String value);
     }
 }
