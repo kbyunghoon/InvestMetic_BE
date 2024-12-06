@@ -18,12 +18,18 @@ public class NoticeRepositoryCustomImpl implements NoticeRepositoryCustom {
 
     @Override
     public NoticeDetailResponseDto findByNoticeId(Long noticeId) {
-        List<NoticeFileResponseDto> files=queryFactory.select(new QNoticeFileResponseDto(noticeFile.noticeFileId, noticeFile.fileName)).from(noticeFile).where(noticeFile.notice.noticeId.eq(noticeId)).fetch();
-        NoticeDetailResponseDto noticeDetail=queryFactory
+        List<NoticeFileResponseDto> files = queryFactory
+                .select(new QNoticeFileResponseDto(
+                        noticeFile.noticeFileId,
+                        noticeFile.fileName
+                )).from(noticeFile)
+                .where(noticeFile.notice.noticeId
+                        .eq(noticeId)).fetch();
+        NoticeDetailResponseDto noticeDetail = queryFactory
                 .select(new QNoticeDetailResponseDto(
                         notice.title,
                         notice.content
-                        ))
+                ))
                 .from(notice)
                 .where(notice.noticeId.eq(noticeId))
                 .fetchOne();

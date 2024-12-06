@@ -8,16 +8,16 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class NoticeRegistDto {
+public class NoticeRegisterDto {
     private String title;
     private String content;
     private List<Integer> sizes;
     private List<String> filePaths;
-    public Notice toEntity(Long userId){
+    public Notice toEntity(User user){
         return Notice.builder()
                 .title(title)
                 .content(content)
-                .user(User.builder().userId(userId).build())
+                .user(user)
                 .build();
     }
 }

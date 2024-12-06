@@ -90,8 +90,8 @@ public enum ErrorCode {
     ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, 5004, "해당 답변을 찾을 수 없습니다."),
 
     // 공지사항 관련 오류(6000번대 );
-    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, 6001, "해당 공지사항을 찾을 수 없습니다.");
-
+    NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, 6001, "해당 공지사항을 찾을 수 없습니다."),
+    NOTICE_FILE_NOT_FOUND(HttpStatus.NOT_FOUND, 6002, "해당 공지사항 파일을 찾을 수 없습니다.");
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드
     private final String message; // 오류 메시지
