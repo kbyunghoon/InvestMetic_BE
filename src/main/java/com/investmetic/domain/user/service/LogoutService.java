@@ -8,6 +8,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ public class LogoutService {
 
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private final PersistentTokenRepository persistentTokenRepository;
 
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -57,6 +59,7 @@ public class LogoutService {
 
         // 로그아웃 진행: Redis에서 리프레시 토큰 삭제
         redisUtil.deleteRefreshToken(email);
+        persistentTokenRepository.removeUserTokens(email); //로그아웃 시에 DB의 remember-me 토큰 삭제
 
         // 리프레시 토큰 쿠키 제거
         Cookie cookie = new Cookie("refresh-token", null);
@@ -65,9 +68,15 @@ public class LogoutService {
         cookie.setHttpOnly(true);
         //cookie.setSecure(true); // HTTPS 사용 시 활성화
         //cookie.setSameSite("Strict"); // CSRF 방지를 위해 SameSite 설정
-
         response.addCookie(cookie);
         // 응답 헤더에 Access Token 제거 또는 무효화 (선택 사항)
         response.setHeader("access-token", null);
+
+        // 리멤버미 쿠키 제거
+        Cookie rememberMeCookie = new Cookie("remember-me", null);
+        rememberMeCookie.setMaxAge(0);
+        rememberMeCookie.setPath("/");
+        rememberMeCookie.setHttpOnly(true);
+        response.addCookie(rememberMeCookie);
     }
 }

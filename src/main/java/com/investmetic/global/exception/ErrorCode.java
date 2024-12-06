@@ -46,6 +46,7 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, 2503, "Invalid refresh token."),
     AUTHORIZATION_DENIED(HttpStatus.FORBIDDEN, 2504, "권한이 없습니다."),
     SAME_AS_OLD_PASSWORD(HttpStatus.BAD_REQUEST, 2208, "기존 비밀번호와 동일합니다."),
+    TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST,2601, "REMEMBER_ME_TOKEN_NOT_FOUND"),
 
 
     // 전략 관련 오류

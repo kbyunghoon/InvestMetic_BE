@@ -2,6 +2,7 @@ package com.investmetic.global.util;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -18,6 +19,11 @@ public class RedisUtil {
         ValueOperations<String, String> valueOperations = template.opsForValue();
         return Optional.ofNullable(valueOperations.get(key));
     }
+
+    public Set<String> getAllKeys(String pattern) {
+        return template.keys(pattern);
+    }
+
 
     public boolean existData(String key) {
         return Boolean.TRUE.equals(template.hasKey(key));

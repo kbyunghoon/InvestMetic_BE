@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @RequiredArgsConstructor
@@ -20,14 +21,30 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final CustomUserDetailService customUserDetailService;
+    private final RememberMeServices rememberMeServices;
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 헤더에서 access키에 담긴 토큰을 꺼냄
         String accessToken = request.getHeader("access-token");
 
-        // 토큰이 없다면 다음 필터로 넘김
         if (accessToken == null) {
+            Authentication authentication = rememberMeServices.autoLogin(request, response);
+
+            if (authentication != null) {
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                String email = authentication.getName();
+                String role = authentication.getAuthorities().stream()
+                        .findFirst()
+                        .map(grantedAuthority -> grantedAuthority.getAuthority())
+                        .orElse("ROLE_USER");
+
+                String newAccessToken = jwtUtil.createJwt("access", email, role, 1800000L); // 1시간 유효
+                response.setHeader("access-token", "Bearer " + newAccessToken);
+                return; // 인증이 성공적으로 처리되었으므로 반환
+            }
             filterChain.doFilter(request, response);
             return;
         }
@@ -57,7 +74,6 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         String email = jwtUtil.getEmail(accessToken);
-
 
         CustomUserDetails user = (CustomUserDetails) customUserDetailService.loadUserByUsername(email);
 
