@@ -18,9 +18,9 @@
 2024년 10월 23일 ~ 2024년 12월 6일
 
 ### 🧙 맴버구성
-- :lipstick: Frontend
+- :lipstick: Frontend - ([https://github.com/FC-DEV-FinalProject/FinalProject_team3_FE](https://github.com/FC-DEV-FinalProject/FinalProject_team3_FE))
   - 김다은, 강호연, 김난아, 김수민, 양해석
-- :computer: Backend - (https://github.com/eungenie/SpringBoot-Project-Triport)
+- :computer: Backend - ([https://github.com/FC-DEV-FinalProject/FinalProject_team3_BE](https://github.com/FC-DEV-FinalProject/FinalProject_team3_BE))
   - 김병훈, 강영웅, 오정훈, 임정훈, 정룡우, 황정하
 - 😎 Design
   - 박진이
