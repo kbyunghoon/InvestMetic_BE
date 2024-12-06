@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
     Long countByRole(Role role);
 
-    @Query("select u.role from User u where u.email = :email")
-    Optional<Role> findRoleByEmail(@Param("email") String email);
+    @Query("select u.role from User u where u.userId = :userId")
+    Optional<Role> findRoleByUserUserId(@Param("userId") Long userId);
 
     Optional<User> findByEmail(String email);
 
@@ -20,4 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
 
     @Query("select u.email from User u where u.phone = :phone")
     Optional<String> findEmailByPhone(@Param("phone") String phone);
+
+    @Query("select u from User u  where u.role = 'SUPER_ADMIN' order by u.userId limit 1")
+    User findSuperAdminUser();
+
+
 }

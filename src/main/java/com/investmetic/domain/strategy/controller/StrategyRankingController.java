@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -49,5 +50,19 @@ public class StrategyRankingController {
 
         return BaseResponse.success(strategyListingService
                 .search(searchRequest, userId, pageable));
+    }
+
+
+    @Operation(summary = "트레이더 전략 목록 조회",
+            description = "<a href='https://www.notion.so/3c8846654055444ebc05705357f42528' target='_blank'>API 명세서</a>")
+    @GetMapping("/trader/{traderId}")
+    public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getTraderStrategy(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @RequestParam("traderId") Long traderId,
+            @PageableDefault(size = 4) Pageable pageable) {
+
+        Long userId = customUserDetails == null ? null : customUserDetails.getUserId();
+
+        return BaseResponse.success(strategyListingService.getTraderStrategies(traderId ,pageable, userId));
     }
 }

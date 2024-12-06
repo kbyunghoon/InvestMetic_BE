@@ -256,12 +256,14 @@ public class UserService {
 
     //이메일 마스킹 처리
     private String emailMasking(String email) {
-
-        String localPart = email.substring(0, email.indexOf('@'));
+        int atIndex = email.indexOf('@');
+        String localPart = email.substring(0, atIndex);
+        String domainPart = email.substring(atIndex); // @와 뒷부분
 
         if (localPart.length() > 3) {
-            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3);
+            return localPart.substring(0, 3) + "*".repeat(localPart.length() - 3) + domainPart;
         }
+
         return email;
     }
 
@@ -270,5 +272,4 @@ public class UserService {
     private interface ValidationFunction {
         boolean exists(String value);
     }
-
 }

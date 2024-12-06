@@ -50,7 +50,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.nickname,
                         user.phone,
                         user.infoAgreement,
-                        user.role))
+                        user.role,
+                        user.birthDate))
                 .where(user.email.eq(email))
                 .fetchOne());
     }
@@ -86,10 +87,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                                 user.nickname,
                                 user.phone,
                                 user.infoAgreement,
-                                user.role)).from(user)
+                                user.role,
+                                user.birthDate)).from(user)
                 .where(condition.toArray(new Predicate[0]))
                 .orderBy(orderByLatest())
-                .offset(pageable.getPageNumber())
+                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
@@ -132,7 +134,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.role.in(Role.TRADER, Role.TRADER_ADMIN))
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
-                .offset((long) pageable.getPageNumber() * pageable.getPageSize())
+                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
@@ -219,8 +221,18 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
-                        user.phone, user.infoAgreement, user.role)).where(user.phone.eq(phone)).fetchOne());
+                .select(new QUserProfileDto(
+                        user.userId,
+                        user.userName,
+                        user.email,
+                        user.imageUrl,
+                        user.nickname,
+                        user.phone,
+                        user.infoAgreement,
+                        user.role,
+                        user.birthDate))
+                .where(user.phone.eq(phone))
+                .fetchOne());
     }
 
     @Override
@@ -228,8 +240,18 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(user.userId, user.userName, user.email, user.imageUrl, user.nickname,
-                        user.phone, user.infoAgreement, user.role)).where(user.nickname.eq(nickname)).fetchOne());
+                .select(new QUserProfileDto(
+                        user.userId,
+                        user.userName,
+                        user.email,
+                        user.imageUrl,
+                        user.nickname,
+                        user.phone,
+                        user.infoAgreement,
+                        user.role,
+                        user.birthDate))
+                .where(user.nickname.eq(nickname))
+                .fetchOne());
     }
 
 
