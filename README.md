@@ -1,4 +1,4 @@
-## 항해99 실전 프로젝트 (Triport)
+## 데브캠프 실전 프로젝트 (InvestMetic)
 
 <p align='center'>
     <img src="https://img.shields.io/badge/SpringBoot-v3.3.5-6db33f?logo=Spring-boot"/>
