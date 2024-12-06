@@ -95,7 +95,7 @@ public class StrategyStatisticsScheduler {
                 .maxCumulativeProfitAmount(lastDailyAnalysis.getMaxCumulativeProfitLoss())
                 .maxCumulativeProfitRate(lastDailyAnalysis.getMaxCumulativeProfitLossRate())
                 .averageProfitLossAmount(lastDailyAnalysis.getAverageProfitLoss())
-                .averageProfitLossRate(lastDailyAnalysis.getCumulativeProfitLossRate())
+                .averageProfitLossRate(lastDailyAnalysis.getCumulativeProfitLossRate() * 100)
                 .maxDailyProfitAmount(lastDailyAnalysis.getMaxDailyProfit())
                 .maxDailyProfitRate(lastDailyAnalysis.getMaxDailyProfitRate())
                 .maxDailyLossAmount(lastDailyAnalysis.getMaxDailyLoss())
@@ -111,7 +111,7 @@ public class StrategyStatisticsScheduler {
                 .maxConsecutiveProfitDays(maxConsecutiveProfitDays)
                 .totalLossDays(lastDailyAnalysis.getLossDays().intValue())
                 .maxConsecutiveLossDays(maxConsecutiveLossDays)
-                .winRate(lastDailyAnalysis.getWinRate() * 10)
+                .winRate(lastDailyAnalysis.getWinRate() * 100)
                 .totalTradeDays(totalTradeDays)
                 .dailyProfitLossStdDev(dailyProfitLossStdDev)
                 .build();
