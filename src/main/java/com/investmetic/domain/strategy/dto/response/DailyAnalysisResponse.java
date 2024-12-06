@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.investmetic.global.util.RoundUtil;
 import com.investmetic.global.util.exceldownload.ExcelColumn;
 import com.investmetic.global.util.exceldownload.ExcelSheet;
 import com.querydsl.core.annotations.QueryProjection;
@@ -40,8 +41,8 @@ public class DailyAnalysisResponse {
         this.principal = principal;
         this.transaction = transaction;
         this.dailyProfitLoss = dailyProfitLoss;
-        this.dailyProfitLossRate = dailyProfitLossRate;
+        this.dailyProfitLossRate = RoundUtil.roundToThird(dailyProfitLossRate);
         this.cumulativeProfitLoss = cumulativeProfitLoss;
-        this.cumulativeProfitLossRate = cumulativeProfitLossRate;
+        this.cumulativeProfitLossRate = RoundUtil.roundToThird(cumulativeProfitLossRate);
     }
 }

@@ -3,6 +3,7 @@ package com.investmetic.domain.qna.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.investmetic.domain.qna.dto.BaseQnAInfoDto;
+import com.investmetic.domain.qna.dto.QuestionStrategyInfoDto;
 import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.model.QnaState;
 import com.investmetic.domain.qna.model.entity.Question;
@@ -24,7 +25,7 @@ public class QuestionsResponse {
     private Long questionId; // 문의 ID
     private String title; // 문의 제목
     private String questionContent; // 문의 내용
-    private String strategyName; // 전략 이름
+    private QuestionStrategyInfoDto strategy; // 전략
     private QnaState stateCondition; // 문의 상태
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt; // 문의 생성일
@@ -38,7 +39,12 @@ public class QuestionsResponse {
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
                 .questionContent(question.getContent())
-                .strategyName(question.getStrategy().getStrategyName())
+                .strategy(
+                        QuestionStrategyInfoDto.builder()
+                                .id(question.getStrategy().getStrategyId())
+                                .name(question.getStrategy().getStrategyName())
+                                .build()
+                )
                 .stateCondition(question.getQnaState())
                 .createdAt(question.getCreatedAt())
                 .investor(BaseQnAInfoDto.builder()
@@ -54,7 +60,12 @@ public class QuestionsResponse {
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
                 .questionContent(question.getContent())
-                .strategyName(question.getStrategy().getStrategyName())
+                .strategy(
+                        QuestionStrategyInfoDto.builder()
+                                .id(question.getStrategy().getStrategyId())
+                                .name(question.getStrategy().getStrategyName())
+                                .build()
+                )
                 .stateCondition(question.getQnaState())
                 .createdAt(question.getCreatedAt())
                 .trader(BaseQnAInfoDto.builder()
@@ -72,7 +83,12 @@ public class QuestionsResponse {
                 .questionId(question.getQuestionId())
                 .title(question.getTitle())
                 .questionContent(question.getContent())
-                .strategyName(question.getStrategy().getStrategyName())
+                .strategy(
+                        QuestionStrategyInfoDto.builder()
+                                .id(question.getStrategy().getStrategyId())
+                                .name(question.getStrategy().getStrategyName())
+                                .build()
+                )
                 .stateCondition(question.getQnaState())
                 .createdAt(question.getCreatedAt())
                 .investor(BaseQnAInfoDto.builder()

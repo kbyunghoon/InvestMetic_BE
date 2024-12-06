@@ -53,9 +53,10 @@ public class UserMyPageController {
     @Operation(summary = "회원 정보 수정",
             description = "<a href='https://www.notion.so/006c1966582148799c2e0ae31f6a3353' target='_blank'>API 명세서</a>")
     @PatchMapping("/profile")
-    public ResponseEntity<BaseResponse<String>> updateUserInfo(@Valid @RequestBody UserModifyDto userModifyDto) {
+    public ResponseEntity<BaseResponse<String>> updateUserInfo(@Valid @RequestBody UserModifyDto userModifyDto,
+                                                               @AuthenticationPrincipal CustomUserDetails user) {
 
-        String email = userModifyDto.getEmail();
+        String email = user.getEmail();
 
         return BaseResponse.success(userMyPageService.changeUserInfo(userModifyDto, email));
     }
@@ -69,7 +70,6 @@ public class UserMyPageController {
     @PostMapping("/authenticate/password")
     public ResponseEntity<BaseResponse<Void>> passwordCheck(@RequestBody PasswordDto passwordDto) {
 
-        //@AuthenticationPrincipal
         userMyPageService.checkPassword(passwordDto.getEmail(), passwordDto.getPassword());
 
         return BaseResponse.success();

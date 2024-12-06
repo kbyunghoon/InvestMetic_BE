@@ -62,7 +62,26 @@ public class QuestionService {
     public void deleteQuestion(Long strategyId, Long questionId, Long userId) {
         Question question = findQuestionById(questionId);
         User user = findUserById(userId);
+
         validateAccess(user, question, userId);
+
+        answerRepository.findByQuestion(question).ifPresent(answerRepository::delete);
+
+        questionRepository.delete(question);
+    }
+
+    /**
+     * 관리자 문의 삭제
+     */
+    @Transactional
+    public void adminDeleteQuestion(Long strategyId, Long questionId, Long userId) {
+        Question question = findQuestionById(questionId);
+        User user = findUserById(userId);
+
+        validateAdminAccess(user);
+
+        answerRepository.findByQuestion(question).ifPresent(answerRepository::delete);
+
         questionRepository.delete(question);
     }
 
@@ -314,7 +333,6 @@ public class QuestionService {
 
     private QuestionsResponse filterTraderQuestions(Question question) {
         return QuestionsResponse.forTrader(question);
-
     }
 
     private QuestionsResponse filterAdminQuestions(Question question) {
@@ -324,7 +342,8 @@ public class QuestionService {
             User trader = answer.getUser();
             return QuestionsResponse.forAdmin(question, trader);
         } else {
-            return QuestionsResponse.forTrader(question);
+            User trader = question.getStrategy().getUser();
+            return QuestionsResponse.forAdmin(question, trader);
         }
     }
 
