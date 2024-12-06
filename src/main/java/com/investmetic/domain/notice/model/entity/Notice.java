@@ -45,5 +45,10 @@ public class Notice extends BaseEntity {
     public void modifyUser(User user) {
         this.user = user;
     }
+
+    public void updateNotice(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 }
 

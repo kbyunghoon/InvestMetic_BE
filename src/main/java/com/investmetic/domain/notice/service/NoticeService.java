@@ -58,6 +58,32 @@ public class NoticeService {
                 .toList();
     }
 
+    @Transactional
+    public List<String> updateNotice(Long noticeId, NoticeRegisterDto noticeRegisterDto) {
+        // 1. 공지사항 조회
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));
+
+        // 2. 공지사항 제목과 내용 수정 (더티 체킹 활용)
+        notice.updateNotice(noticeRegisterDto.getTitle(), noticeRegisterDto.getContent());
+
+        // 3. 기존 파일 삭제
+        List<NoticeFile> existingFiles = noticeFileRepository.findByNotice(notice);
+        for (NoticeFile file : existingFiles) {
+            s3FileService.deleteFromS3(file.getFileUrl()); // S3에서 파일 삭제
+        }
+        noticeFileRepository.deleteAll(existingFiles);
+
+        // 4. 새 파일 추가 (더티 체킹 적용)
+        List<NoticeFile> newFiles = noticeRegisterDto.toNoticeFiles(notice, s3FileService);
+        noticeFileRepository.saveAll(newFiles);
+
+        // 5. 업데이트된 파일 presignedUrl 반환
+        return newFiles.stream()
+                .map(file -> s3FileService.getPreSignedUrl(file.getFileUrl()))
+                .toList();
+    }
+
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOTICE_NOT_FOUND));

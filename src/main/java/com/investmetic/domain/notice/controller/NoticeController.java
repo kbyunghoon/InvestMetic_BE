@@ -25,6 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -53,6 +54,17 @@ public class NoticeController {
             description = "<a href='https://www.notion.so/47f085979b85479f88d4ac8c3a534e09' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<NoticeDetailResponseDto>> getNotice(@PathVariable Long noticeId) {
         return BaseResponse.success(noticeService.getNoticeDetail(noticeId));
+    }
+
+    @PatchMapping("/admin/notices/{noticeId}")
+    @Operation(summary = "공지사항 수정 기능",
+            description ="<a href='https://field-sting-eff.notion.site/a5f446e31c564356bb36184e1963712a?pvs=4' target='_blank'>API 명세서</a>")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
+    public ResponseEntity<BaseResponse<List<String>>> updateNotice(
+            @PathVariable Long noticeId,
+            @RequestBody NoticeRegisterDto noticeRegisterDto) {
+        noticeService.updateNotice(noticeId, noticeRegisterDto);
+        return BaseResponse.success(noticeService.updateNotice(noticeId, noticeRegisterDto));
     }
 
     @GetMapping("/notices")
