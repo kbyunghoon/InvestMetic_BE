@@ -318,7 +318,7 @@ public class DailyAnalysisScheduler {
 
         // 최대 누적 손익률
         double maxCumulativeProfitLossRate = beforeDatas.stream()
-                .mapToDouble(DailyAnalysis::getCumulativeProfitLoss)
+                .mapToDouble(DailyAnalysis::getCumulativeProfitLossRate)
                 .filter(value -> value > 0)
                 .max()
                 .orElse(0.0);
