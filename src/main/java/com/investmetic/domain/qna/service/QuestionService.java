@@ -314,7 +314,6 @@ public class QuestionService {
 
     private QuestionsResponse filterTraderQuestions(Question question) {
         return QuestionsResponse.forTrader(question);
-
     }
 
     private QuestionsResponse filterAdminQuestions(Question question) {
@@ -324,7 +323,8 @@ public class QuestionService {
             User trader = answer.getUser();
             return QuestionsResponse.forAdmin(question, trader);
         } else {
-            return QuestionsResponse.forTrader(question);
+            User trader = question.getStrategy().getUser();
+            return QuestionsResponse.forAdmin(question, trader);
         }
     }
 
