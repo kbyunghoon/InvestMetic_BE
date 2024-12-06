@@ -5,6 +5,7 @@ import static org.springframework.web.util.UriUtils.extractFileExtension;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.investmetic.domain.notice.dto.request.NoticeRegisterDto;
 import com.investmetic.domain.notice.dto.response.NoticeDetailResponseDto;
 import com.investmetic.domain.notice.model.entity.Notice;
@@ -18,6 +19,7 @@ import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import nonapi.io.github.classgraph.json.JSONUtils;
@@ -82,8 +84,8 @@ public class NoticeService {
 
                 S3ObjectInputStream inputStream = s3Object.getObjectContent()
                 ){
-
-            InputStreamResource resource = new InputStreamResource(inputStream);
+            byte[] fileData = IOUtils.toByteArray(inputStream);
+            InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(fileData));
 
             return FileDownloadResponseDto
                     .builder()
