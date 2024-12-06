@@ -17,6 +17,10 @@ import static org.mockito.Mockito.when;
 import com.investmetic.domain.TestEntity.TestEntityFactory;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
+import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
+import com.investmetic.domain.qna.model.entity.Question;
+import com.investmetic.domain.qna.repository.AnswerRepository;
+import com.investmetic.domain.qna.repository.QuestionRepository;
 import com.investmetic.domain.review.repository.ReviewRepository;
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
@@ -48,6 +52,7 @@ import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -103,6 +108,12 @@ class StrategyServiceTest {
 
     @Mock
     private AccountVerificationRepository accountVerificationRepository;
+
+    @Mock
+    private QuestionRepository questionRepository;
+
+    @Mock
+    private AnswerRepository answerRepository;
 
     private StrategyRegisterRequestDto requestDto;
     private User user;
@@ -237,9 +248,17 @@ class StrategyServiceTest {
                         .accountVerificationUrl("s3://bucket/accounts/account2.png")
                         .build()
         );
+        QuestionRequestDto dto = QuestionRequestDto.builder()
+                .title("title")
+                .content("content")
+                .build();
+
+        Question question = Question.from(user,strategy,dto);
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
         when(accountVerificationRepository.findByStrategy(strategy)).thenReturn(accountVerifications);
+        when(questionRepository.findAllByStrategyStrategyId(strategyId))
+                .thenReturn(new ArrayList<>(List.of(question)));
 
         strategyService.deleteStrategy(strategyId, userId);
 
@@ -249,6 +268,7 @@ class StrategyServiceTest {
         verify(monthlyAnalysisRepository).deleteAllByStrategy(strategy);
         verify(subscriptionRepository).deleteAllByStrategy(strategy);
         verify(reviewRepository).deleteAllByStrategy(strategy);
+
 
         if (strategy.getStrategyStatistics() != null) {
             verify(strategyStatisticsRepository).deleteById(strategy.getStrategyStatistics().getStrategyStatisticsId());

@@ -89,7 +89,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                                 user.role)).from(user)
                 .where(condition.toArray(new Predicate[0]))
                 .orderBy(orderByLatest())
-                .offset(pageable.getPageNumber())
+                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
@@ -132,7 +132,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.role.in(Role.TRADER, Role.TRADER_ADMIN))
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
-                .offset((long) pageable.getPageNumber() * pageable.getPageSize())
+                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
