@@ -392,6 +392,47 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         return PageableExecutionUtils.getPage(strategies, pageable, strategies::size);
     }
 
+    @Override
+    public Page<StrategySimpleResponse> getTraderStrategies(Long traderId, Pageable pageable) {
+        List<StrategySimpleResponse> content = queryFactory
+                .select(new QStrategySimpleResponse(
+                        strategy.strategyId,
+                        strategy.strategyName,
+                        user.imageUrl,
+                        user.nickname,
+                        tradeType.tradeTypeIconUrl,
+                        tradeType.tradeTypeName,
+                        strategyStatistics.maxDrawdown,
+                        strategy.smScore,
+                        strategyStatistics.cumulativeProfitRate,
+                        strategyStatistics.recentYearProfitRate,
+                        strategy.subscriptionCount,
+                        strategy.averageRating,
+                        strategy.reviewCount
+                ))
+                .from(strategy)
+                .leftJoin(strategy.strategyStatistics, strategyStatistics)
+                .join(strategy.tradeType, tradeType)
+                .join(strategy.user, user)
+                .where(strategy.user.userId.eq(traderId)
+                        ,isApprovedAndPublic())
+                .orderBy(strategy.strategyId.desc()) // 최신순(id 내림차순) 정렬
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(strategy)
+                .where(strategy.user.userId.eq(traderId)
+                        ,isApprovedAndPublic());
+
+        // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
+        // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+    }
+
     // 모든 필터 적용
     private BooleanBuilder applyAllFilters(SearchRequest searchRequest) {
         BooleanBuilder builder = new BooleanBuilder();

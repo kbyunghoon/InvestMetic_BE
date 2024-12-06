@@ -1,6 +1,7 @@
 package com.investmetic.domain.strategy.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.investmetic.global.util.RoundUtil;
 import com.investmetic.global.util.exceldownload.ExcelColumn;
 import com.investmetic.global.util.exceldownload.ExcelSheet;
 import com.investmetic.domain.strategy.model.entity.MonthlyAnalysis;
@@ -36,9 +37,9 @@ public class MonthlyAnalysisResponse {
                 monthlyAnalysis.getMonthlyAveragePrincipal(),
                 monthlyAnalysis.getDepositsWithdrawals(),
                 monthlyAnalysis.getMonthlyProfitLoss(),
-                monthlyAnalysis.getMonthlyProfitLossRate(),
+                RoundUtil.roundToThird(monthlyAnalysis.getMonthlyProfitLossRate()),
                 monthlyAnalysis.getCumulativeProfitLoss(),
-                monthlyAnalysis.getCumulativeProfitLossRate()
+                RoundUtil.roundToThird(monthlyAnalysis.getCumulativeProfitLossRate())
         );
     }
 }

@@ -44,8 +44,6 @@ public class UserMyPageService {
         // S3Path 받을 변수 설정.
         String s3Path = null;
 
-        // TODO : jwt, securityContext 에서 email 가져오기.
-
         // dto에 담긴 email과 토큰상의 email이 같은지 확인.
         if (!userModifyDto.getEmail().equals(email)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);

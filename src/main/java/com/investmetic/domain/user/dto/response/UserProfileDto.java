@@ -28,10 +28,12 @@ public class UserProfileDto {
 
     private Role role;
 
+    private String birthDate;
+
     @QueryProjection
     @Builder
     public UserProfileDto(Long userId, String userName, String email, String imageUrl, String nickname, String phone,
-                          Boolean infoAgreement, Role role) {
+                          Boolean infoAgreement, Role role, String birthDate) {
         this.userId = userId;
         this.userName = userName;
         this.email = email;
@@ -40,6 +42,7 @@ public class UserProfileDto {
         this.phone = phone;
         this.infoAgreement = infoAgreement;
         this.role = role;
+        this.birthDate = birthDate;
     }
 
 }
