@@ -62,7 +62,11 @@ public class QuestionService {
     public void deleteQuestion(Long strategyId, Long questionId, Long userId) {
         Question question = findQuestionById(questionId);
         User user = findUserById(userId);
+
         validateAccess(user, question, userId);
+
+        answerRepository.findByQuestion(question).ifPresent(answerRepository::delete);
+
         questionRepository.delete(question);
     }
 
@@ -73,7 +77,11 @@ public class QuestionService {
     public void adminDeleteQuestion(Long strategyId, Long questionId, Long userId) {
         Question question = findQuestionById(questionId);
         User user = findUserById(userId);
+
         validateAdminAccess(user);
+
+        answerRepository.findByQuestion(question).ifPresent(answerRepository::delete);
+
         questionRepository.delete(question);
     }
 

@@ -66,6 +66,7 @@ public class QuestionController {
      */
     @DeleteMapping("/strategies/{strategyId}/questions/{questionId}")
     @PreAuthorize("hasRole('ROLE_INVESTOR')")
+    @Operation(summary = "문의 삭제", description = "<a href='https://field-sting-eff.notion.site/8f929a8362eb473a8cf96cca68771a26?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> deleteQuestion(
             @PathVariable Long strategyId,
             @PathVariable Long questionId,
@@ -74,6 +75,7 @@ public class QuestionController {
 
         return BaseResponse.success(SuccessCode.DELETED);
     }
+
     /**
      * 관리자 문의 삭제
      *
@@ -83,6 +85,7 @@ public class QuestionController {
      */
     @DeleteMapping("/admin/strategies/{strategyId}/questions/{questionId}")
     @PreAuthorize("hasRole('ROLE_TRADER_ADMIN') or hasRole('ROLE_INVESTOR_ADMIN')")
+    @Operation(summary = "관리자용 문의 삭제", description = "<a href='https://field-sting-eff.notion.site/bf3ee54b67434b1fad4f9b3c10492c13?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> adminDeleteQuestion(
             @PathVariable Long strategyId,
             @PathVariable Long questionId,
