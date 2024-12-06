@@ -96,8 +96,9 @@ class UserMyPageControllerTest {
                 setupBefore = TestExecutionEvent.TEST_EXECUTION)
         void updateUserInfo2() throws Exception {
 
-            UserModifyDto userModifyDto = UserModifyDto.builder().email(USER_EMAIL).nickname("테스트").password("asdf")
-                    .phone("01012345678").imageChange(Boolean.FALSE).build();
+            UserModifyDto userModifyDto = UserModifyDto.builder().email(USER_EMAIL).nickname("TTTEEESSS")
+                    .password("asdf")
+                    .phone("12345678912").imageChange(Boolean.FALSE).build();
 
             ResultActions resultActions = mockMvc.perform(
                     patch("/api/users/mypage/profile").contentType(MediaType.APPLICATION_JSON)

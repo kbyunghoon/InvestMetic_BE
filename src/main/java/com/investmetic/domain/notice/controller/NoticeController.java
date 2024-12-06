@@ -1,15 +1,14 @@
 package com.investmetic.domain.notice.controller;
 
 
-import org.springframework.core.io.Resource;
-import com.investmetic.domain.notice.dto.request.NoticeRegisterDto;
 import com.investmetic.domain.notice.dto.request.NoticeRegisterDto;
 import com.investmetic.domain.notice.dto.response.NoticeDetailResponseDto;
 import com.investmetic.domain.notice.dto.response.NoticeListDto;
 import com.investmetic.domain.notice.service.NoticeService;
-import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.common.PageResponseDto;
+import com.investmetic.global.dto.FileDownloadResponseDto;
 import com.investmetic.global.exception.BaseResponse;
+import com.investmetic.global.exception.SuccessCode;
 import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,12 +16,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,8 +76,8 @@ public class NoticeController {
 
     @GetMapping("/notice/{noticeId}/files/{noticeFileId}")
     @Operation(summary = "공지사항 파일 다운로드 기능",
-    description = "<a href='https://field-sting-eff.notion.site/22a21659639540f688faf0c2818c31d7' target='_blank'>API 명세서</a>")
-    public ResponseEntity<Resource> downloadNoticeFile(@PathVariable Long noticeId,@PathVariable Long noticeFileId) {
+            description = "<a href='https://field-sting-eff.notion.site/22a21659639540f688faf0c2818c31d7' target='_blank'>API 명세서</a>")
+    public ResponseEntity<Resource> downloadNoticeFile(@PathVariable Long noticeId, @PathVariable Long noticeFileId) {
         FileDownloadResponseDto downloadNoticeFile = noticeService.downloadFileFromUrl(noticeFileId, noticeId);
         String encodedFileName = URLEncoder.encode(downloadNoticeFile.getDownloadFileName(), StandardCharsets.UTF_8)
                 .replace("+", "%20");
@@ -86,4 +87,18 @@ public class NoticeController {
                         "attachment; filename=\"" + encodedFileName + "\"")
                 .body(downloadNoticeFile.getResource());
     }
+
+    @DeleteMapping("/admin/notices/{noticeId}")
+    @Operation(summary = "공지사항 삭제 기능",
+            description = "<a href='https://www.notion.so/524474e779c04036a9698598ca18f026' target='_blank'>API 명세서</a>")
+    @PreAuthorize("hasAnyRole('ROLE_INVESTOR_ADMIN', 'ROLE_TRADER_ADMIN')")
+    public ResponseEntity<BaseResponse<Void>> deleteNotice(@PathVariable Long noticeId,
+                                                           @AuthenticationPrincipal CustomUserDetails admin) {
+
+        noticeService.deleteNotice(noticeId, admin.getUserId());
+
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
+
+
 }
