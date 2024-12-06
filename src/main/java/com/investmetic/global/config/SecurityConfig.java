@@ -7,7 +7,6 @@ import com.investmetic.global.security.handler.CustomAuthenticationFailureHandle
 import com.investmetic.global.security.handler.CustomAuthenticationSuccessHandler;
 import com.investmetic.global.security.service.CustomUserDetailService;
 import com.investmetic.global.util.JWTUtil;
-import com.investmetic.global.util.RedisUtil;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +22,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -34,10 +34,10 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
-    private final RedisUtil redisUtil;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final CustomAuthenticationFailureHandler failureHandler;
     private final UserRepository userRepository;
+    private final RememberMeServices rememberMeServices;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -93,6 +93,10 @@ public class SecurityConfig {
                         .requestMatchers("/profile").authenticated() // /profile은 인증 필요
                         .anyRequest().permitAll() // 모든 요청 허용
                 );
+        http
+                .rememberMe(httpSecurityRememberMeConfigurer -> httpSecurityRememberMeConfigurer
+                        .rememberMeServices(rememberMeServices)
+                        .key("security"));
 
         LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration));
         loginFilter.setAuthenticationSuccessHandler(successHandler); // 성공 핸들러 설정
@@ -100,7 +104,8 @@ public class SecurityConfig {
         loginFilter.setFilterProcessesUrl("/api/users/login"); // 로그인 엔드포인트 변경
 
         http
-                .addFilterBefore(new JWTFilter(jwtUtil, new CustomUserDetailService(userRepository)),
+                .addFilterBefore(
+                        new JWTFilter(jwtUtil, new CustomUserDetailService(userRepository), rememberMeServices),
                         LoginFilter.class);
 
         http
