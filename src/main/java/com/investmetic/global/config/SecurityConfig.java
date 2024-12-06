@@ -39,7 +39,6 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final RememberMeServices rememberMeServices;
 
-
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -105,7 +104,8 @@ public class SecurityConfig {
         loginFilter.setFilterProcessesUrl("/api/users/login"); // 로그인 엔드포인트 변경
 
         http
-                .addFilterBefore(new JWTFilter(jwtUtil, new CustomUserDetailService(userRepository)),
+                .addFilterBefore(
+                        new JWTFilter(jwtUtil, new CustomUserDetailService(userRepository), rememberMeServices),
                         LoginFilter.class);
 
         http
