@@ -74,6 +74,23 @@ public class QuestionController {
 
         return BaseResponse.success(SuccessCode.DELETED);
     }
+    /**
+     * 관리자 문의 삭제
+     *
+     * @param strategyId 삭제할 문의가 속한 전략 ID
+     * @param questionId 삭제할 문의 ID
+     * @return 문의 삭제 성공 응답
+     */
+    @DeleteMapping("/admin/strategies/{strategyId}/questions/{questionId}")
+    @PreAuthorize("hasRole('ROLE_TRADER_ADMIN') or hasRole('ROLE_INVESTOR_ADMIN')")
+    public ResponseEntity<BaseResponse<Void>> adminDeleteQuestion(
+            @PathVariable Long strategyId,
+            @PathVariable Long questionId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        questionService.adminDeleteQuestion(strategyId, questionId, customUserDetails.getUserId());
+
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
 
     /**
      * 투자자 문의 목록 조회

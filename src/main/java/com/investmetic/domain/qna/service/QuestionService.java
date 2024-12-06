@@ -67,6 +67,17 @@ public class QuestionService {
     }
 
     /**
+     * 관리자 문의 삭제
+     */
+    @Transactional
+    public void adminDeleteQuestion(Long strategyId, Long questionId, Long userId) {
+        Question question = findQuestionById(questionId);
+        User user = findUserById(userId);
+        validateAdminAccess(user);
+        questionRepository.delete(question);
+    }
+
+    /**
      * 투자자 문의 목록 조회
      */
     @Transactional(readOnly = true)
