@@ -35,5 +35,7 @@ public interface StrategyRepositoryCustom {
     List<Double> findProfitRateData(Long strategyId);
 
     Page<AdminStrategyResponseDto> findAdminStrategies(Pageable pageable, String searchWord, IsApproved isApproved);
+
+    Page<StrategySimpleResponse> getTraderStrategies(Long traderId, Pageable pageable);
 }
 

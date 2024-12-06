@@ -14,6 +14,7 @@ import com.investmetic.domain.strategy.model.entity.StockType;
 import com.investmetic.domain.strategy.model.entity.TradeType;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.strategy.repository.StrategyRepositoryCustomImpl;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.global.common.PageResponseDto;
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ public class StrategyListingService {
     private final StrategyRepository strategyRepository;
     private final StockTypeRepository stockTypeRepository;
     private final TradeTypeRepository tradeTypeRepository;
+    private final StrategyRepositoryCustomImpl strategyRepositoryCustomImpl;
 
 
     /**
@@ -209,5 +211,17 @@ public class StrategyListingService {
         List<StockType> stockTypes = stockTypeRepository.findAll();
         List<TradeType> tradeTypes = tradeTypeRepository.findAll();
         return SearchInfoResponseDto.from(stockTypes, tradeTypes);
+    }
+
+    /*
+    * 특정 트레이더의 전략 목록 조회.
+    * */
+    public PageResponseDto<StrategySimpleResponse> getTraderStrategies(Long traderId, Pageable pageable, Long userId){
+
+        Page<StrategySimpleResponse> content = strategyRepositoryCustomImpl.getTraderStrategies(traderId, pageable);
+
+        Map<Long, Boolean> subscriptionMap = generateSubscriptionMap(userId, getStrategyIds(content));
+
+       return processStrategyResponses(content, subscriptionMap);
     }
 }

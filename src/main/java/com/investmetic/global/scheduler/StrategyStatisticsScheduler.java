@@ -82,6 +82,7 @@ public class StrategyStatisticsScheduler {
 
         // 빌더를 이용해 객체 생성
         return StrategyStatistics.builder()
+                .balance(lastDailyAnalysis.getBalance())
                 .operationPeriod(operationPeriod)
                 .cumulativeTransactionAmount(lastDailyAnalysis.getCumulativeTransactionAmount())
                 .startDate(startDate)
@@ -89,13 +90,15 @@ public class StrategyStatisticsScheduler {
                 .endDate(endDate)
                 .daysSincePeakUpdate(lastDailyAnalysis.getDaysSincePeak())
                 .cumulativeProfitAmount(lastDailyAnalysis.getCumulativeProfitLoss())
+                .cumulativeProfitRate(lastDailyAnalysis.getCumulativeProfitLossRate())
                 .recentYearProfitRate(recentYearProfitRate)
                 .maxCumulativeProfitAmount(lastDailyAnalysis.getMaxCumulativeProfitLoss())
                 .maxCumulativeProfitRate(lastDailyAnalysis.getMaxCumulativeProfitLossRate())
                 .averageProfitLossAmount(lastDailyAnalysis.getAverageProfitLoss())
-                .averageProfitLossRate(lastDailyAnalysis.getCumulativeProfitLossRate())
+                .averageProfitLossRate(lastDailyAnalysis.getCumulativeProfitLossRate() * 100)
                 .maxDailyProfitAmount(lastDailyAnalysis.getMaxDailyProfit())
                 .maxDailyProfitRate(lastDailyAnalysis.getMaxDailyProfitRate())
+                .maxDailyLossAmount(lastDailyAnalysis.getMaxDailyLoss())
                 .maxDailyLossRate(lastDailyAnalysis.getMaxDailyLossRate())
                 .roa(lastDailyAnalysis.getRoa())
                 .profitFactor(lastDailyAnalysis.getProfitFactor())
@@ -108,7 +111,7 @@ public class StrategyStatisticsScheduler {
                 .maxConsecutiveProfitDays(maxConsecutiveProfitDays)
                 .totalLossDays(lastDailyAnalysis.getLossDays().intValue())
                 .maxConsecutiveLossDays(maxConsecutiveLossDays)
-                .winRate(lastDailyAnalysis.getWinRate() * 10)
+                .winRate(lastDailyAnalysis.getWinRate() * 100)
                 .totalTradeDays(totalTradeDays)
                 .dailyProfitLossStdDev(dailyProfitLossStdDev)
                 .build();

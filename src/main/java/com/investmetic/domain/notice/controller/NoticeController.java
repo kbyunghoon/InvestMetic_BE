@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@Tag(name = "전략 관리 페이지 API", description = "전략 관리 페이지 관련 API")
+@Tag(name = "공지사항 관련 API", description = "공지사항 관련 API")
 public class NoticeController {
     private final NoticeService noticeService;
 
@@ -42,7 +42,7 @@ public class NoticeController {
         return BaseResponse.success(noticeService.saveNotice(noticeRegisterDto, customUserDetails.getUserId()));
     }
 
-    @GetMapping("/notice/{noticeId}")
+    @GetMapping("/notices/{noticeId}")
     @Operation(summary = "공지사항 상세 조회 기능",
             description = "<a href='https://www.notion.so/47f085979b85479f88d4ac8c3a534e09' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<NoticeDetailResponseDto>> getNotice(@PathVariable Long noticeId) {
