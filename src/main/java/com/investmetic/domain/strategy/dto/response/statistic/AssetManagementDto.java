@@ -2,10 +2,12 @@ package com.investmetic.domain.strategy.dto.response.statistic;
 
 import com.investmetic.domain.strategy.model.entity.StrategyStatistics;
 import java.time.LocalDate;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@Builder
 @RequiredArgsConstructor
 public class AssetManagementDto {
     private final Long balance; // 잔고
@@ -17,14 +19,14 @@ public class AssetManagementDto {
     private final long daysSincePeakUpdate; // 최고점 이후 경과일
 
     public static AssetManagementDto from(StrategyStatistics stats) {
-        return new AssetManagementDto(
-                stats.getBalance(),
-                stats.getCumulativeTransactionAmount(),
-                stats.getPrincipal(),
-                stats.getOperationPeriod(),
-                stats.getStartDate(),
-                stats.getEndDate(),
-                stats.getDaysSincePeakUpdate()
-        );
+        return AssetManagementDto.builder()
+                .balance(stats.getBalance())
+                .cumulativeTransactionAmount(stats.getCumulativeTransactionAmount())
+                .principal(stats.getPrincipal())
+                .operationPeriod(stats.getOperationPeriod())
+                .startDate(stats.getStartDate())
+                .endDate(stats.getEndDate())
+                .daysSincePeakUpdate(stats.getDaysSincePeakUpdate())
+                .build();
     }
 }
