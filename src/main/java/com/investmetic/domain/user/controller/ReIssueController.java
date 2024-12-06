@@ -24,7 +24,7 @@ public class ReIssueController {
 
     private final ReIssueService reIssueService;
 
-    @Operation(summary = "Re-Issue",
+    @Operation(summary = "리프레시, 액세스 토큰 재발급",
             description = "<a href='https://www.notion.so/6ab21f30c5d2472fa1493b9dc05dd207' target='_blank'>API 명세서</a>")
     @PostMapping("/refreshtoken")
     public ResponseEntity<BaseResponse<Void>> reissue(HttpServletRequest request, HttpServletResponse response) {
