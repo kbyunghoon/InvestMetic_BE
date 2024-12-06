@@ -41,15 +41,11 @@ public class NoticeController {
     @Operation(summary = "공지사항 수정 기능",
     description ="<a href='https://field-sting-eff.notion.site/a5f446e31c564356bb36184e1963712a?pvs=4' target='_blank'>API 명세서</a>")
     @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
-    public ResponseEntity<BaseResponse<NoticeDetailResponseDto>> updateNotice(
+    public ResponseEntity<BaseResponse<List<String>>> updateNotice(
             @PathVariable Long noticeId,
-            @RequestBody NoticeRegisterDto noticeRegisterDto,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        NoticeDetailResponseDto updatedNotice = noticeService.updateNotice(
-                noticeId,
-                noticeRegisterDto,
-                customUserDetails.getUserId());
-        return BaseResponse.success(updatedNotice);
+            @RequestBody NoticeRegisterDto noticeRegisterDto) {
+        noticeService.updateNotice(noticeId, noticeRegisterDto);
+        return BaseResponse.success(noticeService.updateNotice(noticeId, noticeRegisterDto));
     }
 
     @GetMapping("/notice/{noticeId}")
