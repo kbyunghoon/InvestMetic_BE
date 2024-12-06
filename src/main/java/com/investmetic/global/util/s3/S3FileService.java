@@ -201,12 +201,10 @@ public class S3FileService {
             }
 
             if (!keysToDelete.isEmpty()) {
-                // 해당 s3객체key 리스트를 포함하도록 함.
-                DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName).withKeys(keysToDelete);
-
                 try {
                     // s3에서 해당 key리스트 모두 삭제. - 요청 1번.
-                    amazonS3.deleteObjects(deleteObjectsRequest);
+                    deleteByKeyList(keysToDelete);
+
                 } catch (SdkClientException e) {
                     // 삭제 오류
                     log.error("Folder Not Deleted in S3 : strategy/{}/", strategyId);
@@ -221,6 +219,13 @@ public class S3FileService {
                 break;
             }
         }
+    }
+
+    // s3KeyList 한 번에 삭제.
+    public void deleteByKeyList(List<KeyVersion> keysToDelete) {
+        DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName).withKeys(keysToDelete);
+
+        amazonS3.deleteObjects(deleteObjectsRequest);
     }
 
     /**
