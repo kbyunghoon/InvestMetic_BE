@@ -60,7 +60,7 @@ public class StrategyRankingController {
     public ResponseEntity<BaseResponse<PageResponseDto<StrategySimpleResponse>>> getTraderStrategy(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PageableDefault(size = 4) Pageable pageable,
-            @PathVariable String traderId) {
+            @PathVariable Long traderId) {
 
         Long userId = customUserDetails == null ? null : customUserDetails.getUserId();
 
