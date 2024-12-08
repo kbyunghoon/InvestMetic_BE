@@ -65,9 +65,6 @@ public class StrategyCalculatorScheduler {
     public void calculateSmScores() {
         List<Strategy> strategiesList = strategyRepository.findAll();
 
-        // 1. 각 전략의 최신 KP Ratio를 가져오고 설정
-        setLatestKpRatios(strategiesList);
-
         // 2. KP Ratio의 평균과 표준 편차 계산
         double[] stats = calculateStatistics(strategiesList);
         double mean = stats[0];
@@ -78,14 +75,6 @@ public class StrategyCalculatorScheduler {
 
         // 4. 전략 저장
         strategyRepository.saveAll(strategiesList);
-    }
-
-    private void setLatestKpRatios(List<Strategy> strategiesList) {
-        strategiesList.forEach(strategy -> {
-            Double kpRatio = dailyAnalysisRepository.findLatestKpRatioByStrategyId(strategy.getStrategyId())
-                    .orElse(0.0);
-            strategy.setKpRatio(kpRatio);
-        });
     }
 
     private double[] calculateStatistics(List<Strategy> strategiesList) {
