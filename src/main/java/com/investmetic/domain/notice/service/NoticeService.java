@@ -51,7 +51,11 @@ public class NoticeService {
         Notice notice = noticeRepository.save(noticeRegisterDto.toEntity(user));
 
         List<NoticeFile> noticeFiles = noticeRegisterDto.toNoticeFiles(notice, s3FileService);
-        noticeFileRepository.saveAll(noticeFiles);
+
+        // 파일이 존재할 경우 저장
+        if(!noticeFiles.isEmpty()){
+            noticeFileRepository.saveAll(noticeFiles);
+        }
 
         return noticeFiles.stream()
                 .map(file -> s3FileService.getPreSignedUrl(file.getFileUrl()))

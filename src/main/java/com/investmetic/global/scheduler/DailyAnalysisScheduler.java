@@ -241,7 +241,7 @@ public class DailyAnalysisScheduler {
                 .sum() + withdrawal;
 
         // 일간 손익률
-        double dailyProfitLossRate = (previousDailyProfitLossRate != 0)
+        double dailyProfitLossRate = (previousReferencePrice  != 0)
                 ? (referencePrice - previousReferencePrice) / previousReferencePrice
                 : 0.0;
 
