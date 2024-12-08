@@ -93,7 +93,7 @@ public class StrategyStatisticsScheduler {
                 .daysSincePeakUpdate(lastDailyAnalysis.getDaysSincePeak())
                 .cumulativeProfitAmount(lastDailyAnalysis.getCumulativeProfitLoss()) // 누적 수익 금액
                 .cumulativeProfitRate(lastDailyAnalysis.getCumulativeProfitLossRate() * 100) // 누적 수익률
-                .recentYearProfitRate(recentYearProfitRate * 100) //최근 1년 수익률
+                .recentYearProfitRate(recentYearProfitRate) //최근 1년 수익률
                 .maxCumulativeProfitAmount(lastDailyAnalysis.getMaxCumulativeProfitLoss())
                 .maxCumulativeProfitRate(lastDailyAnalysis.getMaxCumulativeProfitLossRate() * 100) // 최대 누적 수익률
                 .averageProfitLossAmount(lastDailyAnalysis.getAverageProfitLoss())
