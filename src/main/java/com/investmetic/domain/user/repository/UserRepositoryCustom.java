@@ -16,9 +16,12 @@ public interface UserRepositoryCustom {
 
     Optional<UserProfileDto> findByPhoneUserInfo(String phone);
 
+    Optional<TraderProfileDto> findTraderInfoByUserId(Long userId);
+
     Page<UserProfileDto> getAdminUsersPage(UserAdminPageRequestDto requestDto, Pageable pageRequest);
 
     Page<TraderProfileDto> getTraderListPage(TraderListSort sort, String traderNickname, Pageable pageRequest);
+
 
 
     boolean existsByEmail(String email);

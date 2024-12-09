@@ -164,6 +164,15 @@ public class UserService {
         return new PageResponseDto<>(page);
     }
 
+    /**
+     * 트레이더 프로필 조회
+     * */
+    public TraderProfileDto getTraderProfile(Long userId){
+
+        return userRepository.findTraderInfoByUserId(userId)
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
+    }
+
 
     // 회원 가입시에 새로 생겼을지도 모르는 중복 금지 데이터 다시 검증.
     private void extracted(UserSignUpDto userSignUpDto) {

@@ -3,6 +3,8 @@ package com.investmetic.domain.user.repository;
 import static com.investmetic.domain.strategy.model.entity.QStrategy.strategy;
 import static com.investmetic.domain.user.model.entity.QUser.user;
 
+import com.investmetic.domain.strategy.model.IsApproved;
+import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.user.dto.object.ColumnCondition;
 import com.investmetic.domain.user.dto.object.RoleCondition;
 import com.investmetic.domain.user.dto.object.TraderListSort;
@@ -131,7 +133,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .from(user)
                 .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
                 .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
-                        user.role.in(Role.TRADER, Role.TRADER_ADMIN))
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN),
+                        isApprovedAndPublic())
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
                 .offset(pageable.getOffset())
@@ -142,7 +145,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(user.count())
                 .from(user)
                 .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
-                        user.role.in(Role.TRADER, Role.TRADER_ADMIN));
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN),
+                        isApprovedAndPublic());
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -253,6 +257,33 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .where(user.nickname.eq(nickname))
                 .fetchOne());
     }
+
+    @Override
+    public Optional<TraderProfileDto> findTraderInfoByUserId(Long userId){
+
+        return Optional.ofNullable(queryFactory.select(
+                        new QTraderProfileDto(user.userId,
+                                user.userName,
+                                user.nickname,
+                                user.imageUrl,
+                                strategy.count().coalesce(0L),
+                                strategy.subscriptionCount.sum().coalesce(0))
+                )
+                .from(user)
+                .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
+                .where(user.userId.eq(userId)
+                        ,user.role.in(Role.TRADER, Role.TRADER_ADMIN),
+                        isApprovedAndPublic())
+                .groupBy(user.userId)
+                .fetchOne());
+    }
+
+    private BooleanExpression isApprovedAndPublic() {
+        return strategy.isApproved.eq(IsApproved.APPROVED)
+                .and(strategy.isPublic.eq(IsPublic.PUBLIC));
+    }
+
+
 
 
 }
