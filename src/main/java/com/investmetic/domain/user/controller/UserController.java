@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -108,6 +109,15 @@ public class UserController {
             @PageableDefault(size = 9) Pageable pageable) {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
+    }
+    /**
+     * 트레이더 프로필 조회.
+     * */
+    @Operation(summary = "트레이더 프로필 조회",
+            description = "<a href='https://www.notion.so/583381a286744d6bb2752b7468c7da03' target='_blank'>API 명세서</a>")
+    @GetMapping("/traders/{traderId}")
+    public ResponseEntity<BaseResponse<TraderProfileDto>> getTrader(@PathVariable Long traderId) {
+        return BaseResponse.success(userService.getTraderProfile(traderId));
     }
 
     // 전화번호를 통한 이메일 찾기
