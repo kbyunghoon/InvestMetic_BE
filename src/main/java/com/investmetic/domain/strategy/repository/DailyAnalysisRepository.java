@@ -127,6 +127,8 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
                 DA.daily_date BETWEEN :startDate AND :endDate
             GROUP BY
                 DA.daily_date
+            ORDER BY 
+                DA.daily_date asc; 
             """, nativeQuery = true)
     List<Object[]> findMetricsByDateRange(
             @Param("startDate") String startDate,
