@@ -115,9 +115,7 @@ public class StrategyAnalysisService {
         Optional<DailyAnalysis> nextDailyAnalysis = dailyAnalysisRepository.findByAfterDate(strategy, dailyDate);
         nextDailyAnalysis.ifPresent(analysis -> analysis.setProceed(Proceed.NO));
 
-        List<DailyAnalysis> dailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
-
-        if (dailyAnalyses.isEmpty()) {
+        if (nextDailyAnalysis.isEmpty()) {
             strategy.resetStrategyDailyAnalysis();
             monthlyAnalysisRepository.deleteAllByStrategy(strategy);
         }
