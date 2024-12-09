@@ -6,6 +6,7 @@ import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
 import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
+import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class StrategyAnalysisService {
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final StrategyRepository strategyRepository;
+    private final MonthlyAnalysisRepository monthlyAnalysisRepository;
 
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
@@ -97,6 +99,7 @@ public class StrategyAnalysisService {
         strategy.resetStrategyDailyAnalysis();
 
         dailyAnalysisRepository.deleteAllByStrategy(strategy);
+        monthlyAnalysisRepository.deleteAllByStrategy(strategy);
     }
 
     @Transactional
@@ -111,6 +114,13 @@ public class StrategyAnalysisService {
         LocalDate dailyDate = dailyAnalysis.getDailyDate();
         Optional<DailyAnalysis> nextDailyAnalysis = dailyAnalysisRepository.findByAfterDate(strategy, dailyDate);
         nextDailyAnalysis.ifPresent(analysis -> analysis.setProceed(Proceed.NO));
+
+        List<DailyAnalysis> dailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
+
+        if (dailyAnalyses.isEmpty()) {
+            strategy.resetStrategyDailyAnalysis();
+            monthlyAnalysisRepository.deleteAllByStrategy(strategy);
+        }
 
         dailyAnalysisRepository.deleteByStrategyAndDailyAnalysisId(strategy, analysisId);
     }
