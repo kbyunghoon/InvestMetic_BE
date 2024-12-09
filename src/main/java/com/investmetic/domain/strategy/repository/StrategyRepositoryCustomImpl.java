@@ -280,7 +280,8 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
                 .from(strategy)
-                .where(isApprovedAndPublic());
+                .join(subscription).on(subscription.strategy.eq(strategy))  // 구독 테이블 조인
+                .where(isApprovedAndPublic(), subscription.user.userId.eq(userId));
 
         // 만약 페이지의 처음이나, 끝일때, 전체 데이터 크기가 pageSize보다 작은 경우 COUNT 쿼리가 실행되지 않음
         // 그 외 경우에만 fetchOne() 을 실행하여 전체 데이터 개수를 계산
