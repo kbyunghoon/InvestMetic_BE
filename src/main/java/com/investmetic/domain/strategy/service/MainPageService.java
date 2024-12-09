@@ -48,8 +48,8 @@ public class MainPageService {
     public TotalStrategyMetricsResponseDto getMetricsByDateRange() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        // fixme 현제 시간으로 바뀌어야 됨
-        LocalDate endDate = LocalDate.of(2023,12,13);
+
+        LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusYears(1);
         // 네이티브 쿼리 실행
         List<Object[]> results = dailyAnalysisRepository.findMetricsByDateRange(startDate.format(formatter), endDate.format(formatter));
