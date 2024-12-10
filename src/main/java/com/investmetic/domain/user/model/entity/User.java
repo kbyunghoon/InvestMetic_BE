@@ -30,6 +30,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicUpdate
 public class User extends BaseEntity {
+    public static final String DEFAULT_IMAGE_URL = "https://fastcampus-team3.s3.ap-northeast-2.amazonaws.com/user-profile/investmetic_default_image.png";
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     List<UserHistory> userHistory; //회원 변경 이력 (user Entity만 가지고 있음)
@@ -48,7 +49,7 @@ public class User extends BaseEntity {
     private String password; // 비밀번호 (암호화 필요)
 
     @Column(length = 1000)
-    private String imageUrl; // 프로필 이미지 URL
+    private String imageUrl = DEFAULT_IMAGE_URL; // 프로필 이미지 URL
 
     private String phone; // 전화번호
 
