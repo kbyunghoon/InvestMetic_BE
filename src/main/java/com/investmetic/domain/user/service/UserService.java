@@ -12,10 +12,13 @@ import com.investmetic.domain.user.dto.response.FoundEmailDto;
 import com.investmetic.domain.user.dto.response.TraderProfileDto;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
+import com.investmetic.domain.user.service.logic.UserCommonLogic;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
+import com.investmetic.global.security.CustomUserDetails;
 import com.investmetic.global.util.RedisUtil;
+import com.investmetic.global.util.s3.S3FileService;
 import com.investmetic.global.util.stibee.StibeeEmailService;
 import java.security.SecureRandom;
 import java.time.Instant;
@@ -39,7 +42,9 @@ public class UserService {
     private final RedisUtil redisUtil;
     private final SecureRandom secureRandom = new SecureRandom();
     private final TaskScheduler taskScheduler;
-
+    private final UserCommonLogic userCommonLogic;
+    private final S3FileService s3FileService;
+    private final StibeeEmailService stibeeEmailService;
 
     //회원 가입
     @Transactional
@@ -166,11 +171,11 @@ public class UserService {
 
     /**
      * 트레이더 프로필 조회
-     * */
-    public TraderProfileDto getTraderProfile(Long userId){
+     */
+    public TraderProfileDto getTraderProfile(Long userId) {
 
         return userRepository.findTraderInfoByUserId(userId)
-                .orElseThrow(()->new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
     }
 
 
@@ -276,5 +281,22 @@ public class UserService {
     @FunctionalInterface
     private interface ValidationFunction {
         boolean exists(String value);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User deleteUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+
+        userCommonLogic.deleteUser(deleteUser);
+
+        //회원이 프로필을 가지고 있다면 s3 객체 삭제.
+        if (deleteUser.getImageUrl() != null) {
+            s3FileService.deleteFromS3(deleteUser.getImageUrl());
+        }
+
+        // 스티비 주소록에서 해당 회원 삭제.
+        stibeeEmailService.deleteSubscriber(deleteUser.getEmail());
+        userRepository.delete(deleteUser);
     }
 }

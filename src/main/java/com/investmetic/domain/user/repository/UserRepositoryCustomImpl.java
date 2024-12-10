@@ -123,7 +123,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         // 전략순일때도 전략 -> 구독 -> 유저 id 순으로 정렬하기.
         List<TraderProfileDto> content = queryFactory.select(
-                        new QTraderProfileDto(user.userId,
+                        new QTraderProfileDto(
+                                user.userId,
                                 user.userName,
                                 user.nickname,
                                 user.imageUrl,
@@ -131,10 +132,14 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                                 strategy.subscriptionCount.sum().coalesce(0))
                 )
                 .from(user)
-                .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
-                .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
-                        user.role.in(Role.TRADER, Role.TRADER_ADMIN),
-                        isApprovedAndPublic())
+                .leftJoin(strategy).on(
+                        user.userId.eq((strategy.user.userId)),
+                        isApprovedAndPublic()
+                )
+                .where(
+                        keywordCondition(ColumnCondition.NICKNAME, traderNickname),
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN)
+                        )
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
                 .offset(pageable.getOffset())
@@ -144,9 +149,10 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         JPAQuery<Long> countQuery = queryFactory
                 .select(user.count())
                 .from(user)
-                .where(keywordCondition(ColumnCondition.NICKNAME, traderNickname),
-                        user.role.in(Role.TRADER, Role.TRADER_ADMIN),
-                        isApprovedAndPublic());
+                .where(
+                        keywordCondition(ColumnCondition.NICKNAME, traderNickname),
+                        user.role.in(Role.TRADER, Role.TRADER_ADMIN)
+                );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }
@@ -270,10 +276,13 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                                 strategy.subscriptionCount.sum().coalesce(0))
                 )
                 .from(user)
-                .leftJoin(strategy).on(user.userId.eq((strategy.user.userId)))
+                .leftJoin(strategy).on(
+                        user.userId.eq((strategy.user.userId)),
+                        isApprovedAndPublic()
+                )
                 .where(user.userId.eq(userId)
-                        ,user.role.in(Role.TRADER, Role.TRADER_ADMIN),
-                        isApprovedAndPublic())
+                        ,user.role.in(Role.TRADER, Role.TRADER_ADMIN)
+                )
                 .groupBy(user.userId)
                 .fetchOne());
     }
