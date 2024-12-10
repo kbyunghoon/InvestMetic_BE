@@ -117,7 +117,6 @@ public class NoticeService {
             throw new BusinessException(ErrorCode.NOTICE_FILE_NOT_FOUND);
         }
         String noticeFileUrl = noticeFile.getFileUrl();
-        System.out.println(noticeFileUrl);
         try (
                 S3Object s3Object = s3FileService.extractFileKeyFromUrl(noticeFileUrl);
 
@@ -152,8 +151,8 @@ public class NoticeService {
 
         // 필터와 컨트롤러 사이 시간에 회원이 변경 되었다면...?
         if (Role.isAdmin(user.getRole())) {
-            noticeRepository.deleteById(noticeId);
             s3NoticeFileDelete(noticeId);
+            noticeRepository.deleteById(noticeId);
         } else {
             throw new BusinessException(ErrorCode.AUTHORIZATION_DENIED);
         }
@@ -177,6 +176,7 @@ public class NoticeService {
             }
             // 삭제 요청. 공지사항 파일은 1000개 미만이므로 반복 안함.
             try {
+                noticeFileRepository.deleteAllInBatch(noticeFileList);
                 s3FileService.deleteByKeyList(keysToDelete);
             } catch (SdkClientException e) {
                 log.error("noticeFile delete failed : notice Id = {}", noticeId);
