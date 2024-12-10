@@ -11,6 +11,7 @@ import com.investmetic.domain.user.service.UserService;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
+import com.investmetic.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -110,9 +113,10 @@ public class UserController {
         return BaseResponse.success(userService.getTraderList(sort, keyword, pageable));
 
     }
+
     /**
      * 트레이더 프로필 조회.
-     * */
+     */
     @Operation(summary = "트레이더 프로필 조회",
             description = "<a href='https://www.notion.so/583381a286744d6bb2752b7468c7da03' target='_blank'>API 명세서</a>")
     @GetMapping("/traders/{traderId}")
@@ -137,6 +141,16 @@ public class UserController {
             @RequestBody UserModifyDto userModifyDto) {
 
         userMyPageService.resetPassword(userModifyDto, userModifyDto.getEmail());
+        return BaseResponse.success();
+    }
+
+    @Operation(summary = "회원탈퇴",
+            description = "<a href='https://www.notion.so/a3347cba4f5045cab7b7a4d8ad3ca7ec' target='_blank'>API 명세서</a>")
+    @DeleteMapping()
+    public ResponseEntity<BaseResponse<Void>> deleteUser(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        userService.deleteUser(customUserDetails.getUserId());
         return BaseResponse.success();
     }
 }
