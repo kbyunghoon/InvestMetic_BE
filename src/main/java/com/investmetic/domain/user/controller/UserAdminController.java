@@ -87,7 +87,7 @@ public class UserAdminController {
      */
     @Operation(summary = "회원 등급 변경",
             description = "<a href='https://www.notion.so/40f133634e07445293933bf9e8a34934' target='_blank'>API 명세서</a>")
-    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN') and (#userId != authentication.getPrincipal().userId)")
     @PatchMapping("/users/{userId}/role")
     public ResponseEntity<BaseResponse<Void>> updateUserRole(@PathVariable("userId") Long userId,
                                                              @RequestBody RoleUpdateRequestDto requestDto) {
