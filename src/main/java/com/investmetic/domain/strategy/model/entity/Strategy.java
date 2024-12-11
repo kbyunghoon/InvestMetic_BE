@@ -6,6 +6,7 @@ import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.global.common.BaseEntity;
+import com.investmetic.global.util.RoundUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -92,7 +93,7 @@ public class Strategy extends BaseEntity {
     private Integer reviewCount = 0; // 리뷰수
 
     public void updateAverageRating(Double newAverageRating) {
-        this.averageRating = newAverageRating;
+        this.averageRating = RoundUtil.roundToSecond(newAverageRating);
     }
 
     public void incrementReviewCount() {
