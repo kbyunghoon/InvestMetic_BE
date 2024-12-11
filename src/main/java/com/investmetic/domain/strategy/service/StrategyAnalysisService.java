@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.service;
 
 import com.investmetic.domain.strategy.dto.request.TraderDailyAnalysisRequestDto;
 import com.investmetic.domain.strategy.dto.response.DailyAnalysisResponse;
+import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.entity.DailyAnalysis;
 import com.investmetic.domain.strategy.model.entity.Proceed;
 import com.investmetic.domain.strategy.model.entity.Strategy;
@@ -61,6 +62,12 @@ public class StrategyAnalysisService {
                     .build();
 
             dailyAnalysisRepository.save(dailyAnalysis);
+        }
+
+        List<DailyAnalysis> dailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
+
+        if(dailyAnalyses.size() >= 3) {
+            strategy.setIsPublic(IsPublic.PUBLIC);
         }
     }
 
