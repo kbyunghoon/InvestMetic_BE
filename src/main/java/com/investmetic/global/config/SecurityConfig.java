@@ -70,6 +70,7 @@ public class SecurityConfig {
                     config.setAllowCredentials(true);
                     config.addExposedHeader("access-token");
                     config.addAllowedHeader("*");
+                    config.addExposedHeader("Content-Disposition");
                     return config;
                 }));
         http
