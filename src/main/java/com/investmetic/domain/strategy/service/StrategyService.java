@@ -28,6 +28,7 @@ import com.investmetic.domain.strategy.repository.StrategyRepository;
 import com.investmetic.domain.strategy.repository.StrategyStatisticsRepository;
 import com.investmetic.domain.strategy.repository.TradeTypeRepository;
 import com.investmetic.domain.subscription.repository.SubscriptionRepository;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.domain.user.model.entity.User;
 import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.dto.FileDownloadResponseDto;
@@ -70,7 +71,8 @@ public class StrategyService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+        verifyUserPermission(strategy, user);
 
         strategy.setIsPublic(strategy.getIsPublic() == IsPublic.PUBLIC ? IsPublic.PRIVATE : IsPublic.PUBLIC);
     }
@@ -128,7 +130,10 @@ public class StrategyService {
         // 전략 조회 및 권한 확인
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
-        verifyUserPermission(strategy, userId);
+
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         // 종속 데이터 및 관련 파일 삭제
         deleteAssociatedData(strategy);
@@ -240,7 +245,9 @@ public class StrategyService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
             String proposalFilePath = s3FileService.getS3StrategyPath(
@@ -275,7 +282,9 @@ public class StrategyService {
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         TradeTypeDto tradeTypeDto = TradeTypeDto.fromEntity(strategy.getTradeType());
 
@@ -321,8 +330,8 @@ public class StrategyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
     }
 
-    private void verifyUserPermission(Strategy strategy, Long userId) {
-        if (!strategy.getUser().getUserId().equals(userId)) {
+    private void verifyUserPermission(Strategy strategy, User user) {
+        if (user.getRole() == Role.TRADER && !strategy.getUser().getUserId().equals(user.getUserId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
