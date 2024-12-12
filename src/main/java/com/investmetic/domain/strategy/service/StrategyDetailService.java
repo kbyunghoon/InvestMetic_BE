@@ -88,6 +88,17 @@ public class StrategyDetailService {
         // 구독여부 업데이트
         strategyDetail.updateIsSubscribed(isSubscribed);
 
+        // todo 임시용 쓰레기코드 (수정해야함)
+        // 제안서 여부 판단
+        Strategy strategy = strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        if (strategy.getProposalFilePath() == null) {
+            strategyDetail.updateHasProposal(false);
+        } else {
+            strategyDetail.updateHasProposal(true);
+        }
+
         return strategyDetail;
     }
 
@@ -96,7 +107,21 @@ public class StrategyDetailService {
      */
     public MyStrategyDetailResponse getMyStrategyDetail(Long strategyId) {
         validateStrategyExists(strategyId);
-        return strategyRepository.findMyStrategyDetail(strategyId);
+
+        MyStrategyDetailResponse myStrategyDetail = strategyRepository.findMyStrategyDetail(strategyId);
+
+        // todo 임시용 쓰레기코드 (수정해야함)
+        // 제안서 여부 판단
+        Strategy strategy = strategyRepository.findById(strategyId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
+
+        if (strategy.getProposalFilePath() == null) {
+            myStrategyDetail.updateHasProposal(false);
+        } else {
+            myStrategyDetail.updateHasProposal(true);
+        }
+
+        return myStrategyDetail;
     }
 
     /**

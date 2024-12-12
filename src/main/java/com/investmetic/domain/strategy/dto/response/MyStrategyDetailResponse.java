@@ -32,6 +32,7 @@ public class MyStrategyDetailResponse {
     private LocalDateTime createdAt;                    // 전략 등록일
     private IsPublic isPublic;                      // 공개여부
     private IsApproved isApproved;                  // 승인여부
+    private Boolean hasProposal;
 
 
     @QueryProjection
@@ -61,4 +62,7 @@ public class MyStrategyDetailResponse {
         this.isApproved = isApproved;
     }
 
+    public void updateHasProposal(Boolean hasProposal) {
+        this.hasProposal = hasProposal;
+    }
 }

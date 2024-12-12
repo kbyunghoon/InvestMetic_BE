@@ -34,6 +34,7 @@ public class StrategyDetailResponse {
     private LocalDate finalProfitLossDate;          // 최종 손익 입력 일자
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;                    // 전략 등록일
+    private Boolean hasProposal;
 
 
     @QueryProjection
@@ -70,5 +71,9 @@ public class StrategyDetailResponse {
 
     public void updateIsSubscribed(boolean isSubscribed) {
         this.isSubscribed = isSubscribed;
+    }
+
+    public void updateHasProposal(Boolean hasProposal) {
+        this.hasProposal = hasProposal;
     }
 }
