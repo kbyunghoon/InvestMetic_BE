@@ -394,8 +394,9 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
         // 페이징 count 쿼리 최적화
         JPAQuery<Long> countQuery = queryFactory
                 .select(Wildcard.count)
-                .from(strategy);
-        
+                .from(strategy)
+                .where(applySearchWordFilter(searchWord), applyIsApprovedFilter(isApproved));
+
         return PageableExecutionUtils.getPage(strategies, pageable, countQuery::fetchOne);
     }
 
