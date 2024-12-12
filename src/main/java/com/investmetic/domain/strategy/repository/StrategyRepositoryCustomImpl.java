@@ -390,7 +390,13 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-        return PageableExecutionUtils.getPage(strategies, pageable, strategies::size);
+
+        // 페이징 count 쿼리 최적화
+        JPAQuery<Long> countQuery = queryFactory
+                .select(Wildcard.count)
+                .from(strategy);
+        
+        return PageableExecutionUtils.getPage(strategies, pageable, countQuery::fetchOne);
     }
 
     @Override
