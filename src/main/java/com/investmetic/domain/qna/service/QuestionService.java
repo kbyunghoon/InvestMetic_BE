@@ -325,9 +325,10 @@ public class QuestionService {
 
         if (answer != null) {
             User trader = answer.getUser();
+
             return QuestionsResponse.forAdmin(question, trader);
         } else {
-            return QuestionsResponse.forTrader(question);
+            return QuestionsResponse.forInvestor(question, question.getStrategy().getUser());
         }
     }
 

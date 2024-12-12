@@ -35,7 +35,7 @@ public class AdminStrategyController {
     @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     public ResponseEntity<BaseResponse<Void>> updateStrategy(@PathVariable("strategyId") Long strategyId,
                                                              IsApproved isApproved) {
-        adminStrategyService.manageAproveState(strategyId, isApproved);
+        adminStrategyService.manageApproveState(strategyId, isApproved);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
     @Operation(summary = "관리자 페이지 전략 목록 조회 기능",
