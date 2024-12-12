@@ -23,9 +23,7 @@ public class MonthlyAnalysisScheduler {
                 .collect(Collectors.groupingBy(daily -> YearMonth.from(daily.getDailyDate())));
 
         groupedByMonth.forEach((month, dailyAnalysisList) -> {
-            Long monthlyPrincipal = dailyAnalysisList.stream()
-                    .mapToLong(DailyAnalysis::getPrincipal)
-                    .sum();
+            Long monthlyPrincipal = dailyAnalysisList.get(dailyAnalysisList.size() - 1).getPrincipal();
 
             Long monthlyTransaction = dailyAnalysisList.stream()
                     .mapToLong(DailyAnalysis::getTransaction)
