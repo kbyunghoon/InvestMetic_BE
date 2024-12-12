@@ -76,7 +76,7 @@ public class StrategyController {
     }
 
     @GetMapping("/modify/{strategyId}")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "전략 수정 페이지 진입 시 해당 전략 정보 조회", description = "<a href='https://field-sting-eff.notion.site/b5f3a515edd6479f8c22a40732b42475?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<StrategyModifyInfoResponseDto>> loadStrategyModifyInfo(
             @PathVariable Long strategyId,
@@ -87,7 +87,7 @@ public class StrategyController {
     }
 
     @PostMapping("/modify/{strategyId}")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "전략 수정", description = "<a href='https://field-sting-eff.notion.site/cec6a33cd3ba4d598fd31793c6d086cc?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> modifyStrategyInfo(
             @PathVariable Long strategyId,
@@ -139,7 +139,7 @@ public class StrategyController {
     }
 
     @DeleteMapping("/{strategyId}")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 삭제 기능", description = "<a href='https://field-sting-eff.notion.site/658d5163ce7642ff9164a80fb25a1d18?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> deleteStrategy(@PathVariable Long strategyId,
                                                              @AuthenticationPrincipal CustomUserDetails customUserDetails) {
