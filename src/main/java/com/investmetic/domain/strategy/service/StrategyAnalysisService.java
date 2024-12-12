@@ -9,6 +9,9 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -29,6 +32,7 @@ public class StrategyAnalysisService {
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final StrategyRepository strategyRepository;
     private final MonthlyAnalysisRepository monthlyAnalysisRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
@@ -42,7 +46,9 @@ public class StrategyAnalysisService {
 
         Strategy strategy = findStrategyById(strategyId);
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         for (TraderDailyAnalysisRequestDto analysisRequest : analysisRequests) {
             Optional<DailyAnalysis> existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
@@ -66,7 +72,7 @@ public class StrategyAnalysisService {
 
         List<DailyAnalysis> dailyAnalyses = dailyAnalysisRepository.findByStrategy(strategy);
 
-        if(dailyAnalyses.size() >= 3) {
+        if (dailyAnalyses.size() >= 3) {
             strategy.setIsPublic(IsPublic.PUBLIC);
         }
     }
@@ -75,7 +81,9 @@ public class StrategyAnalysisService {
     public void modifyDailyAnalysis(Long strategyId, TraderDailyAnalysisRequestDto analysisRequest, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         DailyAnalysis existsDailyData = dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(
                         strategy,
@@ -101,7 +109,9 @@ public class StrategyAnalysisService {
     public void deleteStrategyAllDailyAnalysis(Long strategyId, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         strategy.resetStrategyDailyAnalysis();
 
@@ -113,7 +123,9 @@ public class StrategyAnalysisService {
     public void deleteStrategyDailyAnalysis(Long strategyId, Long analysisId, Long userId) {
         Strategy strategy = findStrategyById(strategyId);
 
-        verifyUserPermission(strategy, userId);
+        User user = verifyUser(userId);
+
+        verifyUserPermission(strategy, user);
 
         DailyAnalysis dailyAnalysis = dailyAnalysisRepository.findByDailyAnalysisId(analysisId)
                 .orElseThrow(() -> new BusinessException((ErrorCode.INVALID_TYPE_VALUE)));
@@ -141,8 +153,13 @@ public class StrategyAnalysisService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
     }
 
-    private void verifyUserPermission(Strategy strategy, Long userId) {
-        if (!strategy.getUser().getUserId().equals(userId)) {
+    private User verifyUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_INFO_NOT_FOUND));
+    }
+
+    private void verifyUserPermission(Strategy strategy, User user) {
+        if (user.getRole() == Role.TRADER && !strategy.getUser().getUserId().equals(user.getUserId())) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
     }
