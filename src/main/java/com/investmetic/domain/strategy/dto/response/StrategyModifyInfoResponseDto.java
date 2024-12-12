@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.dto.response;
 
 import com.investmetic.domain.strategy.dto.StockTypeDto;
 import com.investmetic.domain.strategy.dto.TradeTypeDto;
+import com.investmetic.domain.strategy.model.IsPublic;
 import com.investmetic.domain.strategy.model.MinimumInvestmentAmount;
 import com.investmetic.domain.strategy.model.OperationCycle;
 import com.investmetic.domain.strategy.model.entity.Strategy;
@@ -21,7 +22,8 @@ public class StrategyModifyInfoResponseDto {
     private List<StockTypeDto> stockTypes;
     private MinimumInvestmentAmount minimumInvestmentAmount;
     private OperationCycle operationCycle;
-    //    private String proposalFileUrl;
+    private String proposalFileUrl;
+    private IsPublic isPublic;
     private String description;
 
     @Builder
@@ -31,7 +33,8 @@ public class StrategyModifyInfoResponseDto {
         this.tradeType = tradeType;
         this.operationCycle = strategy.getOperationCycle();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
-//        this.proposalFileUrl = strategy.getProposalFilePath();
+        this.proposalFileUrl = strategy.getProposalFilePath();
+        this.isPublic = strategy.getIsPublic();
         this.description = strategy.getStrategyDescription();
     }
 }
