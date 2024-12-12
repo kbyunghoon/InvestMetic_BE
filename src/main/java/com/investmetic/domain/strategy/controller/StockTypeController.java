@@ -58,5 +58,12 @@ public class StockTypeController {
         stockTypeService.changeActivateState(stockTypeId);
         return BaseResponse.success(SuccessCode.UPDATED);
     }
-
+    @Operation(summary = "종목 삭제(관리자 페이지)",
+            description = "<a href='' target='_blank'>API 명세서</a>")
+    @DeleteMapping("stock-type/{stockTypeId}")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
+    public ResponseEntity<BaseResponse<Void>> deleteStockType(@PathVariable Long stockTypeId) {
+        stockTypeService.deleteStockType(stockTypeId);
+        return BaseResponse.success(SuccessCode.DELETED);
+    }
 }

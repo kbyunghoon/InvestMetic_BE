@@ -14,4 +14,6 @@ public interface StockTypeGroupRepository extends JpaRepository<StockTypeGroup, 
     List<StockType> findStockTypeIdsByStrategy(@Param("strategy") Strategy strategy);
 
     void deleteAllByStrategy(Strategy strategy);
+
+    void deleteAllByStockType(StockType stockType);
 }

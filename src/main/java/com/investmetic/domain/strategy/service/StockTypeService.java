@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.service;
 import com.investmetic.domain.strategy.dto.request.StockTypeRequestDTO;
 import com.investmetic.domain.strategy.dto.response.StockTypeResponseDTO;
 import com.investmetic.domain.strategy.model.entity.StockType;
+import com.investmetic.domain.strategy.repository.StockTypeGroupRepository;
 import com.investmetic.domain.strategy.repository.StockTypeRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class StockTypeService {
     private final StockTypeRepository stockTypeRepository;
     private final S3FileService s3FileService;
+    private final StockTypeGroupRepository stockTypeGroupRepository;
 
     public String saveStockType(StockTypeRequestDTO stockTypeRequestDTO) {
         StockType stockType = stockTypeRequestDTO.toEntity();
@@ -43,6 +45,13 @@ public class StockTypeService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
         stockType.changeActivateState();
         stockTypeRepository.save(stockType);
+    }
+
+    @Transactional
+    public void deleteStockType(Long stockTypeId) {
+        StockType stockType = stockTypeRepository.findByStockTypeId(stockTypeId).orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
+        stockTypeGroupRepository.deleteAllByStockType(stockType);
+        stockTypeRepository.deleteById(stockTypeId);
     }
 
 }
