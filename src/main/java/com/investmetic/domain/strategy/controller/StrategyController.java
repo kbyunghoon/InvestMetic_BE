@@ -57,7 +57,7 @@ public class StrategyController {
     private final StrategyListingService strategyListingService;
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "전략 등록", description = "<a href='https://field-sting-eff.notion.site/9dbecd9a350942a6aa38204329a1c186?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<PresignedUrlResponseDto>> registerStrategy(
             @RequestBody @Valid StrategyRegisterRequestDto requestDto,
@@ -68,7 +68,7 @@ public class StrategyController {
     }
 
     @GetMapping("/register")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "전략 등록 페이지 진입 시 요청", description = "<a href='https://field-sting-eff.notion.site/f1e0b17145a74ace9b5cfec0e6e408ed?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<RegisterInfoResponseDto>> loadStrategyRegistrationInfo() {
 
@@ -114,7 +114,7 @@ public class StrategyController {
     }
 
     @PatchMapping("/{strategyId}/daily-analysis")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN','ROLE_TRADER')")
     @Operation(summary = "트레이더 전략 일간 분석 수정 기능", description = "<a href='https://field-sting-eff.notion.site/c9db716164ad405f8f4d4c622476e9f6?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> modifyStrategyDailyAnalysis(
             @PathVariable Long strategyId,

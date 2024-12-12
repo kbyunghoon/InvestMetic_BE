@@ -8,10 +8,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum FilePath {
-    USER_PROFILE("user-profile/", 1024 * 1024 * 2, Arrays.asList("jpg", "jpeg", "png")),
+    USER_PROFILE("user-profile/", 1024 * 1024 * 5, Arrays.asList("jpg", "jpeg", "png")),
     STRATEGY_EXCEL("excel/", 1024 * 1024 * 500, Arrays.asList("xls", "xlsx")),
-    STRATEGY_PROPOSAL("proposal/", 1024 * 1024 * 500, Arrays.asList("xls", "xlsx")),
-    STRATEGY_IMAGE("image/", 1024 * 1024 * 2, Arrays.asList("jpg", "jpeg", "png")),
+    STRATEGY_PROPOSAL("proposal/", 1024 * 1024 * 50,
+            Arrays.asList("xls", "xlsx", "jpg", "jpeg", "png", "doc", "docx", "pptx", "ppt", "pdf")),
+    STRATEGY_IMAGE("image/", 1024 * 1024 * 5, Arrays.asList("jpg", "jpeg", "png")),
     NOTICE("notice/", 1024 * 1024 * 5, Arrays.asList("jpg", "jpeg", "png", "doc", "docx", "pptx", "ppt"));
 
     private final String path;

@@ -160,7 +160,7 @@ public class StrategyService {
         deleteAllQnA(strategy.getStrategyId());
     }
 
-    private void deleteAllQnA(Long strategyId){
+    private void deleteAllQnA(Long strategyId) {
         List<Question> questionList = questionRepository.findAllByStrategyStrategyId(strategyId);
         List<Question> completeQuestionList = new ArrayList<>();
 
@@ -194,6 +194,47 @@ public class StrategyService {
     @Transactional
     public PresignedUrlResponseDto registerStrategy(
             StrategyRegisterRequestDto requestDto, Long userId) {
+        if (requestDto.getProposalFile() != null) {
+            return registerStrategyWithProposal(requestDto, userId);
+        } else {
+            registerStrategyWithoutProposal(requestDto, userId);
+            return null;
+        }
+    }
+
+
+    public void registerStrategyWithoutProposal(StrategyRegisterRequestDto requestDto, Long userId) {
+        User user = verifyUser(userId);
+
+        TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+
+        Strategy strategy = Strategy.builder()
+                .user(user)
+                .strategyName(requestDto.getStrategyName())
+                .tradeType(tradeType)
+                .operationCycle(requestDto.getOperationCycle())
+                .minimumInvestmentAmount(requestDto.getMinimumInvestmentAmount())
+                .strategyDescription(requestDto.getDescription())
+                .build();
+
+        strategyRepository.save(strategy);
+
+        requestDto.getStockTypeIds().forEach(stockTypeId -> {
+            StockType stockType = stockTypeRepository.findById(stockTypeId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.STOCKTYPE_NOT_FOUND));
+
+            StockTypeGroup stockTypeGroup = StockTypeGroup.builder()
+                    .strategy(strategy)
+                    .stockType(stockType)
+                    .build();
+
+            stockTypeGroupRepository.save(stockTypeGroup);
+        });
+
+    }
+
+    public PresignedUrlResponseDto registerStrategyWithProposal(StrategyRegisterRequestDto requestDto, Long userId) {
         User user = verifyUser(userId);
 
         TradeType tradeType = tradeTypeRepository.findByTradeTypeIdAndActivateStateTrue(requestDto.getTradeTypeId())
@@ -234,6 +275,7 @@ public class StrategyService {
         });
 
         return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
+
     }
 
 
