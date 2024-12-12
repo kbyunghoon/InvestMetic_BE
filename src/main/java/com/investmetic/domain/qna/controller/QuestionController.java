@@ -7,6 +7,7 @@ import com.investmetic.domain.qna.dto.request.QuestionRequestDto;
 import com.investmetic.domain.qna.dto.response.QuestionsDetailResponse;
 import com.investmetic.domain.qna.dto.response.QuestionsResponse;
 import com.investmetic.domain.qna.service.QuestionService;
+import com.investmetic.domain.user.model.Role;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BaseResponse;
 import com.investmetic.global.exception.SuccessCode;
@@ -113,7 +114,7 @@ public class QuestionController {
 
         // 추후 시큐리티 적용 시 Authentication 객체로부터 userId와 userRole을 추출
         PageResponseDto<QuestionsResponse> response = questionService.getInvestorQuestions(
-                customUserDetails.getUserId(), customUserDetails.getRole(), keyword, searchCondition,
+                customUserDetails.getUserId(), Role.INVESTOR, keyword, searchCondition,
                 stateCondition,
                 pageable);
         return BaseResponse.success(response);
@@ -137,7 +138,7 @@ public class QuestionController {
 
         // 추후 시큐리티 적용 시 Authentication 객체로부터 userId와 userRole을 추출
         PageResponseDto<QuestionsResponse> response = questionService.getTraderQuestions(customUserDetails.getUserId(),
-                customUserDetails.getRole(), keyword, searchCondition, stateCondition,
+                Role.INVESTOR, keyword, searchCondition, stateCondition,
                 pageable);
         return BaseResponse.success(response);
     }
