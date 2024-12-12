@@ -49,7 +49,7 @@ public class QuestionsResponse {
                 .createdAt(question.getCreatedAt())
                 .investor(BaseQnAInfoDto.builder()
                         .id(investor.getUserId())
-                        .userName(investor.getUserName())
+                        .userName(investor.getNickname())
                         .profileImageUrl(investor.getImageUrl())
                         .build())
                 .build();
@@ -70,7 +70,7 @@ public class QuestionsResponse {
                 .createdAt(question.getCreatedAt())
                 .trader(BaseQnAInfoDto.builder()
                         .id(trader.getUserId())
-                        .userName(trader.getUserName())
+                        .userName(trader.getNickname())
                         .profileImageUrl(trader.getImageUrl())
                         .build())
                 .build();
@@ -93,12 +93,12 @@ public class QuestionsResponse {
                 .createdAt(question.getCreatedAt())
                 .investor(BaseQnAInfoDto.builder()
                         .id(investor.getUserId())
-                        .userName(investor.getUserName())
+                        .userName(investor.getNickname())
                         .profileImageUrl(investor.getImageUrl())
                         .build())
                 .trader(BaseQnAInfoDto.builder()
                         .id(trader.getUserId())
-                        .userName(trader.getUserName())
+                        .userName(trader.getNickname())
                         .profileImageUrl(trader.getImageUrl())
                         .build())
                 .build();
