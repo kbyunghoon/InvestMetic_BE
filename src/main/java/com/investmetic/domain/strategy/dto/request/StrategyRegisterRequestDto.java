@@ -32,7 +32,6 @@ public class StrategyRegisterRequestDto {
     @NotNull(message = "최소 운용 금액을 입력해주세요.")
     private MinimumInvestmentAmount minimumInvestmentAmount;
 
-    @NotNull(message = "제안서 파일를 업로드 해주세요.")
     private ProposalFileDto proposalFile;
 
     @NotNull(message = "전략 소개를 입력해주세요.")
