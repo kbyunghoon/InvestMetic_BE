@@ -29,7 +29,7 @@ public class AnswerController {
 
     //문의 답변 등록
     @PostMapping("/trader/questions/{questionId}/answers")
-    @PreAuthorize("hasRole('ROLE_TRADER')")
+    @PreAuthorize("hasAnyRole('ROLE_TRADER','ROLE_TRADER_ADMIN', 'ROLE_INVESTOR_ADMIN')")
     @Operation(summary = "문의 답변 등록", description = "<a href='https://field-sting-eff.notion.site/7d8679f1a17846a3bd1ce2f8aca1a306?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<BaseResponse<Void>> addAnswer(
             @PathVariable Long questionId,
