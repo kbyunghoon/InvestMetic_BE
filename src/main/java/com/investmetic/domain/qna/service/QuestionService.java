@@ -106,6 +106,7 @@ public class QuestionService {
                                                                  SearchCondition searchCondition,
                                                                  StateCondition stateCondition,
                                                                  Pageable pageable) {
+        // userRole에 TRADER가 들어감.
         return searchQuestions(userId, keyword, searchCondition, stateCondition, pageable, userRole);
     }
 
@@ -362,6 +363,7 @@ public class QuestionService {
             conditions.add(question.user.userId.eq(userId));
         } else if (Role.isTrader(role) && userId != null) {
             // 트레이더 또는 트레이더 관리자
+            // 해당 전략의 userId 가 현재 요청한 유저의 userId와 같은 것만 표시.
             conditions.add(question.strategy.user.userId.eq(userId));
         } else if (Role.isAdmin(role)) {
             // 관리자 (슈퍼 관리자, 투자자 관리자, 트레이더 관리자)

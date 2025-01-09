@@ -138,7 +138,7 @@ public class QuestionController {
 
         // 추후 시큐리티 적용 시 Authentication 객체로부터 userId와 userRole을 추출
         PageResponseDto<QuestionsResponse> response = questionService.getTraderQuestions(customUserDetails.getUserId(),
-                Role.INVESTOR, keyword, searchCondition, stateCondition,
+                Role.TRADER, keyword, searchCondition, stateCondition,
                 pageable);
         return BaseResponse.success(response);
     }
