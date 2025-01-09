@@ -11,7 +11,6 @@ import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +19,7 @@ public class TradeTypeService {
     private final TradeTypeRepository tradeTypeRepository;
     private final S3FileService s3FileService;
 
+    @Transactional
     public String saveTradeType(TradeTypeRequestDTO tradeTypeRequestDTO) {
         // 클라이언트에서 입력한 파일 경로로 생성한 이미지 경로 저장
         TradeType tradeType = tradeTypeRequestDTO.toEntity();
@@ -38,6 +38,7 @@ public class TradeTypeService {
 
         return tradeTypes;
     }
+
     @Transactional
     public void changeActivateState(Long tradeTypeId) {
         TradeType tradeType = tradeTypeRepository
@@ -45,5 +46,13 @@ public class TradeTypeService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
         tradeType.changeActivateState();
         tradeTypeRepository.save(tradeType);
+    }
+
+    @Transactional
+    public void deleteTradeType(Long tradeTypeId) {
+        TradeType tradeType = tradeTypeRepository
+                .findById(tradeTypeId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRADETYPE_NOT_FOUND));
+        tradeTypeRepository.deleteById(tradeTypeId);
     }
 }
