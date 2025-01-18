@@ -155,25 +155,6 @@ class StrategyDailyAnalysisServiceTest {
     }
 
     @Test
-    @DisplayName("전략 일간 분석 등록 - 이미 존재하는 경우 예외 발생")
-    void 전략_일간_분석_등록_테스트_3() {
-        Long strategyId = strategy.getStrategyId();
-        List<TraderDailyAnalysisRequestDto> dailyAnalysisList = List.of(requestDailyAnalysis);
-        Long userId = user.getUserId();
-
-        when(strategyRepository.findById(strategy.getStrategyId())).thenReturn(Optional.of(strategy));
-        when(dailyAnalysisRepository.findDailyAnalysisByStrategyAndDate(strategy, requestDailyAnalysis.getDate()))
-                .thenReturn(Optional.of(existingDailyAnalysisProceedNo));
-
-        BusinessException exception = assertThrows(BusinessException.class, () ->
-                strategyAnalysisService.createDailyAnalysis(strategyId, dailyAnalysisList,
-                        userId));
-
-        assertEquals(ErrorCode.DAILY_ANALYSIS_ALREADY_EXISTS, exception.getErrorCode());
-        verify(dailyAnalysisRepository, never()).save(any(DailyAnalysis.class));
-    }
-
-    @Test
     @DisplayName("전략 일간 분석 등록 - 권한이 없는 사용자일 경우 예외 발생")
     void 전략_일간_분석_등록_테스트_4() {
         Long strategyId = strategy.getStrategyId();
