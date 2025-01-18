@@ -23,6 +23,7 @@ public class StrategyModifyInfoResponseDto {
     private MinimumInvestmentAmount minimumInvestmentAmount;
     private OperationCycle operationCycle;
     private String proposalFileUrl;
+    private String proposalFileName;
     private IsPublic isPublic;
     private String description;
 
@@ -33,8 +34,22 @@ public class StrategyModifyInfoResponseDto {
         this.tradeType = tradeType;
         this.operationCycle = strategy.getOperationCycle();
         this.minimumInvestmentAmount = strategy.getMinimumInvestmentAmount();
-        this.proposalFileUrl = strategy.getProposalFilePath();
         this.isPublic = strategy.getIsPublic();
         this.description = strategy.getStrategyDescription();
+
+        if (strategy.getProposalFilePath() != null) {
+            this.proposalFileUrl = "/" + strategy.getStrategyId() + "/download-proposal";
+            this.proposalFileName = "/" + strategy.getStrategyId() + "/download-proposal";
+        } else {
+            this.proposalFileUrl = null;
+            this.proposalFileName = extractFileName(strategy.getProposalFilePath());
+        }
+    }
+    private String extractFileName(String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return null;
+        }
+        String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+        return fileName.length() > 8 ? fileName.substring(8) : fileName;
     }
 }
