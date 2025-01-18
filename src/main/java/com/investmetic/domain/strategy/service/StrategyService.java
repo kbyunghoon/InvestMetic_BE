@@ -301,7 +301,10 @@ public class StrategyService {
 
             String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
-            s3FileService.deleteFromS3(strategy.getProposalFilePath());
+            if (!strategy.getProposalFilePath().isEmpty()) {
+                s3FileService.deleteFromS3(strategy.getProposalFilePath());
+            }
+
             strategy.modifyStrategyWithProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription(),
                     proposalFilePath);
 
