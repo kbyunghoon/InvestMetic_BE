@@ -39,11 +39,10 @@ public class StrategyModifyInfoResponseDto {
 
         if (strategy.getProposalFilePath() != null) {
             this.proposalFileUrl = "/" + strategy.getStrategyId() + "/download-proposal";
-            this.proposalFileName = "/" + strategy.getStrategyId() + "/download-proposal";
         } else {
             this.proposalFileUrl = null;
-            this.proposalFileName = extractFileName(strategy.getProposalFilePath());
         }
+        this.proposalFileName = extractFileName(strategy.getProposalFilePath());
     }
     private String extractFileName(String filePath) {
         if (filePath == null || filePath.isEmpty()) {
