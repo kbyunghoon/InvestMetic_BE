@@ -2,6 +2,7 @@ package com.investmetic.domain.strategy.service;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.investmetic.domain.accountverification.model.entity.AccountVerification;
 import com.investmetic.domain.accountverification.repository.AccountVerificationRepository;
 import com.investmetic.domain.qna.model.QnaState;
@@ -43,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +80,6 @@ public class StrategyService {
 
     @Transactional(readOnly = true)
     public FileDownloadResponseDto downloadFileFromUrl(Long strategyId, Long userId) {
-        // 전략 조회 및 유효성 검사
         Strategy strategy = strategyRepository.findById(strategyId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
@@ -88,24 +88,17 @@ public class StrategyService {
         }
 
         String proposalFilePath = strategy.getProposalFilePath();
-
         if (proposalFilePath == null || proposalFilePath.isBlank()) {
             throw new BusinessException(ErrorCode.PROPOSAL_NOT_FOUND);
         }
-
-        // S3 파일 키 추출 및 파일 가져오기
         try (
                 S3Object s3Object = s3FileService.extractFileKeyFromUrl(proposalFilePath);
                 S3ObjectInputStream inputStream = s3Object.getObjectContent()
         ) {
+            byte[] fileBytes = IOUtils.toByteArray(inputStream);
             String fileExtension = extractFileExtension(proposalFilePath);
-
-            // 다운로드 시 파일명 변경
             String newFileName = strategy.getStrategyName() + "_제안서" + fileExtension;
-
-            // InputStreamResource 생성
-            InputStreamResource resource = new InputStreamResource(inputStream);
-
+            ByteArrayResource resource = new ByteArrayResource(fileBytes);
             return FileDownloadResponseDto.builder()
                     .downloadFileName(newFileName)
                     .resource(resource)
@@ -115,6 +108,7 @@ public class StrategyService {
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // 파일 확장자 추출 메서드
     private String extractFileExtension(String filePath) {

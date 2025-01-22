@@ -154,11 +154,13 @@ public class StrategyController {
     @Operation(summary = "트레이더 전략 제안서 다운로드 기능", description = "<a href='https://field-sting-eff.notion.site/0b7c02614c9e485180a3f2e010773c11?pvs=4' target='_blank'>API 명세서</a>")
     public ResponseEntity<Resource> downloadProposal(@PathVariable Long strategyId,
                                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-        FileDownloadResponseDto fileDownloadResponse = strategyService.downloadFileFromUrl(strategyId,
-                customUserDetails.getUserId());
 
-        String encodedFileName = URLEncoder.encode(fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8)
-                .replace("+", "%20");
+        FileDownloadResponseDto fileDownloadResponse =
+                strategyService.downloadFileFromUrl(strategyId, customUserDetails.getUserId());
+
+        String encodedFileName = URLEncoder.encode(
+                fileDownloadResponse.getDownloadFileName(), StandardCharsets.UTF_8
+        ).replace("+", "%20");
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
