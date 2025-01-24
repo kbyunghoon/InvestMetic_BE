@@ -113,7 +113,7 @@ public class StrategyService {
             // AWS에 저장되어있는 객체 Key가 DB와 다를 경우 NotFound 발생(The specified key does not exist).
             log.error("strategy ID : %s".formatted(strategyId));
             log.error("Amazon Exception : %s".formatted(sdkClientException.getMessage()));
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ErrorCode.S3_PROPOSAL_DOWNLOAD_FAILED);
         }
     }
 
