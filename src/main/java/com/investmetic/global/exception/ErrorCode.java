@@ -70,6 +70,7 @@ public enum ErrorCode {
     ANALYSIS_OPTION_NOT_FOUND(HttpStatus.BAD_REQUEST, 3019, "유효하지 않은 옵션입니다."),
     DAILY_ANALYSIS_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, 3020, "해당 날짜의 전략 통계가 이미 존재합니다."),
     DAILY_ANALYSIS_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 날짜의 전략 통계가 존재하지 않습니다."),
+    S3_PROPOSAL_DOWNLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,3022, "전략서 다운로드에 실패하였습니다."),
 
     STOCKTYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3021, "해당 종목이 존재하지 않습니다."),
     TRADETYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, 3022, "해당 매매 유형이 존재하지 않습니다."),
@@ -93,7 +94,11 @@ public enum ErrorCode {
 
     // 공지사항 관련 오류(6000번대 );
     NOTICE_NOT_FOUND(HttpStatus.NOT_FOUND, 6001, "해당 공지사항을 찾을 수 없습니다."),
-    NOTICE_FILE_NOT_FOUND(HttpStatus.NOT_FOUND, 6002, "해당 공지사항 파일을 찾을 수 없습니다.");
+    NOTICE_FILE_NOT_FOUND(HttpStatus.NOT_FOUND, 6002, "해당 공지사항 파일을 찾을 수 없습니다."),
+    S3_NOTICE_FILE_DOWNLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR,6003, "공지사항 파일 다운로드에 실패하였습니다.");
+
+
+
     private final HttpStatus status; // HTTP 상태 코드
     private final int code; // 고유 오류 코드
     private final String message; // 오류 메시지

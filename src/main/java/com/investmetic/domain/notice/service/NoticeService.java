@@ -135,7 +135,7 @@ public class NoticeService {
             // AWS에 저장되어있는 객체 Key가 DB와 다를 경우 NotFound 발생.
             log.error("Notice ID : %s".formatted(noticeId));
             log.error("Amazon Exception : %s".formatted(sdkClientException.getMessage()));
-            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+            throw new BusinessException(ErrorCode.S3_NOTICE_FILE_DOWNLOAD_FAILED);
         }
 
     }
