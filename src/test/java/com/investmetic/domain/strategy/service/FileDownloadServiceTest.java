@@ -57,7 +57,7 @@ class FileDownloadServiceTest {
         S3ObjectInputStream mockInputStream = mock(S3ObjectInputStream.class);
 
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(mockStrategy));
-        when(s3FileService.extractFileKeyFromUrl(proposalFilePath)).thenReturn(mockS3Object);
+        when(s3FileService.extractFileFromUrl(proposalFilePath)).thenReturn(mockS3Object);
         when(mockS3Object.getObjectContent()).thenReturn(mockInputStream);
 
         FileDownloadResponseDto response = strategyService.downloadFileFromUrl(strategyId, user.getUserId());
@@ -67,7 +67,7 @@ class FileDownloadServiceTest {
         assertNotNull(response.getResource());
 
         verify(strategyRepository, times(1)).findById(strategyId);
-        verify(s3FileService, times(1)).extractFileKeyFromUrl(proposalFilePath);
+        verify(s3FileService, times(1)).extractFileFromUrl(proposalFilePath);
         verify(mockS3Object, times(1)).getObjectContent();
     }
 
