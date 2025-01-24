@@ -24,7 +24,6 @@ import com.investmetic.global.util.s3.S3FileService;
 import jakarta.transaction.Transactional;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -118,7 +117,7 @@ public class NoticeService {
         }
         String noticeFileUrl = noticeFile.getFileUrl();
         try (
-                S3Object s3Object = s3FileService.extractFileKeyFromUrl(noticeFileUrl);
+                S3Object s3Object = s3FileService.extractFileFromUrl(noticeFileUrl);
 
                 S3ObjectInputStream inputStream = s3Object.getObjectContent()
         ) {
@@ -130,7 +129,12 @@ public class NoticeService {
                     .downloadFileName(noticeFile.getFileName())
                     .resource(resource)
                     .build();
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (SdkClientException sdkClientException) {
+            // AWS에 저장되어있는 객체 Key가 DB와 다를 경우 NotFound 발생.
+            log.error("Notice ID : %s".formatted(noticeId));
+            log.error("Amazon Exception : %s".formatted(sdkClientException.getMessage()));
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 

@@ -14,8 +14,6 @@ import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -243,11 +241,13 @@ public class S3FileService {
     /**
      * URL에서 S3 파일 키 추출
      */
-    public S3Object extractFileKeyFromUrl(String fileUrl) throws URISyntaxException {
-        URI uri = new URI(fileUrl);
-        String path = uri.getPath(); // 경로 추출
+    public S3Object extractFileFromUrl(String fileUrl) {
+        //  s3Key : "strategy/3458/proposal/fb8d6a98BL_전략.xls"
+        String s3Key = fileUrl.substring(fileUrl.lastIndexOf(".com/") + 5);
+
+        log.debug("s3Key : %s".formatted(s3Key));
         // S3에서 파일 가져오기
-        return amazonS3.getObject(bucketName, path.substring(1));
+        return amazonS3.getObject(bucketName, s3Key);
     }
 
 

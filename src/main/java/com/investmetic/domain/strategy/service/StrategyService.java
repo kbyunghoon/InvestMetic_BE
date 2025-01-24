@@ -1,5 +1,6 @@
 package com.investmetic.domain.strategy.service;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.util.IOUtils;
@@ -39,17 +40,18 @@ import com.investmetic.global.exception.ErrorCode;
 import com.investmetic.global.util.s3.FilePath;
 import com.investmetic.global.util.s3.S3FileService;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StrategyService {
     private final StrategyRepository strategyRepository;
     private final S3FileService s3FileService;
@@ -92,7 +94,7 @@ public class StrategyService {
             throw new BusinessException(ErrorCode.PROPOSAL_NOT_FOUND);
         }
         try (
-                S3Object s3Object = s3FileService.extractFileKeyFromUrl(proposalFilePath);
+                S3Object s3Object = s3FileService.extractFileFromUrl(proposalFilePath);
                 S3ObjectInputStream inputStream = s3Object.getObjectContent()
         ) {
             byte[] fileBytes = IOUtils.toByteArray(inputStream);
@@ -104,7 +106,13 @@ public class StrategyService {
                     .resource(resource)
                     .build();
 
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
+
+        } catch (SdkClientException sdkClientException) {
+            // AWS에 저장되어있는 객체 Key가 DB와 다를 경우 NotFound 발생(The specified key does not exist).
+            log.error("strategy ID : %s".formatted(strategyId));
+            log.error("Amazon Exception : %s".formatted(sdkClientException.getMessage()));
             throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
