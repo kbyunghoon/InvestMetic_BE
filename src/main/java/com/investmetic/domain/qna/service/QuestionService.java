@@ -162,22 +162,8 @@ public class QuestionService {
         }
 
         // 역할에 따른 정보를 설정
-        String profileImageUrl = "http://default-image-url.com/default.jpg"; // 기본 이미지 URL
-        String nickname;
-
-        if (Role.isInvestor(role)) {
-            // 투자자: 트레이더 정보 반환
-            profileImageUrl = question.getUser().getImageUrl(); // 트레이더 이미지
-            nickname = question.getUser().getNickname();       // 트레이더 닉네임
-        } else if (Role.isTrader(role)) {
-            // 트레이더: 투자자 정보 반환
-            profileImageUrl = question.getStrategy().getUser().getImageUrl();              // 투자자 이미지
-            nickname = question.getStrategy().getUser().getNickname();                    // 투자자 닉네임
-        } else {
-            // 관리자: 기본 정보 반환
-            profileImageUrl = question.getUser().getImageUrl();              // 투자자 이미지
-            nickname = question.getUser().getNickname();                    // 투자자 닉네임
-        }
+        String profileImageUrl = question.getUser().getImageUrl();
+        String nickname = question.getUser().getNickname();
 
         // 답변이 없는 경우에는 Answer 관련 필드를 적절히 처리
         AnswerResponseDto answerResponse = null;
