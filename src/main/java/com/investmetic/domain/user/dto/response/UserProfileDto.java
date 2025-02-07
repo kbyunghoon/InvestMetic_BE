@@ -3,6 +3,7 @@ package com.investmetic.domain.user.dto.response;
 
 import com.investmetic.domain.user.model.Role;
 import com.querydsl.core.annotations.QueryProjection;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,10 +31,12 @@ public class UserProfileDto {
 
     private String birthDate;
 
+    private LocalDate joinDate;
+
     @QueryProjection
     @Builder
     public UserProfileDto(Long userId, String userName, String email, String imageUrl, String nickname, String phone,
-                          Boolean infoAgreement, Role role, String birthDate) {
+                          Boolean infoAgreement, Role role, String birthDate,LocalDate joinDate) {
         this.userId = userId;
         this.userName = userName;
         this.email = email;
@@ -43,6 +46,7 @@ public class UserProfileDto {
         this.infoAgreement = infoAgreement;
         this.role = role;
         this.birthDate = birthDate;
+        this.joinDate = joinDate;
     }
 
 }

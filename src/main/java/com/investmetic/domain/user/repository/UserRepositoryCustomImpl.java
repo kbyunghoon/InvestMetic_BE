@@ -53,7 +53,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.phone,
                         user.infoAgreement,
                         user.role,
-                        user.birthDate))
+                        user.birthDate,
+                        user.joinDate))
                 .where(user.email.eq(email))
                 .fetchOne());
     }
@@ -90,7 +91,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                                 user.phone,
                                 user.infoAgreement,
                                 user.role,
-                                user.birthDate)).from(user)
+                                user.birthDate,
+                                user.joinDate)).from(user)
                 .where(condition.toArray(new Predicate[0]))
                 .orderBy(orderByLatest())
                 .offset(pageable.getOffset())
@@ -139,7 +141,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .where(
                         keywordCondition(ColumnCondition.NICKNAME, traderNickname),
                         user.role.in(Role.TRADER, Role.TRADER_ADMIN)
-                        )
+                )
                 .groupBy(user.userId)
                 .orderBy(orderSpecifiers.toArray(new OrderSpecifier[0])) // 구독순, 전략순
                 .offset(pageable.getOffset())
@@ -240,7 +242,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.phone,
                         user.infoAgreement,
                         user.role,
-                        user.birthDate))
+                        user.birthDate,
+                        user.joinDate))
                 .where(user.phone.eq(phone))
                 .fetchOne());
     }
@@ -259,13 +262,14 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         user.phone,
                         user.infoAgreement,
                         user.role,
-                        user.birthDate))
+                        user.birthDate,
+                        user.joinDate))
                 .where(user.nickname.eq(nickname))
                 .fetchOne());
     }
 
     @Override
-    public Optional<TraderProfileDto> findTraderInfoByUserId(Long userId){
+    public Optional<TraderProfileDto> findTraderInfoByUserId(Long userId) {
 
         return Optional.ofNullable(queryFactory.select(
                         new QTraderProfileDto(user.userId,
@@ -281,7 +285,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                         isApprovedAndPublic()
                 )
                 .where(user.userId.eq(userId)
-                        ,user.role.in(Role.TRADER, Role.TRADER_ADMIN)
+                        , user.role.in(Role.TRADER, Role.TRADER_ADMIN)
                 )
                 .groupBy(user.userId)
                 .fetchOne());
@@ -291,8 +295,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         return strategy.isApproved.eq(IsApproved.APPROVED)
                 .and(strategy.isPublic.eq(IsPublic.PUBLIC));
     }
-
-
 
 
 }
