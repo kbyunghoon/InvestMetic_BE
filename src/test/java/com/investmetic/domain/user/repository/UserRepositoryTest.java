@@ -45,25 +45,6 @@ class UserRepositoryTest {
         assertThat(result.get().getEmail()).isEqualTo("test@example.com");
     }
 
-    @Test
-    void findByNicknameUserInfo_성공() {
-        User user = createOneUser();
-
-        Optional<UserProfileDto> result = userRepository.findByNicknameUserInfo(user.getNickname());
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getNickname()).isEqualTo("testNickname");
-    }
-
-    @Test
-    void findByPhoneUserInfo_성공() {
-        User user = createOneUser();
-
-        Optional<UserProfileDto> result = userRepository.findByPhoneUserInfo(user.getPhone());
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getPhone()).isEqualTo("01012345678");
-    }
 
     @Test
     void existsByEmail_성공() {

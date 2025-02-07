@@ -35,7 +35,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-
     /**
      * 회원 정보 제공
      */
@@ -226,46 +225,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
 
         return queryFactory.selectFrom(user).where(user.email.eq(email)).fetchFirst() != null;
-    }
-
-    @Override
-    public Optional<UserProfileDto> findByPhoneUserInfo(String phone) {
-        QUser user = QUser.user;
-
-        return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(
-                        user.userId,
-                        user.userName,
-                        user.email,
-                        user.imageUrl,
-                        user.nickname,
-                        user.phone,
-                        user.infoAgreement,
-                        user.role,
-                        user.birthDate,
-                        user.joinDate))
-                .where(user.phone.eq(phone))
-                .fetchOne());
-    }
-
-    @Override
-    public Optional<UserProfileDto> findByNicknameUserInfo(String nickname) {
-        QUser user = QUser.user;
-
-        return Optional.ofNullable(queryFactory.from(user)
-                .select(new QUserProfileDto(
-                        user.userId,
-                        user.userName,
-                        user.email,
-                        user.imageUrl,
-                        user.nickname,
-                        user.phone,
-                        user.infoAgreement,
-                        user.role,
-                        user.birthDate,
-                        user.joinDate))
-                .where(user.nickname.eq(nickname))
-                .fetchOne());
     }
 
     @Override
