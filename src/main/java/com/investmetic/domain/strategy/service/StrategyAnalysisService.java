@@ -8,6 +8,9 @@ import com.investmetic.domain.strategy.model.entity.Strategy;
 import com.investmetic.domain.strategy.repository.DailyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.MonthlyAnalysisRepository;
 import com.investmetic.domain.strategy.repository.StrategyRepository;
+import com.investmetic.domain.user.model.Role;
+import com.investmetic.domain.user.model.entity.User;
+import com.investmetic.domain.user.repository.UserRepository;
 import com.investmetic.global.common.PageResponseDto;
 import com.investmetic.global.exception.BusinessException;
 import com.investmetic.global.exception.ErrorCode;
@@ -26,6 +29,7 @@ public class StrategyAnalysisService {
     private final DailyAnalysisRepository dailyAnalysisRepository;
     private final StrategyRepository strategyRepository;
     private final MonthlyAnalysisRepository monthlyAnalysisRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public void createDailyAnalysis(Long strategyId, List<TraderDailyAnalysisRequestDto> analysisRequests,
@@ -138,6 +142,11 @@ public class StrategyAnalysisService {
     }
 
     private void verifyUserPermission(Strategy strategy, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USERS_NOT_FOUND));
+        if (Role.isAdmin(user.getRole())) {
+            return;
+        }
+
         if (!strategy.getUser().getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
