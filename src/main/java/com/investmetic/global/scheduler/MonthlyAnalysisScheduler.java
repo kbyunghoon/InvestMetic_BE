@@ -23,7 +23,9 @@ public class MonthlyAnalysisScheduler {
                 .collect(Collectors.groupingBy(daily -> YearMonth.from(daily.getDailyDate())));
 
         groupedByMonth.forEach((month, dailyAnalysisList) -> {
-            Long monthlyPrincipal = dailyAnalysisList.get(dailyAnalysisList.size() - 1).getPrincipal();
+            DailyAnalysis lastDayAnalysis = dailyAnalysisList.get(dailyAnalysisList.size() - 1);
+
+            Long monthlyPrincipal = lastDayAnalysis.getPrincipal();
 
             Long monthlyTransaction = dailyAnalysisList.stream()
                     .mapToLong(DailyAnalysis::getTransaction)
@@ -38,14 +40,9 @@ public class MonthlyAnalysisScheduler {
                     .average()
                     .orElse(0.0);
 
-            Long monthlyCumulativeProfitLoss = dailyAnalysisList.stream()
-                    .mapToLong(DailyAnalysis::getCumulativeProfitLoss)
-                    .sum();
+            Long monthlyCumulativeProfitLoss = lastDayAnalysis.getCumulativeProfitLoss();
 
-            Double monthlyCumulativeProfitLossRate = dailyAnalysisList.stream()
-                    .mapToDouble(DailyAnalysis::getCumulativeProfitLossRate)
-                    .average()
-                    .orElse(0.0);
+            Double monthlyCumulativeProfitLossRate = lastDayAnalysis.getCumulativeProfitLossRate();
 
             LocalDate monthlyDate = month.atEndOfMonth();
 
