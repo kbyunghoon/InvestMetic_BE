@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -290,10 +291,20 @@ public class StrategyService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.STRATEGY_NOT_FOUND));
 
         User user = verifyUser(userId);
-
         verifyUserPermission(strategy, user);
 
-        if (Boolean.TRUE.equals(requestDto.getProposalModified())) {
+        boolean proposalModified = Optional.ofNullable(requestDto.getProposalModified()).orElse(false);
+
+        if (proposalModified) {
+            if (requestDto.getProposalFile() == null) {
+                // 제안서를 삭제하는 경우
+                deleteProposalFileIfExists(strategy);
+                strategy.modifyStrategyWithProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription(),
+                        null);
+                return null; // Presigned URL 필요 없음
+            }
+
+            // 새 제안서 업로드
             String proposalFilePath = s3FileService.getS3StrategyPath(
                     FilePath.STRATEGY_PROPOSAL,
                     strategyId,
@@ -303,18 +314,23 @@ public class StrategyService {
 
             String presignedUrl = s3FileService.getPreSignedUrl(proposalFilePath);
 
-            if (strategy.getProposalFilePath() != null) {
-                s3FileService.deleteFromS3(strategy.getProposalFilePath());
-            }
+            deleteProposalFileIfExists(strategy);
 
             strategy.modifyStrategyWithProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription(),
                     proposalFilePath);
 
             return PresignedUrlResponseDto.builder().presignedUrl(presignedUrl).build();
-        } else {
-            strategy.modifyStrategyWithoutProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription());
+        }
+        strategy.modifyStrategyWithoutProposalFilePath(requestDto.getStrategyName(), requestDto.getDescription());
+        return null;
+    }
 
-            return null;
+    /**
+     * 기존 제안서 파일이 존재하면 S3에서 삭제하는 메서드
+     */
+    private void deleteProposalFileIfExists(Strategy strategy) {
+        if (strategy.getProposalFilePath() != null) {
+            s3FileService.deleteFromS3(strategy.getProposalFilePath());
         }
     }
 
