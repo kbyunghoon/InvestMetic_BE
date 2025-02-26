@@ -149,9 +149,6 @@ public class Strategy extends BaseEntity {
         this.proposalFilePath = proposalFilePath;
     }
 
-    public void plusSubscriptionCount() {
-        this.subscriptionCount += 1;
-    }
 
     public void minusSubscriptionCount() {
         this.subscriptionCount -= 1;
