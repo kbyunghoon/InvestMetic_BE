@@ -3,6 +3,7 @@ package com.investmetic.domain.strategy.repository;
 import com.investmetic.domain.strategy.model.entity.Strategy;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,4 +29,12 @@ public interface StrategyRepository extends JpaRepository<Strategy, Long>, Strat
             """,
             nativeQuery = true)
     List<Object[]> findTop20ProfitRatesByStrategyIds(@Param("strategyIds") List<Long> strategyIds);
+
+    @Modifying
+    @Query("UPDATE Strategy s SET s.subscriptionCount = s.subscriptionCount + 1 WHERE s.id = :id")
+    void incrementSubscriptionCount(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Strategy s SET s.subscriptionCount = s.subscriptionCount - 1 WHERE s.id = :id")
+    void decrementSubscriptionCount(@Param("id") Long id);
 }

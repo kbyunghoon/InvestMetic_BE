@@ -10,10 +10,12 @@ import com.investmetic.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final StrategyRepository strategyRepository;
@@ -37,21 +39,24 @@ public class SubscriptionService {
         } else {
             handleSubscribe(user, strategy);
         }
-    }
 
-    /**
-     * 전략 구독
-     */
-    private void handleUnsubscribe(Subscription subscription, Strategy strategy) {
-        strategy.minusSubscriptionCount();
-        subscriptionRepository.delete(subscription);
+        strategyRepository.save(strategy);
     }
 
     /**
      * 구독 취소
      */
+    private void handleUnsubscribe(Subscription subscription, Strategy strategy) {
+        strategyRepository.decrementSubscriptionCount(strategy.getStrategyId());
+        subscriptionRepository.delete(subscription);
+    }
+
+    /**
+     * 전략 구독
+     */
     private void handleSubscribe(User user, Strategy strategy) {
-        strategy.plusSubscriptionCount();
+
+        strategyRepository.incrementSubscriptionCount(strategy.getStrategyId());
         Subscription subscription = Subscription.builder()
                 .user(user)
                 .strategy(strategy)
