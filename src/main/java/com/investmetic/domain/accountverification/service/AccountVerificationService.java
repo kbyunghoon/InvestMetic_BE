@@ -16,9 +16,10 @@ import com.investmetic.global.util.s3.S3FileService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -106,9 +107,20 @@ public class AccountVerificationService {
     }
 
     private void verifyUserPermission(Strategy strategy, Long userId) {
-        if (!strategy.getUser().getUserId().equals(userId)) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = isAdmin(authentication);
+        if (!isAdmin && !strategy.getUser().getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN_ACCESS);
         }
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority ->
+                        grantedAuthority.getAuthority().equals("ROLE_TRADER_ADMIN") ||
+                                grantedAuthority.getAuthority().equals("ROLE_TRADER_ADMIN") ||
+                                grantedAuthority.getAuthority().equals("ROLE_SUPER_ADMIN")
+                );
     }
 
     private Strategy findStrategyById(Long strategyId) {
