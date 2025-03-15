@@ -97,14 +97,9 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
                     SELECT DA2.reference_price
                     FROM daily_analysis AS DA2
                              JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
-                    WHERE st.strategy_id = (
-                        SELECT st1.strategy_id
-                        FROM strategy AS st1
-                        WHERE st1.sm_score = (
-                            SELECT MAX(st2.sm_score) FROM strategy AS st2
-                        )
-                        LIMIT 1
-                    )
+                     WHERE st.strategy_id = (
+                                SELECT strategy_id FROM strategy ORDER BY sm_score DESC LIMIT 1
+                            )
                       AND DA2.daily_date = DA.daily_date
                 ),0) AS highest_sm_score_reference_price,
                 coalesce((
@@ -112,13 +107,8 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
                     FROM daily_analysis AS DA2
                              JOIN strategy AS st ON DA2.strategy_id = st.strategy_id
                     WHERE st.strategy_id = (
-                        SELECT st1.strategy_id
-                        FROM strategy AS st1
-                        WHERE st1.subscription_count = (
-                            SELECT MAX(st2.subscription_count) FROM strategy AS st2
-                        )
-                        LIMIT 1
-                    )
+                        SELECT strategy_id FROM strategy ORDER BY subscription_count DESC LIMIT 1
+                            )
                       AND DA2.daily_date = DA.daily_date
                 ),0) AS highest_subscribe_score_reference_price
             FROM
@@ -144,14 +134,14 @@ public interface DailyAnalysisRepository extends JpaRepository<DailyAnalysis, Lo
     void deleteByStrategyAndDailyAnalysisId(Strategy strategy, Long analysisId);
 
     @Query("""
-        SELECT d
-        FROM DailyAnalysis d
-        WHERE d.strategy.strategyId = :strategyId
-        AND d.dailyDate = (
-            SELECT MAX(d2.dailyDate)
-            FROM DailyAnalysis d2
-            WHERE d2.strategy.strategyId = :strategyId
-        )
-    """)
+                SELECT d
+                FROM DailyAnalysis d
+                WHERE d.strategy.strategyId = :strategyId
+                AND d.dailyDate = (
+                    SELECT MAX(d2.dailyDate)
+                    FROM DailyAnalysis d2
+                    WHERE d2.strategy.strategyId = :strategyId
+                )
+            """)
     DailyAnalysis findLatestStrategy(@Param("strategyId") Long strategyId);
 }
