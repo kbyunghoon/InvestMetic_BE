@@ -41,8 +41,8 @@ public class DailyAnalysisResponse {
         this.principal = principal;
         this.transaction = transaction;
         this.dailyProfitLoss = dailyProfitLoss;
-        this.dailyProfitLossRate = RoundUtil.roundToThird(dailyProfitLossRate);
+        this.dailyProfitLossRate = RoundUtil.roundToFifth(dailyProfitLossRate);
         this.cumulativeProfitLoss = cumulativeProfitLoss;
-        this.cumulativeProfitLossRate = RoundUtil.roundToThird(cumulativeProfitLossRate);
+        this.cumulativeProfitLossRate = RoundUtil.roundToFifth(cumulativeProfitLossRate);
     }
 }

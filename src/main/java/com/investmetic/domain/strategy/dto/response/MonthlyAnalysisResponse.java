@@ -37,9 +37,9 @@ public class MonthlyAnalysisResponse {
                 monthlyAnalysis.getMonthlyAveragePrincipal(),
                 monthlyAnalysis.getDepositsWithdrawals(),
                 monthlyAnalysis.getMonthlyProfitLoss(),
-                RoundUtil.roundToThird(monthlyAnalysis.getMonthlyProfitLossRate()),
+                RoundUtil.roundToFifth(monthlyAnalysis.getMonthlyProfitLossRate()),
                 monthlyAnalysis.getCumulativeProfitLoss(),
-                RoundUtil.roundToThird(monthlyAnalysis.getCumulativeProfitLossRate())
+                RoundUtil.roundToFifth(monthlyAnalysis.getCumulativeProfitLossRate())
         );
     }
 }
