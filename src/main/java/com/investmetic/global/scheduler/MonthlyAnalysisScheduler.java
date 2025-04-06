@@ -35,10 +35,7 @@ public class MonthlyAnalysisScheduler {
                     .mapToLong(DailyAnalysis::getDailyProfitLoss)
                     .sum();
 
-            Double monthlyProfitLossRate = dailyAnalysisList.stream()
-                    .mapToDouble(DailyAnalysis::getDailyProfitLossRate)
-                    .average()
-                    .orElse(0.0);
+            Double monthlyProfitLossRate = (double) monthlyProfitLoss / monthlyPrincipal;
 
             Long monthlyCumulativeProfitLoss = lastDayAnalysis.getCumulativeProfitLoss();
 
