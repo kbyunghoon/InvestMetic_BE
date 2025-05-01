@@ -32,25 +32,22 @@ public class StrategyStatisticsScheduler {
                 .max(Comparator.comparing(DailyAnalysis::getDailyDate))
                 .orElseThrow(() -> new BusinessException(ErrorCode.DAILY_ANALYSIS_QUERY_FAILED));
 
-        StrategyStatistics calculatedStatistics = createStrategyStatistics(dailyAnalyses, firstDailyAnalysis,
-                lastDailyAnalysis);
-
-        Optional<StrategyStatistics> optionalStrategyStatistics = strategyStatisticsRepository.findById(
-                firstDailyAnalysis.getStrategy().getStrategyId());
 
         Strategy strategy = firstDailyAnalysis.getStrategy();
 
-        // 이미 존재하는 통계일때
-        if (optionalStrategyStatistics.isPresent()) {
-            // 기존 통계가 있으면 업데이트
-            StrategyStatistics existingStatistics = optionalStrategyStatistics.get();
-            existingStatistics.updateExistingStatistics(calculatedStatistics);
-            return;
-        }
+        StrategyStatistics calculatedStatistics = createStrategyStatistics(dailyAnalyses, firstDailyAnalysis,
+                lastDailyAnalysis);
 
-        // 새 통계 생성 후 설정
-        strategy.setStrategyStatistics(calculatedStatistics);
-        strategyStatisticsRepository.save(calculatedStatistics);
+        StrategyStatistics existingStatistics = strategy.getStrategyStatistics();
+
+        if (existingStatistics != null) {
+            // 기존 통계 업데이트
+            existingStatistics.updateExistingStatistics(calculatedStatistics);
+        } else {
+            // 새 통계 생성
+            strategyStatisticsRepository.save(calculatedStatistics);
+            strategy.setStrategyStatistics(calculatedStatistics);
+        }
 
         // mdd, 수익률표준편차, 승률 순위 업데이트 쿼리
         strategyStatisticsRepository.updateRanks();
