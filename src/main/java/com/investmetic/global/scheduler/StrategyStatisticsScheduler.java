@@ -10,9 +10,9 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +20,7 @@ public class StrategyStatisticsScheduler {
 
     private final StrategyStatisticsRepository strategyStatisticsRepository;
 
+    @Transactional
     public void calculateStatistics(List<DailyAnalysis> dailyAnalyses) {
 
         // 처음 일간 분석 데이터
@@ -31,7 +32,6 @@ public class StrategyStatisticsScheduler {
         DailyAnalysis lastDailyAnalysis = dailyAnalyses.stream()
                 .max(Comparator.comparing(DailyAnalysis::getDailyDate))
                 .orElseThrow(() -> new BusinessException(ErrorCode.DAILY_ANALYSIS_QUERY_FAILED));
-
 
         Strategy strategy = firstDailyAnalysis.getStrategy();
 
@@ -45,8 +45,8 @@ public class StrategyStatisticsScheduler {
             existingStatistics.updateExistingStatistics(calculatedStatistics);
         } else {
             // 새 통계 생성
-            strategyStatisticsRepository.save(calculatedStatistics);
             strategy.setStrategyStatistics(calculatedStatistics);
+            strategyStatisticsRepository.save(calculatedStatistics);
         }
 
         // mdd, 수익률표준편차, 승률 순위 업데이트 쿼리

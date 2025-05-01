@@ -147,6 +147,7 @@ public class StrategyStatistics extends BaseTimeEntity {
     }
 
     public void updateExistingStatistics(StrategyStatistics updated) {
+        this.balance = updated.getBalance();
         this.operationPeriod = updated.getOperationPeriod();
         this.cumulativeTransactionAmount = updated.getCumulativeTransactionAmount();
         this.startDate = updated.getStartDate();
@@ -154,6 +155,7 @@ public class StrategyStatistics extends BaseTimeEntity {
         this.endDate = updated.getEndDate();
         this.daysSincePeakUpdate = updated.getDaysSincePeakUpdate();
         this.cumulativeProfitAmount = updated.getCumulativeProfitAmount();
+        this.cumulativeProfitRate = updated.getCumulativeProfitRate();
         this.recentYearProfitRate = updated.getRecentYearProfitRate();
         this.maxCumulativeProfitAmount = updated.getMaxCumulativeProfitAmount();
         this.maxCumulativeProfitRate = updated.getMaxCumulativeProfitRate();
@@ -161,6 +163,7 @@ public class StrategyStatistics extends BaseTimeEntity {
         this.averageProfitLossRate = updated.getAverageProfitLossRate();
         this.maxDailyProfitAmount = updated.getMaxDailyProfitAmount();
         this.maxDailyProfitRate = updated.getMaxDailyProfitRate();
+        this.maxDailyLossAmount = updated.getMaxDailyLossAmount();
         this.maxDailyLossRate = updated.getMaxDailyLossRate();
         this.roa = updated.getRoa();
         this.profitFactor = updated.getProfitFactor();
@@ -176,6 +179,6 @@ public class StrategyStatistics extends BaseTimeEntity {
         this.winRate = updated.getWinRate();
         this.totalTradeDays = updated.getTotalTradeDays();
         this.dailyProfitLossStdDev = updated.getDailyProfitLossStdDev();
-        this.initialInvestment = updated.initialInvestment;
+        this.initialInvestment = updated.getInitialInvestment();
     }
 }
