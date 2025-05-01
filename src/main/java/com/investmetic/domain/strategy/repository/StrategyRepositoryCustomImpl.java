@@ -369,6 +369,7 @@ public class StrategyRepositoryCustomImpl implements StrategyRepositoryCustom {
                 .select(dailyAnalysis.cumulativeProfitLossRate)
                 .from(dailyAnalysis)
                 .where(strategy.strategyId.eq(strategyId))
+                .orderBy(dailyAnalysis.dailyDate.asc())
                 .fetch();
     }
 
