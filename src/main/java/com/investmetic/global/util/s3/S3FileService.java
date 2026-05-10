@@ -105,11 +105,39 @@ public class S3FileService {
      */
     public String getPreSignedUrl(String filePath) {
 
-        // s3객체 URL에서 Key 추출(testCode에서 확인)
-        // filename에 ".com/" 안들어가있으면 앞에서부터 문자 짤립니다... postman으로 test할 때 확인하세요.
-        String s3Key = filePath.substring(filePath.lastIndexOf(".com/") + 5);
+        String s3Key = extractS3Key(filePath);
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest = getGeneratePreSignedUrlRequest(bucketName, s3Key);
+
+        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+
+        return URLDecoder.decode(url.toString(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * public-read ACL 없이 파일 업로드용(PUT) presigned url을 생성한다.
+     */
+    public String getPrivateUploadPreSignedUrl(String filePath) {
+        String s3Key = extractS3Key(filePath);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, s3Key)
+                .withMethod(HttpMethod.PUT)
+                .withExpiration(getPreSignedUrlExpiration());
+
+        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+
+        return URLDecoder.decode(url.toString(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * private 객체 조회용(GET) presigned url을 생성한다.
+     */
+    public String getReadPreSignedUrl(String filePath) {
+        String s3Key = extractS3Key(filePath);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName, s3Key)
+                .withMethod(HttpMethod.GET)
+                .withExpiration(getPreSignedUrlExpiration());
 
         URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
 
@@ -151,6 +179,12 @@ public class S3FileService {
         expTimeMillis += apiExpiration; // 1000 - 1초
         expiration.setTime(expTimeMillis); //현재 시간 + 1분 까지 유효
         return expiration;
+    }
+
+    private String extractS3Key(String filePath) {
+        // s3객체 URL에서 Key 추출(testCode에서 확인)
+        // filename에 ".com/" 안들어가있으면 앞에서부터 문자 짤립니다... postman으로 test할 때 확인하세요.
+        return filePath.substring(filePath.lastIndexOf(".com/") + 5);
     }
 
 

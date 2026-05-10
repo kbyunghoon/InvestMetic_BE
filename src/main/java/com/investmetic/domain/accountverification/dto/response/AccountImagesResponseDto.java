@@ -24,10 +24,14 @@ public class AccountImagesResponseDto {
     }
 
     public static AccountImagesResponseDto from(AccountVerification accountVerification) {
+        return from(accountVerification, accountVerification.getAccountVerificationUrl());
+    }
+
+    public static AccountImagesResponseDto from(AccountVerification accountVerification, String imageUrl) {
         return AccountImagesResponseDto.builder()
                 .id(accountVerification.getAccountVerificationId())
                 .title(accountVerification.getTitle())
-                .imageUrl(accountVerification.getAccountVerificationUrl())
+                .imageUrl(imageUrl)
                 .build();
     }
 

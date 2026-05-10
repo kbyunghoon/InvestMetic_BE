@@ -121,7 +121,7 @@ class AccountVerificationServiceTest {
         when(strategyRepository.findById(strategy.getStrategyId())).thenReturn(Optional.of(strategy));
         when(s3FileService.getS3StrategyPath(eq(FilePath.STRATEGY_IMAGE), anyLong(), anyString(), anyInt()))
                 .thenReturn("s3://bucket/path/to/image");
-        when(s3FileService.getPreSignedUrl("s3://bucket/path/to/image"))
+        when(s3FileService.getPrivateUploadPreSignedUrl("s3://bucket/path/to/image"))
                 .thenReturn("https://presigned.url");
 
         MultiPresignedUrlResponseDto response = accountVerificationService.registerStrategyAccountImages(
@@ -163,6 +163,8 @@ class AccountVerificationServiceTest {
                 pageable, 2);
         when(strategyRepository.findById(strategyId)).thenReturn(Optional.of(strategy));
         when(accountVerificationRepository.findByStrategyId(strategyId, pageable)).thenReturn(mockPage);
+        when(s3FileService.getReadPreSignedUrl("http://example.com/image1")).thenReturn("https://read-presigned-1.url");
+        when(s3FileService.getReadPreSignedUrl("http://example.com/image2")).thenReturn("https://read-presigned-2.url");
 
         // When
         PageResponseDto<AccountImagesResponseDto> response = accountVerificationService.getAccountImagesByStrategyId(
@@ -179,6 +181,8 @@ class AccountVerificationServiceTest {
         assertThat(response.isLast()).isTrue();
         assertThat(response.getContent().get(0).getTitle()).isEqualTo("Verification 1");
         assertThat(response.getContent().get(1).getTitle()).isEqualTo("Verification 2");
+        assertThat(response.getContent().get(0).getImageUrl()).isEqualTo("https://read-presigned-1.url");
+        assertThat(response.getContent().get(1).getImageUrl()).isEqualTo("https://read-presigned-2.url");
     }
 
     @Test

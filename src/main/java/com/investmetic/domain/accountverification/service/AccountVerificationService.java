@@ -53,7 +53,7 @@ public class AccountVerificationService {
             );
 
             // Presigned URL 생성 (예제 URL 생성)
-            String presignedUrl = s3FileService.getPreSignedUrl(filePath);
+            String presignedUrl = s3FileService.getPrivateUploadPreSignedUrl(filePath);
 
             // PresignedUrlResponseDto 객체 생성 및 리스트에 추가
             PresignedUrlResponseDto presignedUrlResponseDto = PresignedUrlResponseDto.builder()
@@ -84,7 +84,10 @@ public class AccountVerificationService {
         verifyUserPermission(strategy, userId);
 
         return new PageResponseDto<>(accountVerificationRepository.findByStrategyId(strategyId, pageable)
-                .map(AccountImagesResponseDto::from));
+                .map(accountVerification -> AccountImagesResponseDto.from(
+                        accountVerification,
+                        s3FileService.getReadPreSignedUrl(accountVerification.getAccountVerificationUrl())
+                )));
     }
 
     @Transactional
